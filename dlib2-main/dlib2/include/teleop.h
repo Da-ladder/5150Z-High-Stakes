@@ -1,0 +1,120 @@
+#pragma once
+#include "declarations.h"
+#include "pistons.h"
+#include "autos.h"
+#include "main.h"
+#include "lift.h"
+#include "intakeFuncts.h"
+
+
+/**
+ * @brief Consolidates all driver required functions into one class.
+ * Allows for four motor control with PTO enabled.
+*/
+class DriverControl {
+    private:
+        static int times; // time since last xy cord was printed
+    public:
+        static int onOff;
+        // Changes button binding for various piston systems 
+        inline static void initAll(){
+            moClamp.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L2);
+            liftIntake.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_Y);
+            //intake.set_brake_mode(pros::v5::MotorBrake::hold);
+        };
+
+
+        // Allows for control of the chassis even with PTO enabled
+        static void updateChassis();
+
+
+        // Updates all pistons based on controller input
+        inline static void updatePistions(){
+            moClamp.toggle();
+        }
+
+
+        // Allows for control of intake based on controller input
+        inline static void updateIntake(){
+            if (master.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
+            }
+            if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+                IntakeHelper::voltage(12);
+            } else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+                IntakeHelper::voltage(-12);
+            } else if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)){
+                IntakeHelper::setWallFeeder(!IntakeHelper::getWallFeeder());
+            } else {
+                IntakeHelper::voltage(0);
+            }
+        }
+
+        inline static void updateLift() {
+            if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_A)) {
+                LiftMngr::setVoltage(12, true);
+            } else if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
+                LiftMngr::setVoltage(-12, true);
+            } else if (master.get_digital_new_press(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
+                if (LiftMngr::getLevel() > 50) {
+                    LiftMngr::setLevel(0);
+                } else {
+                    LiftMngr::setLevel(250);
+                }
+            } else {
+                LiftMngr::setVoltage(0);
+            }
+        }
+
+        inline static void openIntake() {
+            if (master.get_digital_new_press(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_UP)) {
+                if (liftIntake.getPistionState() == 1) {
+                    liftIntake.overrideState(0);
+                    // LiftMngr::setLevel(283);
+
+                } else {
+                    liftIntake.overrideState(1);
+                    // LiftMngr::setLevel(180);
+                }
+                
+            } 
+        }
+
+        inline static void clearCorner() {
+            if (master.get_digital_new_press(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_Y)) {
+                if (cornerDeploy.getPistonState() == 1) {
+                    cornerDeploy.overrideState(0);
+                    // LiftMngr::setLevel(283);
+                } else {
+                    cornerDeploy.overrideState(1);
+                    // LiftMngr::setLevel(180);
+                }
+            }
+        }
+        
+        inline static void driverMacro() {
+            //if (master.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
+            //    AutoSelector::run();
+            //}
+        }
+
+        inline static void giveXYTurn() {
+            if (xyBut.get_new_press()) {
+                
+            }
+
+            if (turnBut.get_new_press()) {
+                
+            }
+        }
+
+        // Calls all functions during driver control
+        inline static void main() {
+            updateChassis();
+            updatePistions();
+            updateIntake();
+            updateLift();
+            clearCorner();
+            openIntake();
+            giveXYTurn();
+        }
+};
