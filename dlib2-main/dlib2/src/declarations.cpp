@@ -128,11 +128,16 @@ void Robot::turnQuasiStaticTest() {
 
 void Robot::ffwTurn(Quantity<Degrees, double> heading) {
   // EXP
-
   dlib::PidGains turn_pid_gains{
-      30, // kp, porportional gain
+      30, // kp, porportional gain 30
       0,  // ki, integral gain
-      0.0 // kd, derivative gain
+      0 // kd, derivative gain
+  };
+
+  dlib::PidGains decel_turn_gains{
+      15, // kp, porportional gain 8
+      0,  // ki, integral gain
+      0 // kd, derivative gain
   };
   // EXP END
 
@@ -142,10 +147,11 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
   auto reading = imu.get_rotation();
   auto prevReading = reading;
   auto startHeading = reading;
-  int maxAccel = 1400;
-  int maxVelo = 520;
+  int maxAccel = 1200; // 1400 MAX NO MOGO
+  int maxVelo = 420; // 520 MAX NO MOGO
 
   bool pos = true;
+  bool moarBrake = false;
 
   turn_pid.set_gains(turn_pid_gains);
 
@@ -156,21 +162,22 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
   double ki = 0;
   double kd = 10;
 
-  if (fabs(turn_pid.get_error().in(au::degrees)) < 40) {
-    maxAccel = 1000;
-    maxVelo = 450;
+  if (fabs(turn_pid.get_error().in(au::degrees)) < 80) {
+    maxAccel = 1200; //1k
+    maxVelo = 420; //450
     kp = 30;
     ki = 10;
-  } else if (fabs(turn_pid.get_error().in(au::degrees)) < 100) {
-    kp = 25;
-    ki = 0;
-    ki = 7;
+    moarBrake = true;
+  } else if (fabs(turn_pid.get_error().in(au::degrees)) < 50) {
+    maxAccel = 900; //1k
+    maxVelo = 240; //450
+    moarBrake = true;
   }
 
   dlib::PidGains smol_turn_gains{
-      kp, // kp, porportional gain
-      ki, // ki, integral gain
-      kd  // kd, derivative gain
+      0, // kp, porportional gain
+      0, // ki, integral gain
+      0  // kd, derivative gain
   };
 
   auto val = turn_pid.get_error();
@@ -187,7 +194,7 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
   int cycle = 0;
   while (turnTrapProfile.stage(elapsed_time) !=
              dlib::TrapezoidProfileStage::Done ||
-         cycle <= 20) {
+         cycle <= -1 ) {
     elapsed_time = au::milli(au::seconds)(pros::millis()) - start_time;
     reading = (au::degrees)(imu.raw.get_rotation());
 
@@ -215,9 +222,8 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
     if (turnTrapProfile.stage(elapsed_time) ==
         dlib::TrapezoidProfileStage::Done) {
 
-      if (turn_settler.is_settled(turn_pid.get_error(),
-                                  turn_pid.get_derivative())) {
-        // break;
+      if (abs(turn_pid.get_error().in(au::degrees)) < 0.5) {
+        cycle++;
       }
 
       turn_pid.set_gains(smol_turn_gains);
@@ -226,33 +232,77 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
       pidVoltage = turn_pid.update(reading, milli(seconds)(20));
       chassis.turn_voltage(pidVoltage);
 
-      pros::delay(20);
+      pros::delay(10);
       continue;
     }
 
-    if (pos && ffwdVolts < (au::volts)(-0.25)) {
-      ffwdVolts = (au::volts)(-0.25);
+    if (pos && ffwdVolts < (au::volts)(0)) {
+      ffwdVolts = (au::volts)(0);
     }
 
-    if (!pos && ffwdVolts > (au::volts)(0.25)) {
-      ffwdVolts = (au::volts)(0.25);
+    if (!pos && ffwdVolts > (au::volts)(0)) {
+      ffwdVolts = (au::volts)(0);
     }
 
     auto voltage = ffwdVolts + pidVoltage;
     // Use only feedward output for now
 
+    if (turnTrapProfile.stage(elapsed_time) ==
+        dlib::TrapezoidProfileStage::Decelerating) {
+            turn_pid.set_gains(decel_turn_gains);
+            chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+            chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+
+        if (moarBrake) {
+          if (pos && voltage < (au::volts)(-3)) {
+            voltage = (au::volts)(-3);
+          } else if (!pos && voltage > (au::volts)(3)) {
+            voltage = (au::volts)(3);
+          }
+        } else {
+          if (pos && voltage < (au::volts)(-0.0)) {
+            voltage = (au::volts)(-0.0);
+          } else if (!pos && voltage > (au::volts)(0.0)) {
+            voltage = (au::volts)(0.0);
+          }
+        }
+        
+
+        
+        // chassis.brake();
+
+        if (moarBrake) {
+          chassis.turn_voltage((au::volts)(-12)); //-11
+          pros::delay(5);
+        } else {
+          
+          // pros::delay(5);
+        }
+        
+    }
+
     chassis.turn_voltage(voltage);
 
-    std::cout << elapsed_time.in(au::milli(au::seconds)) << ", "
+    if (turnTrapProfile.stage(elapsed_time) ==
+        dlib::TrapezoidProfileStage::Decelerating) {
+              std::cout << elapsed_time.in(au::milli(au::seconds)) << ", "
               << turnSetpoint.position.in(au::degrees) << ", "
-              << ((reading - prevReading) / (au::seconds)(0.02))
+              << ((reading - prevReading) / (au::seconds)(0.01))
                      .in(au::degrees_per_second)
               << ", " << turnSetpoint.velocity.in(au::degrees_per_second)
               << ", " << turn_pid.get_error() << ", " << voltage << std::endl;
+        } else {
+             std::cout << elapsed_time.in(au::milli(au::seconds)) << ", "
+              << turnSetpoint.position.in(au::degrees) << ", "
+              << ((reading - prevReading) / (au::seconds)(0.01))
+                     .in(au::degrees_per_second)
+              << ", " << turnSetpoint.velocity.in(au::degrees_per_second)
+              << ", " << turn_pid.get_error() << ", " << voltage << std::endl;
+        }
 
     prevReading = reading;
 
-    pros::delay(20);
+    pros::delay(10);
   }
 
   chassis.turn_voltage((au::volts)(0));
@@ -553,7 +603,7 @@ dlib::RotationConfig rotLeft{9, inches(2.75), .8};
 
 // .79 kv works up to 300 dps
 // .35
-dlib::FeedforwardGains TurnFFwdGains{1.9, 0.95, 0.4};
+dlib::FeedforwardGains TurnFFwdGains{1.9, 0.95, 0.55}; // ka 0.4
 
 // 1.4724784904435986,
 //  6.225360763050551,

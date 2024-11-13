@@ -37,7 +37,7 @@ void autonomous() {
 
 	moClamp.overrideState(1);
     pros::delay(400);
-	robot.ffwTurn((au::degrees)(90));
+	robot.ffwTurn((au::degrees)(360));
 
 	AutoSelector::updatePath();
 	// AutoSelector::run();
