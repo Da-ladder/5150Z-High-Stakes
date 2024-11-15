@@ -108,8 +108,13 @@ class Routes{
         // The names attached are within quotes
         
         // AutoSelector::add("Blue elim right hard", placehold1);
-        // AutoSelector::add("Blue right EZ", placehold7); hello
-        AutoSelector::add("EZ RED", placehold4);
+        // AutoSelector::add("Blue right EZ", placehold7); placehold3
+        AutoSelector::add("ELIM Blue RUSH", placehold3);
+        AutoSelector::add("Solo RED MIRROR", placehold2);
+        AutoSelector::add("Solo BLUE", placehold1); //placehold2
+        
+
+        AutoSelector::add("Elims RED", placehold4);
         AutoSelector::add("EZ BLUE", placehold11);
         AutoSelector::add("Blue Solo AWP", placehold3);
         AutoSelector::add("Red Solo AWP", placehold6);

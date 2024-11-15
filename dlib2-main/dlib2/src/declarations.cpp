@@ -129,18 +129,18 @@ void Robot::turnQuasiStaticTest() {
 void Robot::ffwTurn(Quantity<Degrees, double> heading) {
   // EXP
   dlib::PidGains turn_pid_gains{
-      30, // kp, porportional gain 30
-      0,  // ki, integral gain
+      30, // kp, porportional gain //30
+      0, // ki, integral gain
       0 // kd, derivative gain
   };
 
   dlib::PidGains decel_turn_gains{
-      15, // kp, porportional gain 8
-      0,  // ki, integral gain
+      30, // kp, porportional gain //15
+      0, // ki, integral gain
       0 // kd, derivative gain
   };
-  // EXP END
 
+  // EXP END
   auto start_time = au::milli(au::seconds)(pros::millis());
   auto elapsed_time = au::milli(au::seconds)(pros::millis()) - start_time;
   auto target_heaidng = heading;
@@ -163,7 +163,7 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
   double kd = 10;
 
   if (fabs(turn_pid.get_error().in(au::degrees)) < 80) {
-    maxAccel = 1200; //1k
+    maxAccel = 1000; //1k
     maxVelo = 420; //450
     kp = 30;
     ki = 10;
@@ -500,9 +500,10 @@ void Robot::fwdDynoTest() {
     chassis.move_voltage((au::volts)(0));
   }
 
-void Robot::turn_with_pid(Quantity<Degrees, double> heading) {
-    auto target_heaidng = heading;
+void Robot::turn_with_pid(double heading, int timeoutMS) {
+    auto target_heaidng = (au::degrees)(heading);
     auto reading = imu.get_rotation();
+    
 
     turn_pid.target(target_heaidng);
     turn_pid.update(reading, milli(seconds)(20));
@@ -511,8 +512,7 @@ void Robot::turn_with_pid(Quantity<Degrees, double> heading) {
 
     pros::delay(20);
 
-    while (!turn_settler.is_settled(
-        turn_pid.get_error(), turn_pid.get_derivative()) /* || corCycle < 2*/) {
+    while (!turn_settler.is_settled(turn_pid.get_error(), turn_pid.get_derivative()) && timeoutMS > cycle*20) {
       cycle++;
       reading = imu.get_rotation();
       auto voltage = turn_pid.update(reading, milli(seconds)(20));
@@ -534,14 +534,61 @@ void Robot::turn_with_pid(Quantity<Degrees, double> heading) {
     chassis.move(0);
   }
 
-void Robot::turn_to_point(dlib::Vector2d point) {
+void Robot::turn_to_point(dlib::Vector2d point, bool mogoSide) {
     auto angle = odom.angle_to(point);
-    ffwTurn(angle);
+    double targAngle = angle.in(au::degrees);
+
+    
+    if (!mogoSide) { //270
+      targAngle += 180;
+      auto curRotation = imu.get_rotation().in(au::degrees);
+      double error = targAngle - curRotation;
+      
+      if (fabs(error) > 180) {
+        if (error > 0) {
+          while (error > 180) {
+            targAngle -= 360;
+
+            error = targAngle - curRotation;
+          }
+        } else {
+          while (error < 180) {
+            targAngle += 360;
+
+            error = targAngle - curRotation;
+          }
+        }
+      }
+
+      turn_with_pid(targAngle, 1300);
+    } else {
+      auto curRotation = imu.get_rotation().in(au::degrees);
+      double error = targAngle - curRotation;
+
+      if (fabs(error) > 180) {
+        if (error > 0) {
+          while (error > 180) {
+            targAngle -= 360;
+
+            error = targAngle - curRotation;
+          }
+        } else {
+          while (error < 180) {
+            targAngle += 360;
+
+            error = targAngle - curRotation;
+          }
+        }
+      }
+
+      turn_with_pid(targAngle, 1300);
+    }
+    
   }
 
 void Robot::move_to_point(dlib::Vector2d point, bool turn, bool fowards) {
     if (turn) {
-        turn_to_point(point);
+        turn_to_point(point, fowards);
     }
 
     auto displacement = odom.displacement_to(point);
@@ -630,14 +677,14 @@ dlib::ErrorDerivativeSettler<Meters> move_pid_settler{
 };
 
 dlib::PidGains turn_pid_gains{
-    30, // kp, porportional gain
+    35, // kp, porportional gain
     0,  // ki, integral gain
-    0.0 // kd, derivative gain
+    3.2 // kd, derivative gain //2.4 
 };
 
 dlib::ErrorDerivativeSettler<Degrees> turn_pid_settler{
-    degrees(0.5), // error threshold, the maximum error the pid can settle at
-    degrees_per_second(0.5) // derivative threshold, the maximum instantaneous
+    degrees(1.5), // error threshold, the maximum error the pid can settle at
+    degrees_per_second(0.8) // derivative threshold, the maximum instantaneous
                             // error over time the pid can settle at
 };
 

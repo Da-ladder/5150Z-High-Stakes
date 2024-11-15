@@ -12,5 +12,5 @@ void DriverControl::updateChassis() {
 
     // move the robot
     
-    robot.chassis.arcade(fwd, turn);
+    robot.chassis.arcade(-fwd, turn);
 };

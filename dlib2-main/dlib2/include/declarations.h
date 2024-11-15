@@ -108,8 +108,8 @@ class Robot {
     void testStatic();
     void fwdQuasiStaticTest();
     void fwdDynoTest();
-    void turn_with_pid(Quantity<Degrees, double> heading);
-    void turn_to_point(dlib::Vector2d point);
+    void turn_with_pid(double heading, int timeoutMS);
+    void turn_to_point(dlib::Vector2d point, bool mogoSide);
     void move_to_point(dlib::Vector2d point, bool turn = true, bool fowards = true);
     void start_odom();
 };

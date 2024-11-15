@@ -35,12 +35,16 @@ void competition_initialize() {}
 
 void autonomous() {
 
-	moClamp.overrideState(1);
-    pros::delay(400);
-	robot.ffwTurn((au::degrees)(360));
+	// moClamp.overrideState(1);
+    // pros::delay(400);
+	// robot.turn_with_pid((au::degrees)(90));
+
+	// robot.turn_with_pid(147.8, 200);
+
+	// robot.move_to_point({(au::inches)(53.27), (au::inches)(61.3)}, true, false);
 
 	AutoSelector::updatePath();
-	// AutoSelector::run();
+	AutoSelector::run();
 	// robot.chassis.move_voltage((au::volts)(7));
 	// robot.testStatic();
 

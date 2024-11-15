@@ -89,7 +89,12 @@ public:
         }
 
         this->p = error;
-        this->i = this->i + error * delta_time;
+        if (fabs(p.in(BaseUnits{})) < 5) {
+            this->i = this->i + error * delta_time;
+        } else {
+            this->i = this->i;
+        }
+        
         this->d = (delta_error / delta_time);
 
         // TODO: Using `in` this way means that Pid constants are affected by the choice of unit
