@@ -2,6 +2,7 @@
 #include "main.h"
 #include "dlib/dlib.hpp"
 #include "pros/distance.hpp"
+#include <cmath>
 
 // externs all controllers
 extern pros::Controller master;
@@ -39,6 +40,22 @@ extern pros::v5::Vision camDetect;
 
 using namespace au;
 
+class QuadraticFeedforward {
+public:
+	double a = 0;
+	double b = 0;
+	double c = 0;
+
+	QuadraticFeedforward(double a, double b, double c) : a(a), b(c), c(c) {
+
+	}
+
+	inline double calculate(double voltage) {
+		return 0;
+	}
+};
+
+
 class Robot {
     public:
     dlib::Chassis chassis;
@@ -69,6 +86,9 @@ class Robot {
 	dlib::FeedforwardGains linGains;
 	dlib::Feedforward<Meters> linffwd;
 
+	dlib::FeedforwardGains ffwdTurnDecelGains;
+	dlib::Feedforward<Degrees> ffwdTurnDecel;
+
 	
 
 	Robot(
@@ -81,7 +101,8 @@ class Robot {
 		dlib::RotationConfig rotRight,
 		dlib::RotationConfig rotLeft,
 		dlib::FeedforwardGains ffwdGains,
-		dlib::FeedforwardGains linGains
+		dlib::FeedforwardGains linGains,
+		dlib::FeedforwardGains ffwdTurnDecelGains
 	) : 
 		chassis(chassis_config), 
 		imu(imu_config),
@@ -93,7 +114,8 @@ class Robot {
 		rotationRight(rotRight),
 		rotationLeft(rotLeft),
 		ffwd(ffwdGains),
-		linffwd(linGains)
+		linffwd(linGains),
+		ffwdTurnDecel(ffwdTurnDecelGains)
 		{
 
 	}

@@ -26,7 +26,7 @@ pros::v5::Optical opt(1); // Ran out of ports
 
 // Declares distance sensor
 pros::v5::Distance goalOpt(13);
-pros::v5::Distance ringOpt(6);
+pros::v5::Distance ringOpt(19);
 pros::v5::Distance stakeFinder(0);
 
 // Declares rot sensors for odom
@@ -129,17 +129,10 @@ void Robot::turnQuasiStaticTest() {
 void Robot::ffwTurn(Quantity<Degrees, double> heading) {
   // EXP
   dlib::PidGains turn_pid_gains{
-      30, // kp, porportional gain //30
+      0, // kp, porportional gain //10
       0, // ki, integral gain
       0 // kd, derivative gain
   };
-
-  dlib::PidGains decel_turn_gains{
-      30, // kp, porportional gain //15
-      0, // ki, integral gain
-      0 // kd, derivative gain
-  };
-
   // EXP END
   auto start_time = au::milli(au::seconds)(pros::millis());
   auto elapsed_time = au::milli(au::seconds)(pros::millis()) - start_time;
@@ -147,8 +140,8 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
   auto reading = imu.get_rotation();
   auto prevReading = reading;
   auto startHeading = reading;
-  int maxAccel = 1200; // 1400 MAX NO MOGO
-  int maxVelo = 420; // 520 MAX NO MOGO
+  int maxAccel = 1000; // 1400 MAX NO MOGO 1200
+  int maxVelo = 500; // 520 MAX NO MOGO
 
   bool pos = true;
   bool moarBrake = false;
@@ -158,26 +151,28 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
   turn_pid.target(target_heaidng);
   turn_pid.update(reading, milli(seconds)(20));
 
-  double kp = 30;
+  double kp = 5;
   double ki = 0;
-  double kd = 10;
-
+  double kd = 0;
+  
   if (fabs(turn_pid.get_error().in(au::degrees)) < 80) {
     maxAccel = 1000; //1k
-    maxVelo = 420; //450
-    kp = 30;
-    ki = 10;
-    moarBrake = true;
+    maxVelo = 500; //450
+    kp = 45;
+    // moarBrake = true;q
+
   } else if (fabs(turn_pid.get_error().in(au::degrees)) < 50) {
     maxAccel = 900; //1k
     maxVelo = 240; //450
-    moarBrake = true;
+    kp = 50;
+    // moarBrake = true;
   }
+  
 
-  dlib::PidGains smol_turn_gains{
-      0, // kp, porportional gain
+  dlib::PidGains decel_turn_gains{
+      0, // kp, porportional gain //5
       0, // ki, integral gain
-      0  // kd, derivative gain
+      0 // kd, derivative gain
   };
 
   auto val = turn_pid.get_error();
@@ -192,9 +187,11 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
           (au::degrees_per_second)(maxVelo), val);
 
   int cycle = 0;
-  while (turnTrapProfile.stage(elapsed_time) !=
-             dlib::TrapezoidProfileStage::Done ||
-         cycle <= -1 ) {
+  // turnTrapProfile.stage(elapsed_time) !=
+            //  dlib::TrapezoidProfileStage::Done ||
+        //  cycle <= -1 
+  while (turnTrapProfile.stage(elapsed_time) != dlib::TrapezoidProfileStage::Done) {
+    pros::delay(10);
     elapsed_time = au::milli(au::seconds)(pros::millis()) - start_time;
     reading = (au::degrees)(imu.raw.get_rotation());
 
@@ -219,23 +216,6 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
 
     auto pidVoltage = turn_pid.update(reading, milli(seconds)(20));
 
-    if (turnTrapProfile.stage(elapsed_time) ==
-        dlib::TrapezoidProfileStage::Done) {
-
-      if (abs(turn_pid.get_error().in(au::degrees)) < 0.5) {
-        cycle++;
-      }
-
-      turn_pid.set_gains(smol_turn_gains);
-      cycle++;
-
-      pidVoltage = turn_pid.update(reading, milli(seconds)(20));
-      chassis.turn_voltage(pidVoltage);
-
-      pros::delay(10);
-      continue;
-    }
-
     if (pos && ffwdVolts < (au::volts)(0)) {
       ffwdVolts = (au::volts)(0);
     }
@@ -248,11 +228,14 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
     // Use only feedward output for now
 
     if (turnTrapProfile.stage(elapsed_time) ==
-        dlib::TrapezoidProfileStage::Decelerating) {
+        dlib::TrapezoidProfileStage::Decelerating || turnTrapProfile.stage(elapsed_time) ==
+        dlib::TrapezoidProfileStage::Done) {
             turn_pid.set_gains(decel_turn_gains);
-            chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
-            chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+            voltage = ffwdTurnDecel.calculate(targVelo, targAccel) + turn_pid.update(reading, milli(seconds)(20));
+            chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+            chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
 
+        /*
         if (moarBrake) {
           if (pos && voltage < (au::volts)(-3)) {
             voltage = (au::volts)(-3);
@@ -260,12 +243,13 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
             voltage = (au::volts)(3);
           }
         } else {
-          if (pos && voltage < (au::volts)(-0.0)) {
-            voltage = (au::volts)(-0.0);
-          } else if (!pos && voltage > (au::volts)(0.0)) {
-            voltage = (au::volts)(0.0);
+          if (pos && voltage < (au::volts)(0)) {
+            voltage = (au::volts)(0);
+          } else if (!pos && voltage > (au::volts)(0)) {
+            voltage = (au::volts)(0);
           }
         }
+        */
         
 
         
@@ -302,10 +286,12 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
 
     prevReading = reading;
 
-    pros::delay(10);
+    
   }
 
-  chassis.turn_voltage((au::volts)(0));
+  // chassis.turn_voltage((au::volts)(0));
+  // chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::hold);
+  // chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::hold);
   chassis.brake();
 }
 
@@ -408,7 +394,7 @@ void Robot::testStatic() {
       reading = (au::degrees)(imu.raw.get_rotation());
 
       auto ffwdVoltage = ffwd.calculate((targetvelo), au::ZERO);
-      // auto ffwdVoltage = (au::volts)(1.9);
+      // auto ffwdVoltage = (au::volts)(1.8);
 
       chassis.left_motors.raw.move_voltage(
           ffwdVoltage.in(au::milli(au::volts)));
@@ -603,6 +589,8 @@ void Robot::move_to_point(dlib::Vector2d point, bool turn, bool fowards) {
 
   // Odom task
 void Robot::start_odom() {
+
+    chassis.initialize();
     rotationLeft.initialize();
     rotationLeft.raw.set_data_rate(10);
     rotationRight.initialize();
@@ -650,7 +638,14 @@ dlib::RotationConfig rotLeft{9, inches(2.75), .8};
 
 // .79 kv works up to 300 dps
 // .35
-dlib::FeedforwardGains TurnFFwdGains{1.9, 0.95, 0.55}; // ka 0.4
+// 0.87
+dlib::FeedforwardGains TurnFFwdGains{1.8, 0.9, 0.40}; // ka 1.6, 0.92, 0.40
+
+dlib::FeedforwardGains TurnDecelFFwdGains {
+  1.6, 
+  0.60, //0.8 
+  0.175 //0.175
+};
 
 // 1.4724784904435986,
 //  6.225360763050551,
@@ -690,4 +685,4 @@ dlib::ErrorDerivativeSettler<Degrees> turn_pid_settler{
 
 Robot robot = Robot(chassis_config, imu_config, move_pid_gains,
                     move_pid_settler, turn_pid_gains, turn_pid_settler,
-                    rotRight, rotLeft, TurnFFwdGains, LinFFwdGains);
+                    rotRight, rotLeft, TurnFFwdGains, LinFFwdGains, TurnDecelFFwdGains);

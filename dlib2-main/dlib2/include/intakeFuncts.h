@@ -37,6 +37,24 @@ class IntakeHelper {
     inline static void main() {
         bool ringLiftSense = false;
         while (true) {
+            
+            /*
+            if (ringOpt.get() < 80) {
+                blocking = true;
+                intake.move_voltage(12);
+                pros::delay(400);
+                intake.move_voltage(0);
+                pros::delay(100);
+                // intake.move_voltage(12);
+                // pros::delay(200);
+                blocking = false;
+                pros::delay(300);
+            }
+            */
+
+
+
+            /*
 
             if (blockLoop) {
                 pros::delay(5);
@@ -70,32 +88,6 @@ class IntakeHelper {
                         // exlude here
                         
                         if (opt.get_hue() > 200 && opt.get_hue() < 230) {
-                            /*
-                            blocking = true;
-                            intake.move_voltage(4000);
-                            int Ot = 0;
-                            while(ringOpt.get() > 180) {
-                                pros::delay(5);
-                            }
-                            intake.move_voltage(12000);
-                            pros::delay(120);
-                            intake.move_voltage(-10000);
-                            pros::delay(50);
-                            intake.move_voltage(12000);
-                            pros::delay(400);
-                            blocking = false;
-                            */
-
-                            // if (pros::competition::is_autonomous()) {
-                                // intake.move_voltage(0);
-                                // intakeState = 0;
-                            // }
-                            
-                            
-                            
-                            
-                            
-                            
                             
                         }
                     }
@@ -103,28 +95,13 @@ class IntakeHelper {
                     // do nothing if intake is off or going backwards
                 } else {
                     if (intakeState == 1) {
-                        // exlude here
-                        // if (pros::competition::is_autonomous()) {
-                                // intake.move_voltage(0);
-                                // intakeState = 0;
-                            // }
-                        /*
-                        if (opt.get_hue() > 12 && opt.get_hue() < 20) {
-                            pros::delay(120);
-                            blocking = true;
-                            intake.move_voltage(-12000);
-                            pros::delay(75);
-                            intake.move_voltage(12000);
-                            pros::delay(400);
-                            blocking = false;
-                        }
-                        */
+                        
                     }
 
                     // do nothing if intake is off or going backwards
                 }
             }
-            
+            */
 
             
             pros::delay(5);

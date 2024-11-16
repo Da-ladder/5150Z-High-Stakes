@@ -50,14 +50,30 @@ void autonomous() {
 
 	// robot.ffwLat((au::inches)(-5), au::milli(au::seconds)(2000));
 	// robot.turn_with_pid((au::degrees)(90));
-	// robot.ffwTurn((au::degrees)(90));
+	// robot.ffwTurn((au::degrees)(100));
 	// robot.move_with_pid((au::inches)(10));
 
 
 	// TESTS
 	// robot.fwdDynoTest();
-	// robot.turnQuasiStaticTest();
+	//robot.turnQuasiStaticTest();
 	// robot.turnDynoTest();
+	/*
+	auto start_time = pros::millis();
+
+	robot.start_odom();
+
+	while (true) {
+		auto left_disp = robot.chassis.left_motors_displacement();
+		auto right_disp = robot.chassis.right_motors_displacement();
+		auto heading = (left_disp - right_disp) / track_width;
+
+		robot.chassis.turn_voltage(volts(7));
+		std::cout << "heading from wheels: " << heading << ", heading from imu: " << imu.get_rotation() << "\n";
+		pros::delay(20);
+	}
+	*/
+	
 }
 
 void opcontrol() {

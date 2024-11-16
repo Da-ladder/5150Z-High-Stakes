@@ -109,16 +109,25 @@ class Routes{
         
         // AutoSelector::add("Blue elim right hard", placehold1);
         // AutoSelector::add("Blue right EZ", placehold7); placehold3
-        AutoSelector::add("ELIM Blue RUSH", placehold3);
-        AutoSelector::add("Solo RED MIRROR", placehold2);
-        AutoSelector::add("Solo BLUE", placehold1); //placehold2
+        AutoSelector::add("Elims RED", placehold4);
+        AutoSelector::add("Elims BLUE MIRROR", placehold6);
         
 
-        AutoSelector::add("Elims RED", placehold4);
+        AutoSelector::add("skills", skills);
+
+        AutoSelector::add("Solo RED MIRROR", placehold2);
+        AutoSelector::add("Solo BLUE", placehold1);
+
+        AutoSelector::add("ELIM Red RUSH", placehold3);
+        AutoSelector::add("ELIM blue RUSH MIRROR", placehold7);
+
+        
+        
+        
         AutoSelector::add("EZ BLUE", placehold11);
         AutoSelector::add("Blue Solo AWP", placehold3);
         AutoSelector::add("Red Solo AWP", placehold6);
-        AutoSelector::add("skills", skills);
+        
         
         
        
