@@ -1,6 +1,7 @@
 #pragma once
 #include "declarations.h"
 #include "pros/llemu.hpp"
+#include "mogoDetect.h"
 #include "lift.h"
 
 /**
@@ -108,29 +109,32 @@ class Routes{
         // The names attached are within quotes
         
         // AutoSelector::add("Blue elim right hard", placehold1);
-        // AutoSelector::add("Blue right EZ", placehold7); placehold3
-        AutoSelector::add("Elims RED", placehold4);
-        AutoSelector::add("Elims BLUE MIRROR", placehold6);
-        
+        // AutoSelector::add("Blue right EZ", placehold7); //placehold3
 
         AutoSelector::add("skills", skills);
-
-        AutoSelector::add("Solo RED MIRROR", placehold2);
-        AutoSelector::add("Solo BLUE", placehold1);
-
-        AutoSelector::add("ELIM Red RUSH", placehold3);
-        AutoSelector::add("ELIM blue RUSH MIRROR", placehold7);
-
-        
-        
-        
         AutoSelector::add("EZ BLUE", placehold11);
-        AutoSelector::add("Blue Solo AWP", placehold3);
-        AutoSelector::add("Red Solo AWP", placehold6);
+
+        AutoSelector::add("ELIM Red RUSH", placehold3); //good
+        AutoSelector::add("ELIM blue RUSH MIRROR", placehold7); //good
+
+        AutoSelector::add("Red Solo AWP", placehold1); //good
+        AutoSelector::add("Blue Solo AWP", placehold5);
+
+        AutoSelector::add("Elims BLUE MIRROR (5 ring)", placehold10); //good-ish
+        AutoSelector::add("Elims RED (5 ring)", placehold4); //good
+
+        
+
+        
+
+        
+
         
         
+        // AutoSelector::add("Solo BLUE", placehold1);
+        // AutoSelector::add("Solo RED MIRROR SHORT", placehold2);        
+
         
-       
      }
      
 };

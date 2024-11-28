@@ -15,10 +15,3 @@ temp.log
 temp.errors
 *.ini
 .d/
-
-# Doxygen
-docs/build/breathe/
-docs/build/doctrees/
-docs/latex/
-docs/xml/
-docs/html

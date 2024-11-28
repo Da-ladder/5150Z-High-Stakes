@@ -2,6 +2,6 @@
 
 double LiftMngr::voltReq = 0;
 bool LiftMngr::blockLiftThread = false;
-int LiftMngr::holdLvl = 0;
+double LiftMngr::holdLvl = 0;
 int LiftMngr::time = 0;
 double LiftMngr::prevVolt = 0;

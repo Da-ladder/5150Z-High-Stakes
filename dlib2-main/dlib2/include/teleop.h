@@ -37,6 +37,7 @@ class DriverControl {
         // Allows for control of intake based on controller input
         inline static void updateIntake(){
             if (master.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
+                IntakeHelper::sortState(!IntakeHelper::getStortState());
             }
             if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
                 IntakeHelper::voltage(12);
@@ -55,10 +56,10 @@ class DriverControl {
             } else if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
                 LiftMngr::setVoltage(-12, true);
             } else if (master.get_digital_new_press(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
-                if (LiftMngr::getLevel() > 50) {
-                    LiftMngr::setLevel(0);
-                } else {
+                if (LiftMngr::getLevel() < 170) {
                     LiftMngr::setLevel(250);
+                } else {
+                    LiftMngr::setLevel(291.62); //87.01 all under
                 }
             } else {
                 LiftMngr::setVoltage(0);
@@ -69,11 +70,8 @@ class DriverControl {
             if (master.get_digital_new_press(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_UP)) {
                 if (liftIntake.getPistionState() == 1) {
                     liftIntake.overrideState(0);
-                    // LiftMngr::setLevel(283);
-
                 } else {
                     liftIntake.overrideState(1);
-                    // LiftMngr::setLevel(180);
                 }
                 
             } 
@@ -98,13 +96,36 @@ class DriverControl {
         }
 
         inline static void giveXYTurn() {
-            if (xyBut.get_new_press()) {
-                
-            }
+            if (xyBut.get_value()) {
 
-            if (turnBut.get_new_press()) {
-                
+                while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN)) { 
+                    pros::delay(25);
+                }
+
+                dlib::Pose2d curPos = robot.odom.get_position();
+                master.clear();
+	            pros::delay(100);
+	            master.set_text(1, 0, "x:" + std::to_string((curPos.x).in(au::inches)));
+                pros::delay(50);
+                master.set_text(2, 0, "y:" + std::to_string((curPos.y).in(au::inches)));
             }
+            
+
+            if (turnBut.get_value()) {
+
+                while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN)) { 
+                    pros::delay(25);
+                }
+
+                master.clear();
+	            pros::delay(100);
+                // master.set_text(1, 0, std::to_string(liftRot.get_position()/100.0));
+	            master.set_text(1, 0, std::to_string(robot.imu.get_rotation().in(au::degrees)));
+            }
+            // master.clear();
+            // pros::delay(50);
+	        // master.set_text(1, 0, std::to_string(intake.get_current_draw()));
+            
         }
 
         // Calls all functions during driver control

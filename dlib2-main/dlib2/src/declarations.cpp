@@ -1,4 +1,6 @@
 #include "declarations.h"
+#include "pros/adi.h"
+#include "pros/adi.hpp"
 #include "pros/distance.hpp"
 
 using namespace pros;
@@ -7,26 +9,29 @@ using namespace pros;
 pros::Controller master(pros::E_CONTROLLER_MASTER);
 
 // buttons for helping make autos
-pros::ADIDigitalIn xyBut('F');
-pros::ADIDigitalIn turnBut('G');
+pros::adi::DigitalIn xyBut('E');
+pros::adi::DigitalIn turnBut('F');
+
+// pros::adi::DigitalIn intakeTop('D');
+
 
 // intake motor go brrr
-pros::Motor intake(14);
+pros::Motor intake(-14);
 
 // lift motor
-MotorGroup lift({-2, 10}, pros::v5::MotorGears::green,
+MotorGroup lift({9, -8}, pros::v5::MotorGears::green,
                 pros::v5::MotorEncoderUnits::degrees);
 
 // Declares the IMU
-pros::IMU imu(11);
+// pros::IMU imu(0);
 
 // Declares color sensor
 pros::v5::Optical camLight(0);
-pros::v5::Optical opt(1); // Ran out of ports
+pros::v5::Optical opt(1);
 
 // Declares distance sensor
-pros::v5::Distance goalOpt(13);
-pros::v5::Distance ringOpt(19);
+pros::v5::Distance goalOpt(10); //ohhhhh
+pros::v5::Distance ringOpt(0);
 pros::v5::Distance stakeFinder(0);
 
 // Declares rot sensors for odom
@@ -36,10 +41,11 @@ pros::Rotation vert(-4);
 pros::Rotation horiz(15);
 
 // lift rot
-pros::Rotation liftRot(1);
+pros::Rotation liftRot(19);
 
 //////// EXPerimental VISION SENSOR ////////
-pros::v5::Vision camDetect(2);
+pros::v5::Vision camDetect(3);
+pros::v5::Vision camRingDetect(20);
 //////// EXPerimental VISION SENSOR ////////
 
 using namespace au;
@@ -104,6 +110,16 @@ void Robot::turnQuasiStaticTest() {
   auto voltage = (au::volts)(0.0);
   auto start_time = pros::millis();
   auto elapsed_time = 0;
+
+  auto linLpastRot = rotationLeft.get_linear_displacement();
+  auto linRpastRot = rotationRight.get_linear_displacement();
+  auto linLcurRot = rotationLeft.get_linear_displacement();
+  auto linRcurRot = rotationRight.get_linear_displacement();
+  double linAngle = 0;
+  double pastLinAngle = 0;
+  double velo = 0;
+
+
   auto pastRot = imu.get_rotation();
   auto curRot = imu.get_rotation();
   int thing = 0;
@@ -111,16 +127,33 @@ void Robot::turnQuasiStaticTest() {
     thing++;
     auto current_time = pros::millis();
     elapsed_time = current_time - start_time;
-    voltage = au::milli(au::volts)(1000.0 *
-                                   (elapsed_time / 1000.0)); // 1 volts/sec ramp
+    // voltage = au::milli(au::volts)(1000.0 * (elapsed_time / 1000.0)); // .5 volts/sec ramp
+    voltage = (au::volts)(1.65);
+    // velo = 50 * (elapsed_time/1000.0); // +50 rpm every sec 12 sec test
+    
+    // voltage = au::milli(au::volts)(4000);
+
     chassis.turn_voltage(voltage);                           // deltaAngle/delT
     curRot = imu.get_rotation();
+
+
+    linLcurRot = rotationLeft.get_linear_displacement();
+    linRcurRot = rotationRight.get_linear_displacement();
+
+    linAngle += ((((linRcurRot-linRpastRot) - (linLcurRot-linLpastRot)).in(au::inches)) / 11.25) * (180/3.1415926535897932384626);
+
+
     if (thing % 2 == 0) {
       std::cout << elapsed_time << ", " << voltage << ", " << curRot << ", "
-                << (curRot - pastRot) / 0.01 << std::endl;
+                << (curRot - pastRot) / 0.02 
+                << ", "
+                << (linAngle-pastLinAngle) / 0.02 << std::endl;
     }
 
-    pros::delay(10);
+    pros::delay(20);
+    linLpastRot = linLcurRot;
+    linRpastRot = linRcurRot;
+    pastLinAngle = linAngle;
     pastRot = curRot;
   }
   chassis.turn_voltage((au::volts)(0));
@@ -128,11 +161,13 @@ void Robot::turnQuasiStaticTest() {
 
 void Robot::ffwTurn(Quantity<Degrees, double> heading) {
   // EXP
+  /*
   dlib::PidGains turn_pid_gains{
-      0, // kp, porportional gain //10
+      0, // kp, porportional gain //30
       0, // ki, integral gain
       0 // kd, derivative gain
   };
+  */
   // EXP END
   auto start_time = au::milli(au::seconds)(pros::millis());
   auto elapsed_time = au::milli(au::seconds)(pros::millis()) - start_time;
@@ -140,13 +175,13 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
   auto reading = imu.get_rotation();
   auto prevReading = reading;
   auto startHeading = reading;
-  int maxAccel = 1000; // 1400 MAX NO MOGO 1200
-  int maxVelo = 500; // 520 MAX NO MOGO
+  int maxAccel = 800; // 1400 MAX NO MOGO 1200
+  int maxVelo = 400; // 520 MAX NO MOGO
 
   bool pos = true;
   bool moarBrake = false;
 
-  turn_pid.set_gains(turn_pid_gains);
+  // turn_pid.set_gains(turn_pid_gains);
 
   turn_pid.target(target_heaidng);
   turn_pid.update(reading, milli(seconds)(20));
@@ -154,19 +189,6 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
   double kp = 5;
   double ki = 0;
   double kd = 0;
-  
-  if (fabs(turn_pid.get_error().in(au::degrees)) < 80) {
-    maxAccel = 1000; //1k
-    maxVelo = 500; //450
-    kp = 45;
-    // moarBrake = true;q
-
-  } else if (fabs(turn_pid.get_error().in(au::degrees)) < 50) {
-    maxAccel = 900; //1k
-    maxVelo = 240; //450
-    kp = 50;
-    // moarBrake = true;
-  }
   
 
   dlib::PidGains decel_turn_gains{
@@ -191,7 +213,6 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
             //  dlib::TrapezoidProfileStage::Done ||
         //  cycle <= -1 
   while (turnTrapProfile.stage(elapsed_time) != dlib::TrapezoidProfileStage::Done) {
-    pros::delay(10);
     elapsed_time = au::milli(au::seconds)(pros::millis()) - start_time;
     reading = (au::degrees)(imu.raw.get_rotation());
 
@@ -216,74 +237,63 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
 
     auto pidVoltage = turn_pid.update(reading, milli(seconds)(20));
 
-    if (pos && ffwdVolts < (au::volts)(0)) {
-      ffwdVolts = (au::volts)(0);
+    if (turnTrapProfile.stage(elapsed_time) ==
+          dlib::TrapezoidProfileStage::Decelerating) {
+        // vex is cooked?
+        chassis.turn_voltage(au::volts(0));
     }
 
-    if (!pos && ffwdVolts > (au::volts)(0)) {
-      ffwdVolts = (au::volts)(0);
-    }
-
-    auto voltage = ffwdVolts + pidVoltage;
+     auto voltage = ffwdVolts; //+ pidVoltage;
+    chassis.turn_voltage(voltage);
+    
     // Use only feedward output for now
 
+    /*
     if (turnTrapProfile.stage(elapsed_time) ==
         dlib::TrapezoidProfileStage::Decelerating || turnTrapProfile.stage(elapsed_time) ==
         dlib::TrapezoidProfileStage::Done) {
             turn_pid.set_gains(decel_turn_gains);
-            voltage = ffwdTurnDecel.calculate(targVelo, targAccel) + turn_pid.update(reading, milli(seconds)(20));
+            voltage = ffwd.calculate(targVelo, targAccel) + turn_pid.update(reading, milli(seconds)(20));
             chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
             chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
-
-        /*
-        if (moarBrake) {
-          if (pos && voltage < (au::volts)(-3)) {
-            voltage = (au::volts)(-3);
-          } else if (!pos && voltage > (au::volts)(3)) {
-            voltage = (au::volts)(3);
-          }
-        } else {
-          if (pos && voltage < (au::volts)(0)) {
-            voltage = (au::volts)(0);
-          } else if (!pos && voltage > (au::volts)(0)) {
-            voltage = (au::volts)(0);
-          }
-        }
-        */
-        
-
-        
         // chassis.brake();
 
         if (moarBrake) {
-          chassis.turn_voltage((au::volts)(-12)); //-11
+          chassis.turn_voltage(au::max(((au::volts)(0)), voltage)); //-11
           pros::delay(5);
         } else {
           
-          // pros::delay(5);
+          
         }
         
     }
+    */
 
-    chassis.turn_voltage(voltage);
+    
 
+    
+    pros::delay(20);
     if (turnTrapProfile.stage(elapsed_time) ==
         dlib::TrapezoidProfileStage::Decelerating) {
               std::cout << elapsed_time.in(au::milli(au::seconds)) << ", "
               << turnSetpoint.position.in(au::degrees) << ", "
-              << ((reading - prevReading) / (au::seconds)(0.01))
+              << ((reading - prevReading) / (au::seconds)(0.02))
                      .in(au::degrees_per_second)
               << ", " << turnSetpoint.velocity.in(au::degrees_per_second)
-              << ", " << turn_pid.get_error() << ", " << voltage << std::endl;
+              << ", " << turn_pid.get_error() 
+              << ", " << reading.in(au::degrees)
+              << ", " << pidVoltage << std::endl;
         } else {
              std::cout << elapsed_time.in(au::milli(au::seconds)) << ", "
               << turnSetpoint.position.in(au::degrees) << ", "
-              << ((reading - prevReading) / (au::seconds)(0.01))
+              << ((reading - prevReading) / (au::seconds)(0.02))
                      .in(au::degrees_per_second)
               << ", " << turnSetpoint.velocity.in(au::degrees_per_second)
-              << ", " << turn_pid.get_error() << ", " << voltage << std::endl;
+              << ", " << turn_pid.get_error() 
+              << ", " << reading.in(au::degrees)
+              << ", " << pidVoltage << std::endl;
         }
-
+    
     prevReading = reading;
 
     
@@ -296,7 +306,7 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
 }
 
 void Robot::ffwLat(Quantity<Meters, double> displacement,
-              Quantity<Seconds, double> timeout) {
+              Quantity<Seconds, double> timeout, double maxAccel) {
     auto start_time = au::milli(au::seconds)(pros::millis());
     auto elapsed_time = au::milli(au::seconds)(pros::millis()) - start_time;
     auto start_displacement = (rotationLeft.get_linear_displacement() +
@@ -306,7 +316,7 @@ void Robot::ffwLat(Quantity<Meters, double> displacement,
     auto reading = start_displacement;
     bool reverse = false;
 
-    move_pid.target(target_displacement);
+    move_pid.target(target_displacement); //Making all negative
     move_pid.update(reading, milli(seconds)(20));
 
     // MAX VELO: 1.8222920590859724
@@ -317,8 +327,8 @@ void Robot::ffwLat(Quantity<Meters, double> displacement,
       reverse = true;
     }
     dlib::TrapezoidProfile<Meters> forwardTrapProfile =
-        dlib::TrapezoidProfile<Meters>((au::meters_per_second_squared)(3),
-                                       (au::meters_per_second)(1.6),
+        dlib::TrapezoidProfile<Meters>((au::meters_per_second_squared)(maxAccel), //3
+                                       (au::meters_per_second)(1.6), //1.6
                                        displacement);
 
     // TODO: MAKE GOOD SETTLE CONDITION
@@ -369,7 +379,7 @@ void Robot::ffwLat(Quantity<Meters, double> displacement,
 
       // DATA
       std::cout << elapsed_time.in(au::milli(au::seconds)) << ", "
-                << setpoint.position.in(au::meters) << ", "
+                << setpoint.position.in(au::inches) << ", "
                 << chassis.average_motor_velocity().in(au::meters_per_second)
                 << ", " << setpoint.velocity.in(au::meters_per_second) << ", "
                 << move_pid.get_error().in(au::inches) << ", "
@@ -384,7 +394,7 @@ void Robot::testStatic() {
     auto start_time = au::milli(au::seconds)(pros::millis());
     auto elapsed_time = au::milli(au::seconds)(pros::millis()) - start_time;
 
-    auto targetvelo = (au::degrees_per_second)(100);
+    auto targetvelo = (au::degrees_per_second)(107); //9.28
 
     auto reading = imu.get_rotation();
     auto prevReading = reading;
@@ -393,10 +403,10 @@ void Robot::testStatic() {
       elapsed_time = au::milli(au::seconds)(pros::millis()) - start_time;
       reading = (au::degrees)(imu.raw.get_rotation());
 
-      auto ffwdVoltage = ffwd.calculate((targetvelo), au::ZERO);
-      // auto ffwdVoltage = (au::volts)(1.8);
+      // auto ffwdVoltage = ffwd.calculate((targetvelo), au::ZERO);
+      auto ffwdVoltage = (au::volts)(1.75);
 
-      chassis.left_motors.raw.move_voltage(
+      chassis.left_motors.raw.move_voltage( 
           ffwdVoltage.in(au::milli(au::volts)));
       chassis.right_motors.raw.move_voltage(
           -ffwdVoltage.in(au::milli(au::volts)));
@@ -404,13 +414,13 @@ void Robot::testStatic() {
       // chassis.turn_voltage(ffwdVoltage);
       // ((reading-prevReading)/(au::seconds)(0.02)).in(au::degrees_per_second)
       std::cout << elapsed_time.in(au::milli(au::seconds)) << ", "
-                << ((reading - prevReading) / (au::seconds)(0.02))
+                << ((reading - prevReading) / (au::seconds)(0.1))
                        .in(au::degrees_per_second)
                 << ", " << targetvelo.in(au::degrees_per_second) << ", "
                 << reading.in(au::degrees) << ", " << ffwdVoltage.in(au::volts)
                 << std::endl;
       prevReading = reading;
-      pros::delay(20);
+      pros::delay(100);
     }
   }
 
@@ -486,7 +496,7 @@ void Robot::fwdDynoTest() {
     chassis.move_voltage((au::volts)(0));
   }
 
-void Robot::turn_with_pid(double heading, int timeoutMS) {
+void Robot::turn_with_pid(double heading, int timeoutMS, double maxVolts) {
     auto target_heaidng = (au::degrees)(heading);
     auto reading = imu.get_rotation();
     
@@ -511,6 +521,11 @@ void Robot::turn_with_pid(double heading, int timeoutMS) {
         pros::lcd::set_text(6, "TURN NOT SETTLED " + std::to_string(cycle));
         corCycle = 0;
       }
+      if (voltage.in(au::volts) > maxVolts) {
+        voltage = (au::volts)(maxVolts);
+      } else if (voltage.in(au::volts) < -maxVolts) {
+        voltage = (au::volts)(-maxVolts);
+      }
 
       chassis.turn_voltage(voltage);
 
@@ -520,7 +535,7 @@ void Robot::turn_with_pid(double heading, int timeoutMS) {
     chassis.move(0);
   }
 
-void Robot::turn_to_point(dlib::Vector2d point, bool mogoSide) {
+void Robot::turn_to_point(dlib::Vector2d point, bool mogoSide, int to, double maxVolts) {
     auto angle = odom.angle_to(point);
     double targAngle = angle.in(au::degrees);
 
@@ -546,7 +561,7 @@ void Robot::turn_to_point(dlib::Vector2d point, bool mogoSide) {
         }
       }
 
-      turn_with_pid(targAngle, 1300);
+      turn_with_pid(targAngle, to, maxVolts);
     } else {
       auto curRotation = imu.get_rotation().in(au::degrees);
       double error = targAngle - curRotation;
@@ -567,22 +582,22 @@ void Robot::turn_to_point(dlib::Vector2d point, bool mogoSide) {
         }
       }
 
-      turn_with_pid(targAngle, 1300);
+      turn_with_pid(targAngle, to, maxVolts);
     }
     
   }
 
-void Robot::move_to_point(dlib::Vector2d point, bool turn, bool fowards) {
+void Robot::move_to_point(dlib::Vector2d point, bool turn, bool fowards, int to, double maxAccel, double maxTurnVolts) {
     if (turn) {
-        turn_to_point(point, fowards);
+        turn_to_point(point, fowards, to, maxTurnVolts);
     }
 
     auto displacement = odom.displacement_to(point);
 
     if (!fowards) {
-        ffwLat(-displacement, (au::seconds)(0));
+        ffwLat(-displacement, (au::seconds)(0), maxAccel);
     } else {
-        ffwLat(displacement, (au::seconds)(0));
+        ffwLat(displacement, (au::seconds)(0), maxAccel);
     }
     
   }
@@ -620,16 +635,16 @@ void Robot::start_odom() {
 
 // Create a config for everything used in the Robot class
 dlib::ChassisConfig chassis_config{
-    {3, -5, 12},    // left motor ports - + -
-    {-16, -17, 18}, // right motor ports + + -
+    {11, 12, 13},    // left motor ports - + -
+    {-5, -6, -15}, // right motor ports + + -
     pros::MotorGearset::blue,
     rpm(480),     // the drivebase rpm
     inches(2.725) // the drivebase wheel diameter
 };
 
-dlib::RotationConfig rotRight{1, inches(2.75), .8};
+dlib::RotationConfig rotRight{2, inches(2.75), .8};
 
-dlib::RotationConfig rotLeft{9, inches(2.75), .8};
+dlib::RotationConfig rotLeft{4, inches(2.75), .8};
 
 // kv: 0.017650692106976215
 //  ks: 1.4371121135741225
@@ -639,28 +654,30 @@ dlib::RotationConfig rotLeft{9, inches(2.75), .8};
 // .79 kv works up to 300 dps
 // .35
 // 0.87
-dlib::FeedforwardGains TurnFFwdGains{1.8, 0.9, 0.40}; // ka 1.6, 0.92, 0.40
+dlib::FeedforwardGains TurnFFwdGains{
+  1.75, //1.2077766123397968 1.5
+  0.85, //0.997
+  0.12}; // ka 0.17 // .12
 
-dlib::FeedforwardGains TurnDecelFFwdGains {
-  1.6, 
-  0.60, //0.8 
-  0.175 //0.175
-};
 
 // 1.4724784904435986,
 //  6.225360763050551,
 // 1.026599683976744,
 //	6.021757193809706,
 //	0.4782196866053843
-dlib::FeedforwardGains LinFFwdGains{1.026599683976744, 6.021757193809706, 1.1};
+dlib::FeedforwardGains LinFFwdGains{
+  1.026599683976744, 
+  6.021757193809706, //6.021757193809706
+  0.9 //ka 1.1
+};
 
 dlib::ImuConfig imu_config{
-    11,           // imu port
+    16,           // imu port
     1.00961546551 // optional imu scaling constant
 };
 
 dlib::PidGains move_pid_gains{
-    200, // kp, porportional gain 10
+    200, // kp, porportional gain 150
     0,   // ki, integral gain
     0    // kd, derivative gain
 };
@@ -672,17 +689,18 @@ dlib::ErrorDerivativeSettler<Meters> move_pid_settler{
 };
 
 dlib::PidGains turn_pid_gains{
-    35, // kp, porportional gain
+    23, // kp, porportional gain // 23
     0,  // ki, integral gain
-    3.2 // kd, derivative gain //2.4 
+    1.9 // kd, derivative gain // 1.9
 };
 
+// 1.5
 dlib::ErrorDerivativeSettler<Degrees> turn_pid_settler{
-    degrees(1.5), // error threshold, the maximum error the pid can settle at
-    degrees_per_second(0.8) // derivative threshold, the maximum instantaneous
+    degrees(1.5), // error threshold, the maximum error the pid can settle at //1.5
+    degrees_per_second(0.8) // derivative threshold, the maximum instantaneous //0.8
                             // error over time the pid can settle at
 };
 
 Robot robot = Robot(chassis_config, imu_config, move_pid_gains,
                     move_pid_settler, turn_pid_gains, turn_pid_settler,
-                    rotRight, rotLeft, TurnFFwdGains, LinFFwdGains, TurnDecelFFwdGains);
+                    rotRight, rotLeft, TurnFFwdGains, LinFFwdGains, {});

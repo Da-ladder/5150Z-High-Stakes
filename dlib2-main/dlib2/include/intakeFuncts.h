@@ -1,13 +1,13 @@
 #pragma once
 #include "declarations.h"
-#include "main.h"
+#include "pistons.h"
 
 
 
 class IntakeHelper {
     private:
         static bool excludeBlue;
-        static bool blockLoop; // Not in use
+        static bool blockSort; // Not in use
         static int time;
         static int stuckTime;
         static bool feedWall;
@@ -37,73 +37,24 @@ class IntakeHelper {
     inline static void main() {
         bool ringLiftSense = false;
         while (true) {
-            
-            /*
-            if (ringOpt.get() < 80) {
-                blocking = true;
-                intake.move_voltage(12);
-                pros::delay(400);
-                intake.move_voltage(0);
-                pros::delay(100);
-                // intake.move_voltage(12);
-                // pros::delay(200);
-                blocking = false;
-                pros::delay(300);
-            }
-            */
 
-
-
-            /*
-
-            if (blockLoop) {
-                pros::delay(5);
-                continue;
-            }
-            // stuckDetect();
-            time += 1;
-            if (feedWall) {
-                if ((opt.get_hue() > 200 && opt.get_hue() < 230) || (opt.get_hue() > 12 && opt.get_hue() < 20)) {
-                    intake.move_voltage(4000);
+            if (excludeBlue && (!blockSort)) {
+                if (opt.get_hue() >= 200 && opt.get_hue() <= 220) {
+                    colorPistion.overrideState(1); // REJECT blue
+                } else if (opt.get_hue() < 20) {
+                    colorPistion.overrideState(0); // ACCEPT red
                 }
-                if (ringOpt.get() < 180) {
-                    blocking = true;
-                    intake.move_voltage(6000);
-                    pros::delay(80);
-                    intake.move_voltage(-6000);
-                    pros::delay(600);
-                    blocking = false;
-                } else {
-                    // intake.move_voltage(0);
-                }
-            } else if (stap){
-                // stop intake at ring
-                if (ringOpt.get() <= 200) {
-                    intake.move_voltage(0);
+            } else if ((!excludeBlue) && (!blockSort)) {
+                if (opt.get_hue() >= 200 && opt.get_hue() <= 220) {
+                    colorPistion.overrideState(0); // ACCEPT blue
+                } else if (opt.get_hue() < 20) {
+                    colorPistion.overrideState(1); // REJECT red
                 }
             } else {
-                // kicks out rings normally
-                if (excludeBlue) {
-                    if (intakeState == 1) {
-                        // exlude here
-                        
-                        if (opt.get_hue() > 200 && opt.get_hue() < 230) {
-                            
-                        }
-                    }
-
-                    // do nothing if intake is off or going backwards
-                } else {
-                    if (intakeState == 1) {
-                        
-                    }
-
-                    // do nothing if intake is off or going backwards
-                }
+                colorPistion.overrideState(0); // TURN OFF SORTING
             }
-            */
 
-            
+                
             pros::delay(5);
         }
     }
@@ -124,24 +75,38 @@ class IntakeHelper {
         excludeBlue = sort;
     }
 
+    inline static bool getStortState() {
+        return blockSort;
+    }
+
+    inline static void sortState(bool state) {
+        blockSort = state;
+    }
+
     //
     inline static void voltage(double volt) {
         if (!blocking) {
             intake.move_voltage(volt*1000);
+
+            if (volt == 0) {
+                intakeState = 0;
+            } else if (volt > 0) {
+                intakeState = 1;
+            } else {
+                intakeState = 2;
+            }
+        } else {
+            // do nothing
         }
         
-        if (volt == 0) {
-            intakeState = 0;
-        } else if (volt > 0) {
-            intakeState = 1;
-        } else {
-            intakeState = 2;
-        }
+        
     }
 
     inline static void init() {
+        // opt.set_integration_time(20);
+        // pros::delay(50);
         opt.set_led_pwm(100);
-        // opt.set_integration_time(10); //DNE in pros v5
+        // opt.set_integration_time(10);
         pros::Task IntakeMngr(main);
 
     }

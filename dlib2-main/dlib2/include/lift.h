@@ -6,7 +6,7 @@
 class LiftMngr{
     private:
         static bool blockLiftThread;
-        static int holdLvl; // level to hold to
+        static double holdLvl; // level to hold to
         static double voltReq; // voltage that external calls request from setVoltage
         static int time; // time since voltReq was executed and at zero
         static double prevVolt; // previous voltage, used for slew rate
@@ -40,7 +40,7 @@ class LiftMngr{
         }
 
         inline static void main() {
-            double kp = 0.08, ki = 0.005, kd = 0.2; //kp = 0.5, ki = 0.05, kd = 0.1
+            double kp = 0.2, ki = 0.00, kd = 0.1; //kp = 0.08, ki = 0.02, kd = 0.2
             double accumlator = 0;
             double lastErr = 0;
             double perVolt = 0;
@@ -54,18 +54,18 @@ class LiftMngr{
                     time += 1;
 
                     if (time < (50)) {
-                        holdLvl = lift.get_position();
+                        holdLvl = liftRot.get_position()/100.0;
                         setMotorPwr(voltReq);
                         pros::delay(5);
                         continue;
                     }
-                    float error = holdLvl - (lift.get_position());
+                    float error = holdLvl - (liftRot.get_position()/100.0);
 
                     pros::lcd::print(5, "err: %f", error);
 
                     if (true) { //270
                         double wantVolt = 0;
-                        if (fabs(error) > 2) {
+                        if (fabs(error) > 5) {
                             wantVolt = (error * kp) + (accumlator * ki) + ((error-lastErr) * kd);
                         } else {
                             wantVolt = (error * kp) + (accumlator * ki);
@@ -74,23 +74,14 @@ class LiftMngr{
                         
                         setMotorPwr(wantVolt);
 
-
-
-                        if ((error-lastErr) < 0 && fabs(error) > 0.1) {
-                            accumlator += error;
-                        } else if ((error-lastErr) > 0 && fabs(error) > 0.1) {
-                            accumlator += error;
-                        } else {
-                            // do nothing
-                        }
-                        if (fabs(error) < 10 && fabs(error) > 2) {
+                        if (fabs(error) < 5 && fabs(error) > 0) {
                             if (error > 0) {
                                 accumlator += error;
                             } else {
                                 accumlator += error;
                             }
                             
-                        } else if (fabs(error) > 10){
+                        } else if (fabs(error) > 5 || (fabs(error) <= 0.4)){
                             accumlator = 0;
                         }
 
@@ -109,12 +100,12 @@ class LiftMngr{
             return lift.get_position();
         }
 
-        inline static int getLevel() {
+        inline static double getLevel() {
             return holdLvl;
         }
 
         //sets hold level to the user defined lvl
-        inline static void setLevel(int lvl) {
+        inline static void setLevel(double lvl) {
             holdLvl = lvl;
         }
 
@@ -126,11 +117,11 @@ class LiftMngr{
 
         inline static void initall() {
             //sets pos to zero
-            // liftRot.reset();
-            lift.tare_position_all();
+            liftRot.reset();
+            // lift.tare_position_all();
 
             // divides by 100 to get regular degrees
-            holdLvl = lift.get_position();
+            holdLvl = liftRot.get_position()/100.0;
 
             pros::Task liftManagement(main);
         }

@@ -3,14 +3,12 @@
 #include "declarations.h"
 #include "teleop.h"
 #include "main.h"
-#include "pistons.h"
 #include "lift.h"
 #include "intakeFuncts.h"
 #include "pros/abstract_motor.hpp"
 #include "pros/llemu.hpp"
-#include "pros/misc.h"
+#include "mogoDetect.h"
 #include <string>
-#include <iostream>
 
 using namespace au;
 
@@ -23,10 +21,17 @@ void initialize() {
 	Routes::initall();
     DriverControl::initAll();
 	IntakeHelper::init();
-	IntakeHelper::blueExcld(true);
+	// IntakeHelper::sortState(false);
+	// IntakeHelper::blueExcld(true);
+
+	MogoUtils::init();
+	RedRingUtil::init();
 
 	pros::lcd::set_text(1, "ARMED");
+
 	LiftMngr::initall();
+
+	master.rumble("-.-");
 }
 
 void disabled() {}
@@ -34,6 +39,13 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
+	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+    robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+
+	// IntakeHelper::voltage(12);
+
+	// MogoUtils::getMogo(10, 2);
+	// LiftMngr::setLevel(500);
 
 	// moClamp.overrideState(1);
     // pros::delay(400);
@@ -43,20 +55,30 @@ void autonomous() {
 
 	// robot.move_to_point({(au::inches)(53.27), (au::inches)(61.3)}, true, false);
 
-	AutoSelector::updatePath();
-	AutoSelector::run();
+	AutoSelector::updatePath(); // UNCOMMENT
+	AutoSelector::run(); // UNCOMMENT
+
 	// robot.chassis.move_voltage((au::volts)(7));
 	// robot.testStatic();
 
-	// robot.ffwLat((au::inches)(-5), au::milli(au::seconds)(2000));
-	// robot.turn_with_pid((au::degrees)(90));
-	// robot.ffwTurn((au::degrees)(100));
+	// robot.ffwLat((au::inches)(40), au::milli(au::seconds)(2000));
+	// pros::delay(3000);
+	// robot.turn_with_pid(70, 2000);
+	/*
+	robot.ffwTurn((au::degrees)(800));
+	master.clear();
+	pros::delay(150);
+	master.set_text(1, 0, std::to_string(robot.imu.get_rotation().in(au::degrees)));
+
+	/**/
+	
+	
 	// robot.move_with_pid((au::inches)(10));
 
 
 	// TESTS
 	// robot.fwdDynoTest();
-	//robot.turnQuasiStaticTest();
+	// robot.turnQuasiStaticTest();
 	// robot.turnDynoTest();
 	/*
 	auto start_time = pros::millis();
@@ -73,18 +95,26 @@ void autonomous() {
 		pros::delay(20);
 	}
 	*/
+
+	// RedRingUtil::getRing(true, 9, 2);
 	
 }
 
 void opcontrol() {
 
+	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+    robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+
 	while(true){
+
+		// MogoUtils::refreshMogo(); // CALIBRATION
+		RedRingUtil::refreshRing(); // CALIBRATION
+
 
 		AutoSelector::updatePath();
 		AutoSelector::printPath();
         DriverControl::main();
-		pros::delay(10);
-		pros::delay(20);
+		pros::delay(25);
 	}
 	
 	

@@ -10,6 +10,7 @@ extern pros::Controller master;
 // extern button
 extern pros::ADIDigitalIn xyBut;
 extern pros::ADIDigitalIn turnBut;
+// extern pros::adi::DigitalIn intakeTop;
 
 // externs kicker and intake so that auto and driver can use them
 extern pros::Motor intake;
@@ -20,7 +21,7 @@ extern pros::MotorGroup right_motors;
 // Rotation sensor
 extern pros::Rotation liftRot;
 
-extern pros::IMU imu;
+// extern pros::IMU imu;
 extern pros::Rotation vert;
 
 // Color sensors
@@ -32,6 +33,7 @@ extern pros::v5::Distance ringOpt;
 
 // exp stuff
 extern pros::v5::Vision camDetect;
+extern pros::v5::Vision camRingDetect;
 
 // chassis
 
@@ -126,13 +128,13 @@ class Robot {
     void turnQuasiStaticTest();
     void ffwTurn(Quantity<Degrees, double> heading);
     void ffwLat(Quantity<Meters, double> displacement,
-              Quantity<Seconds, double> timeout);
+              Quantity<Seconds, double> timeout, double maxAccel = 3.0);
     void testStatic();
     void fwdQuasiStaticTest();
     void fwdDynoTest();
-    void turn_with_pid(double heading, int timeoutMS);
-    void turn_to_point(dlib::Vector2d point, bool mogoSide);
-    void move_to_point(dlib::Vector2d point, bool turn = true, bool fowards = true);
+    void turn_with_pid(double heading, int timeoutMS, double maxVolts = 12);
+    void turn_to_point(dlib::Vector2d point, bool mogoSide, int to, double maxVolts = 12);
+    void move_to_point(dlib::Vector2d point, bool turn = true, bool fowards = true, int to = 1400, double maxAccel = 3, double maxTurnVolts = 12);
     void start_odom();
 };
 
