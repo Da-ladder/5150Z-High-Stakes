@@ -75,7 +75,7 @@ class MogoUtils {
             int mmDis = 9999; // default for when nothing is detected
 
             // keep looping while mogo has not been detected in the clamp
-            while (mmDis > 55) {
+            while (mmDis > 53) {
                 MogoUtils::refreshMogo();
 
                 disError = 50 - mmDis; // 50 is most in mogo can go on corner
@@ -118,8 +118,8 @@ class MogoUtils {
             }
 
             // Lets the drive contuine under residual power and clamps after 75 ms
-            moveDrive(2, 2, 20);
-            moveDrive(0.5, 0.5, 20);
+            moveDrive(2, 2, 30);
+            moveDrive(1.5, 1.5, 20);
             moClamp.overrideState(1);
             moveDrive(0, 0, 150);
 
@@ -146,10 +146,10 @@ class RedRingUtil {
             camRingDetect.set_exposure(31);
 
             // Sets red & blue ring sig (calibration required)
-            pros::vision_signature_s_t RED_RING_SIG = pros::c::vision_signature_from_utility(1, 8561, 10445, 9504, -2371, -1133, -1752, 2.800, 0);
+            pros::vision_signature_s_t RED_RING_SIG = pros::c::vision_signature_from_utility(1, 8561, 10445, 9504, -2371, -1133, -1752, 4.000, 0);
             camRingDetect.set_signature(RED_RING, &RED_RING_SIG);
 
-            pros::vision_signature_s_t BLUE_RING_SIG = pros::c::vision_signature_from_utility(2, 0, 0, 0, 0, 0, 0, 0, 0);
+            pros::vision_signature_s_t BLUE_RING_SIG = pros::c::vision_signature_from_utility(2, -4153, -3497, -3826, 6599, 8631, 7614, 5.200, 0);
             camRingDetect.set_signature(BLUE_RING, &BLUE_RING_SIG);
         }
 

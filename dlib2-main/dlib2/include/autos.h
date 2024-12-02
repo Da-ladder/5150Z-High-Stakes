@@ -92,15 +92,21 @@ class Routes{
         // during auto selection.
         void static placehold1(); 
         void static placehold2(); 
+        void static placehold2Mir(); 
         void static placehold3();
         void static placehold4();
         void static placehold5();
         void static placehold6();
+        void static placehold6Mir();
         void static placehold7();
         void static placehold8();
         void static placehold9();
         void static placehold10();
         void static placehold11();
+        void static placehold12();
+        void static placehold12Mir();
+        void static placehold13();
+        void static placehold13Mir();
         void static skills();
 
     
@@ -109,7 +115,19 @@ class Routes{
         // The names attached are within quotes
         
         // AutoSelector::add("Blue elim right hard", placehold1);
-        // AutoSelector::add("Blue right EZ", placehold7); //placehold3
+        // AutoSelector::add("Blue right EZ", placehold7); //placehold3 // 2&6
+
+        AutoSelector::add("Sig Solo BLUE", placehold6);
+        AutoSelector::add("Sig Solo Red", placehold6Mir);
+
+        AutoSelector::add("Sig Ring side RED (6 ring)", placehold12); // not ok
+        AutoSelector::add("Sig Ring side BLUE (6 ring)", placehold12Mir); // ok
+
+        AutoSelector::add("Sig Ring side BLUE (STAKE)", placehold2); // ok
+        AutoSelector::add("Sig Ring side RED (STAKE)", placehold2Mir); // ok-ish(mid corner ring)
+
+        AutoSelector::add("Sig Goal Rush RED", placehold13);
+        AutoSelector::add("Sig Goal Rush BLUE", placehold13Mir);
 
         AutoSelector::add("skills", skills);
         AutoSelector::add("EZ BLUE", placehold11);

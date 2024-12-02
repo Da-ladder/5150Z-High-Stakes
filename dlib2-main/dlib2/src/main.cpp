@@ -20,6 +20,7 @@ void initialize() {
 
 	Routes::initall();
     DriverControl::initAll();
+	LiftMngr::initall();
 	IntakeHelper::init();
 	// IntakeHelper::sortState(false);
 	// IntakeHelper::blueExcld(true);
@@ -28,9 +29,6 @@ void initialize() {
 	RedRingUtil::init();
 
 	pros::lcd::set_text(1, "ARMED");
-
-	LiftMngr::initall();
-
 	master.rumble("-.-");
 }
 
@@ -39,8 +37,8 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
-	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
-    robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+    robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
 
 	// IntakeHelper::voltage(12);
 
@@ -95,8 +93,6 @@ void autonomous() {
 		pros::delay(20);
 	}
 	*/
-
-	// RedRingUtil::getRing(true, 9, 2);
 	
 }
 

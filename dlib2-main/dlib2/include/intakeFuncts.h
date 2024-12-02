@@ -41,17 +41,31 @@ class IntakeHelper {
             if (excludeBlue && (!blockSort)) {
                 if (opt.get_hue() >= 200 && opt.get_hue() <= 220) {
                     colorPistion.overrideState(1); // REJECT blue
-                } else if (opt.get_hue() < 20) {
+                    pros::delay(200);
+                } else if (opt.get_hue() < 15) {
                     colorPistion.overrideState(0); // ACCEPT red
                 }
             } else if ((!excludeBlue) && (!blockSort)) {
                 if (opt.get_hue() >= 200 && opt.get_hue() <= 220) {
                     colorPistion.overrideState(0); // ACCEPT blue
-                } else if (opt.get_hue() < 20) {
+                } else if (opt.get_hue() < 15) {
                     colorPistion.overrideState(1); // REJECT red
+                    pros::delay(200);
                 }
             } else {
                 colorPistion.overrideState(0); // TURN OFF SORTING
+            }
+
+            if (stap) {
+                if (excludeBlue) {
+                    if (opt.get_hue() < 20) {
+                        IntakeHelper::voltage(0);
+                    }
+                } else if (!excludeBlue) {
+                    if (opt.get_hue() >= 200 && opt.get_hue() <= 220) {
+                        IntakeHelper::voltage(0);
+                    }
+                }
             }
 
                 
@@ -103,8 +117,8 @@ class IntakeHelper {
     }
 
     inline static void init() {
-        // opt.set_integration_time(20);
-        // pros::delay(50);
+        opt.set_integration_time(50);
+        pros::delay(50);
         opt.set_led_pwm(100);
         // opt.set_integration_time(10);
         pros::Task IntakeMngr(main);

@@ -20,6 +20,7 @@ class DriverControl {
         inline static void initAll(){
             moClamp.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L2);
             liftIntake.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_Y);
+            rushClamp.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_LEFT);
             //intake.set_brake_mode(pros::v5::MotorBrake::hold);
         };
 
@@ -31,6 +32,7 @@ class DriverControl {
         // Updates all pistons based on controller input
         inline static void updatePistions(){
             moClamp.toggle();
+            rushClamp.toggle();
         }
 
 
@@ -56,8 +58,8 @@ class DriverControl {
             } else if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
                 LiftMngr::setVoltage(-12, true);
             } else if (master.get_digital_new_press(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
-                if (LiftMngr::getLevel() < 170) {
-                    LiftMngr::setLevel(250);
+                if (LiftMngr::getLevel() > 280) {
+                    LiftMngr::setLevel(190);
                 } else {
                     LiftMngr::setLevel(291.62); //87.01 all under
                 }
