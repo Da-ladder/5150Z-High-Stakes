@@ -633,11 +633,13 @@ void Robot::start_odom() {
 
 void Robot::restOdom(double x, double y, double theta) {
   dlib::Pose2d thing = {(au::inches)(x), (au::inches)(y), (au::degrees)(theta)};
+  odom.set_position(thing);
 }
 
 void Robot::restOdomKeepAngle(double x, double y) {
   dlib::Pose2d curPos = odom.get_position();
   dlib::Pose2d thing = {(au::inches)(x), (au::inches)(y), curPos.theta};
+  odom.set_position(thing);
 }
 
 
