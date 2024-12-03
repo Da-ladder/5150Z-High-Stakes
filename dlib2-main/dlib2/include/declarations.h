@@ -138,6 +138,7 @@ class Robot {
     void start_odom();
 
 	void restOdom(double x, double y, double theta);
+	void restOdomKeepAngle(double x, double y);
 
 };
 
