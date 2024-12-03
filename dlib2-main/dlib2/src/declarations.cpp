@@ -618,6 +618,7 @@ void Robot::start_odom() {
                     imu.get_rotation());
 
         dlib::Pose2d curPos = odom.get_position();
+        
         pros::lcd::print(0, "x: %f",
                          (curPos.x).in(au::inches)); // print the x position
         pros::lcd::print(1, "y: %f",
@@ -628,7 +629,11 @@ void Robot::start_odom() {
         pros::delay(10);
       }
     });
-  }
+}
+
+void Robot::restOdom(double x, double y, double theta) {
+  dlib::Pose2d thing = {(au::inches)(x), (au::inches)(y), (au::degrees)(theta)};
+}
 
 
 

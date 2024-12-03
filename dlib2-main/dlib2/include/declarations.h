@@ -136,6 +136,9 @@ class Robot {
     void turn_to_point(dlib::Vector2d point, bool mogoSide, int to, double maxVolts = 12);
     void move_to_point(dlib::Vector2d point, bool turn = true, bool fowards = true, int to = 1400, double maxAccel = 3, double maxTurnVolts = 12);
     void start_odom();
+
+	void restOdom(double x, double y, double theta);
+
 };
 
 
