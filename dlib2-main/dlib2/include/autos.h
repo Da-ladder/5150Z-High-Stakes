@@ -116,6 +116,8 @@ class Routes{
         
         // AutoSelector::add("Blue elim right hard", placehold1);
         // AutoSelector::add("Blue right EZ", placehold7); //placehold3 // 2&6
+        AutoSelector::add("skills", skills);
+        AutoSelector::add("EZ BLUE", placehold11);
 
         // AutoSelector::add("Sig Ring side RED (6 ring)", placehold12); // not ok
         AutoSelector::add("Sig Ring side BLUE (6 ring)", placehold12Mir); // ok
@@ -128,9 +130,6 @@ class Routes{
 
         AutoSelector::add("Sig Goal Rush RED", placehold13);
         AutoSelector::add("Sig Goal Rush BLUE", placehold13Mir);
-
-        AutoSelector::add("skills", skills);
-        AutoSelector::add("EZ BLUE", placehold11);
 
         AutoSelector::add("ELIM Red RUSH", placehold3); //good
         AutoSelector::add("ELIM blue RUSH MIRROR", placehold7); //good
