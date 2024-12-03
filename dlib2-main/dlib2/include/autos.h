@@ -117,14 +117,14 @@ class Routes{
         // AutoSelector::add("Blue elim right hard", placehold1);
         // AutoSelector::add("Blue right EZ", placehold7); //placehold3 // 2&6
 
-        AutoSelector::add("Sig Solo BLUE", placehold6);
-        AutoSelector::add("Sig Solo Red", placehold6Mir);
-
-        AutoSelector::add("Sig Ring side RED (6 ring)", placehold12); // not ok
+        // AutoSelector::add("Sig Ring side RED (6 ring)", placehold12); // not ok
         AutoSelector::add("Sig Ring side BLUE (6 ring)", placehold12Mir); // ok
 
         AutoSelector::add("Sig Ring side BLUE (STAKE)", placehold2); // ok
         AutoSelector::add("Sig Ring side RED (STAKE)", placehold2Mir); // ok-ish(mid corner ring)
+
+        AutoSelector::add("Sig Solo BLUE", placehold6);
+        AutoSelector::add("Sig Solo Red", placehold6Mir);
 
         AutoSelector::add("Sig Goal Rush RED", placehold13);
         AutoSelector::add("Sig Goal Rush BLUE", placehold13Mir);
