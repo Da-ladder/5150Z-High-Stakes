@@ -53,10 +53,10 @@ void autonomous() {
 
 	// robot.move_to_point({(au::inches)(53.27), (au::inches)(61.3)}, true, false);
 
-	// AutoSelector::updatePath(); // UNCOMMENT
-	// AutoSelector::run(); // UNCOMMENT
-	pros::delay(150);
-	robot.restOdomKeepAngle(4.5,  5.5);
+	AutoSelector::updatePath(); // UNCOMMENT
+	AutoSelector::run(); // UNCOMMENT
+	// pros::delay(150);
+	// robot.restOdomKeepAngle(4.5,  5.5);
 
 	// robot.chassis.move_voltage((au::volts)(7));
 	// robot.testStatic();

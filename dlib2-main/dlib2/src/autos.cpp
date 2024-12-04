@@ -75,17 +75,103 @@ void Routes::skills() {
     robot.turn_to_point({(au::inches)(-14.67), (au::inches)(-22.36)}, MOGO_SIDE, 800);
 
     // grab mogo
-    MogoUtils::getMogo(10, 2);
+    MogoUtils::getMogo(8, 2);
 
-    // turn to and grab ring
+    // turn to and grab rings
     robot.turn_to_point({(au::inches)(-38.71), (au::inches)(-23.95)}, INTAKE_SIDE, 800);
-    RedRingUtil::getRing(true, 11, 2);
+    RedRingUtil::getRing(true, 9, 2);
+    
+    robot.turn_to_point({(au::inches)(-35.22), (au::inches)(-39.58)}, INTAKE_SIDE, 800);
+    RedRingUtil::getRing(true, 8, 2);
 
+    robot.turn_to_point({(au::inches)(-55.98), (au::inches)(-55.50)}, INTAKE_SIDE, 800);
+    RedRingUtil::getRing(true, 9, 2);
+    pros::delay(300);
+    moveManual(600, 4);
+    
+    robot.move_to_point({(au::inches)(-26.76), (au::inches)(-47.80)}, true, INTAKE_SIDE, 800, 1.5);
+    RedRingUtil::getRing(true, 8, 2);
+    pros::delay(300);
+
+    robot.move_to_point({(au::inches)(-6.22), (au::inches)(-46.01)}, false, INTAKE_SIDE, 800);
+    //RedRingUtil::getRing(true, 6, 2);
+
+    robot.turn_with_pid(54.74, 700, 5);
+    RedRingUtil::getRing(true, 6, 2);
+    pros::delay(500);
+
+    //Drop goal in corner
+    robot.move_to_point({(au::inches)(-4.04), (au::inches)(-58.98)}, true, MOGO_SIDE);
+    moveManual(500, 5); 
+    moClamp.overrideState(0);
+    pros::delay(150);
+    IntakeHelper::voltage(0);
+    //robot.restOdom(0, 0, 0); 
+    
+    //Move to goal 2
+    robot.move_to_point({(au::inches)(-16.81), (au::inches)(-45.34)}, false, INTAKE_SIDE, 1000, 1.5);
+    
+    robot.move_to_point({(au::inches)(-17.07), (au::inches)(9.38)}, true, MOGO_SIDE, 800, 2);
+    //robot.turn_with_pid(88.65, 700, 6);
+    
+    //Grab second goal
+    MogoUtils::getMogo(6, 2);
+    
+    //Grab second set of rings
+    IntakeHelper::voltage(12);
+
+    robot.turn_to_point({(au::inches)(-32.95), (au::inches)(21.18)}, INTAKE_SIDE, 800);
+    RedRingUtil::getRing(true, 8, 2);
+
+    robot.turn_to_point({(au::inches)(-38.62), (au::inches)(40.96)}, INTAKE_SIDE, 800);
+    RedRingUtil::getRing(true, 6, 2);
+
+    robot.turn_to_point({(au::inches)(-59.78), (au::inches)(54.23)}, INTAKE_SIDE, 800);
+    RedRingUtil::getRing(true, 6, 2);
+    pros::delay(300);
+    moveManual(600, 4);
+    
+    robot.move_to_point({(au::inches)(-33.10), (au::inches)(50.53)}, true, INTAKE_SIDE, 800, 2);
+    //RedRingUtil::getRing(true, 8, 2);
+    pros::delay(300);
+
+    robot.move_to_point({(au::inches)(-10.12), (au::inches)(49.69)}, true, INTAKE_SIDE, 800);
+    //RedRingUtil::getRing(true, 6, 2);
+    
+    robot.turn_with_pid(-54.39, 700, 5);
+    RedRingUtil::getRing(true, 6, 2);
+    pros::delay(500);
+
+    //Drop goal in corner
+    robot.move_to_point({(au::inches)(-6.79), (au::inches)(60.02)}, true, MOGO_SIDE);
+    moveManual(500, 5); 
+    moClamp.overrideState(0);
+    pros::delay(150);
+    IntakeHelper::voltage(0);
+    robot.restOdom(0, 0, 0); 
+    
+    //Move to third goal
+    robot.move_to_point({(au::inches)(-25.64), (au::inches)(-1.23)}, false, INTAKE_SIDE, 1.5);
+    robot.move_to_point({(au::inches)(-61.61), (au::inches)(32.48)}, true, INTAKE_SIDE, 2);
+    robot.turn_to_point({(au::inches)(-79.47), (au::inches)(30.94)}, INTAKE_SIDE, 800);
+    IntakeHelper::StopAtColor(true);
+    RedRingUtil::getRing(true, 8, 2); //Grab ring in the way, holds it in intake. 
+    //pros::delay(200);
+    IntakeHelper::StopAtColor(false);
+    robot.move_to_point({(au::inches)(-103.54), (au::inches)(30.58)}, true, MOGO_SIDE, 800, 1.5);
+
+    //Grab third goal
+    MogoUtils::getMogo(6, 2);
+    pros::delay(150);
+    IntakeHelper::voltage(12); //Restart intake.
+    
+
+    /*
     // turn to and grab ring
     robot.move_to_point({(au::inches)(-68.46), (au::inches)(-43.94)}, true, INTAKE_SIDE, 800, 2.5, 8);
     LiftMngr::setLevel(291.62);
     RedRingUtil::getRing(true, 11, 2);
-    moveManual(300, 4);
+    moveManual(300, 6);
 
     // turn to and grab ring + stake
     robot.turn_to_point({(au::inches)(-63.21), (au::inches)(-57.33)}, INTAKE_SIDE, 1200);
@@ -140,6 +226,13 @@ void Routes::skills() {
     LiftMngr::setLevel(291.62);
     robot.move_to_point({(au::inches)(-15.95), (au::inches)(-52.30)}, false, INTAKE_SIDE, 0, 2.5);
     IntakeHelper::voltage(12);
+
+    //Move to goal 2
+    robot.move_to_point({(au::inches)(-106.63), (au::inches)(-34.41)}, true, INTAKE_SIDE, 0, 2.5);
+    robot.turn_with_pid(152.96, 900, 9);
+    //Grab mogo 2
+    MogoUtils::getMogo(10, 2);
+    */
     /*
     robot.move_to_point({(au::inches)(-108.19), (au::inches)(-52.61)}, false, INTAKE_SIDE, 0, 2.5);
 
