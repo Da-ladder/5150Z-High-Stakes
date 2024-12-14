@@ -2,12 +2,18 @@
 #include "declarations.h"
 #include "pistons.h"
 
+#define MAIN_LOOP_DELAY 5
+#define STUCK_DELAY_MS 200
+#define STUCK_DEG_RANGE 10
+#define SORT_MS_EXT_DELAY 330
+
 
 
 class IntakeHelper {
     private:
         static bool excludeBlue;
-        static bool blockSort; // Not in use
+        static bool blockSort;
+        static int intakePos;
         static int time;
         static int stuckTime;
         static bool feedWall;
@@ -19,38 +25,47 @@ class IntakeHelper {
     public:
 
     inline static void stuckDetect() {
-        if (intake.get_current_draw() > 2000 && intakeState == 1) {
-            stuckTime++;
+
+        int curIntakePos = intake.get_position();
+
+        if (intakeState == 1 && abs(curIntakePos - intakePos) < STUCK_DEG_RANGE) {
+            intakePos = curIntakePos;
+            stuckTime ++;
         } else {
+            intakePos = curIntakePos;
             stuckTime = 0;
         }
-        if (stuckTime > 60) {
-            blocking = true;
+
+        // reverse intake if it detects it is stuck
+        if (stuckTime >= (STUCK_DELAY_MS/MAIN_LOOP_DELAY)) {
             intake.move_voltage(-12000);
-            pros::delay(200);
+            pros::delay(100);
             intake.move_voltage(12000);
-            blocking = false;
-            // stuckTime = 0;
+            stuckTime = 0;
         }
+
+
     }
 
     inline static void main() {
         bool ringLiftSense = false;
         while (true) {
 
+            // stuckDetect();
+
             if (excludeBlue && (!blockSort)) {
-                if (opt.get_hue() >= 200 && opt.get_hue() <= 220) {
+                if (opt.get_hue() >= 200 && opt.get_hue() <= 225/* && opt.get_proximity() >=*/) {
                     colorPistion.overrideState(1); // REJECT blue
-                    pros::delay(200);
+                    pros::delay(SORT_MS_EXT_DELAY);
                 } else if (opt.get_hue() < 15) {
                     colorPistion.overrideState(0); // ACCEPT red
                 }
             } else if ((!excludeBlue) && (!blockSort)) {
-                if (opt.get_hue() >= 200 && opt.get_hue() <= 220) {
+                if (opt.get_hue() >= 200 && opt.get_hue() <= 225) {
                     colorPistion.overrideState(0); // ACCEPT blue
                 } else if (opt.get_hue() < 15) {
                     colorPistion.overrideState(1); // REJECT red
-                    pros::delay(200);
+                    pros::delay(SORT_MS_EXT_DELAY);
                 }
             } else {
                 colorPistion.overrideState(0); // TURN OFF SORTING
@@ -58,18 +73,18 @@ class IntakeHelper {
 
             if (stap) {
                 if (excludeBlue) {
-                    if (opt.get_hue() < 20) {
+                    if (opt.get_hue() < 15) {
                         IntakeHelper::voltage(0);
                     }
                 } else if (!excludeBlue) {
-                    if (opt.get_hue() >= 200 && opt.get_hue() <= 220) {
+                    if (opt.get_hue() >= 200 && opt.get_hue() <= 225) {
                         IntakeHelper::voltage(0);
                     }
                 }
             }
 
                 
-            pros::delay(5);
+            pros::delay(MAIN_LOOP_DELAY);
         }
     }
 
@@ -90,11 +105,11 @@ class IntakeHelper {
     }
 
     inline static bool getStortState() {
-        return blockSort;
+        return !blockSort;
     }
 
     inline static void sortState(bool state) {
-        blockSort = state;
+        blockSort = !state;
     }
 
     //

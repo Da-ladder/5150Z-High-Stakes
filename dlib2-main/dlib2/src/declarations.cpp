@@ -16,7 +16,7 @@ pros::adi::DigitalIn turnBut('F');
 
 
 // intake motor go brrr
-pros::Motor intake(-14);
+pros::Motor intake(-14, pros::v5::MotorGears::blue, pros::v5::MotorEncoderUnits::degrees);
 
 // lift motor
 MotorGroup lift({9, -8}, pros::v5::MotorGears::green,

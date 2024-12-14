@@ -5,6 +5,7 @@
 #include "main.h"
 #include "lift.h"
 #include "intakeFuncts.h"
+#include "pros/misc.h"
 
 
 /**
@@ -21,6 +22,7 @@ class DriverControl {
             moClamp.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L2);
             liftIntake.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_Y);
             rushClamp.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_LEFT);
+            hang.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_X);
             //intake.set_brake_mode(pros::v5::MotorBrake::hold);
         };
 
@@ -33,20 +35,20 @@ class DriverControl {
         inline static void updatePistions(){
             moClamp.toggle();
             rushClamp.toggle();
+            hang.toggle();
         }
 
 
         // Allows for control of intake based on controller input
         inline static void updateIntake(){
-            if (master.get_digital(pros::E_CONTROLLER_DIGITAL_X)) {
+            if (master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
                 IntakeHelper::sortState(!IntakeHelper::getStortState());
+                IntakeHelper::StopAtColor(false);
             }
             if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
                 IntakeHelper::voltage(12);
             } else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
                 IntakeHelper::voltage(-12);
-            } else if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)){
-                IntakeHelper::setWallFeeder(!IntakeHelper::getWallFeeder());
             } else {
                 IntakeHelper::voltage(0);
             }
@@ -54,9 +56,9 @@ class DriverControl {
 
         inline static void updateLift() {
             if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_A)) {
-                LiftMngr::setVoltage(12, true);
-            } else if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
                 LiftMngr::setVoltage(-12, true);
+            } else if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
+                LiftMngr::setVoltage(12, true);
             } else if (master.get_digital_new_press(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
                 if (LiftMngr::getLevel() > 280) {
                     LiftMngr::setLevel(190);

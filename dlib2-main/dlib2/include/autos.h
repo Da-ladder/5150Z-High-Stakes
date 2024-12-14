@@ -94,6 +94,7 @@ class Routes{
         void static placehold2(); 
         void static placehold2Mir(); 
         void static placehold3();
+        void static placehold3Mir();
         void static placehold4();
         void static placehold5();
         void static placehold6();
@@ -116,20 +117,31 @@ class Routes{
         
         // AutoSelector::add("Blue elim right hard", placehold1);
         // AutoSelector::add("Blue right EZ", placehold7); //placehold3 // 2&6
-        AutoSelector::add("skills", skills);
-        AutoSelector::add("EZ BLUE", placehold11);
-
-        // AutoSelector::add("Sig Ring side RED (6 ring)", placehold12); // not ok
-        AutoSelector::add("Sig Ring side BLUE (6 ring)", placehold12Mir); // ok
-
-        AutoSelector::add("Sig Ring side BLUE (STAKE)", placehold2); // ok
-        AutoSelector::add("Sig Ring side RED (STAKE)", placehold2Mir); // ok-ish(mid corner ring)
-
-        AutoSelector::add("Sig Solo BLUE", placehold6);
-        AutoSelector::add("Sig Solo Red", placehold6Mir);
 
         AutoSelector::add("Sig Goal Rush RED", placehold13);
         AutoSelector::add("Sig Goal Rush BLUE", placehold13Mir);
+
+
+        AutoSelector::add("Sig Ring side RED (STAKE SAFE LINE)", placehold3Mir); //
+        AutoSelector::add("Sig Ring side BLUE (STAKE SAFE LINE)", placehold3); // ok
+        
+
+        AutoSelector::add("Sig Ring side BLUE (STAKE)", placehold2); // ok
+        AutoSelector::add("Sig Ring side RED (STAKE)", placehold2Mir); //
+        
+        AutoSelector::add("Sig Ring side RED (6 ring)", placehold12); // ???
+        AutoSelector::add("Sig Ring side BLUE (6 ring)", placehold12Mir); // ???
+
+
+        AutoSelector::add("Sig Solo BLUE", placehold6); // ok
+        AutoSelector::add("Sig Solo Red", placehold6Mir);
+
+        AutoSelector::add("skills", skills); // ???
+        AutoSelector::add("EZ BLUE", placehold11); // ???'
+        
+        
+
+        
 
         AutoSelector::add("ELIM Red RUSH", placehold3); //good
         AutoSelector::add("ELIM blue RUSH MIRROR", placehold7); //good

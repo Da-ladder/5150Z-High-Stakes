@@ -29,6 +29,7 @@ void initialize() {
 	RedRingUtil::init();
 
 	pros::lcd::set_text(1, "ARMED");
+	AutoSelector::printPath();
 	master.rumble("-.-");
 }
 
@@ -37,6 +38,7 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
+	// MogoUtils::getMogo(7, 3);
 	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
     robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
 
@@ -105,8 +107,13 @@ void opcontrol() {
 
 	while(true){
 
+
+		//master.set_text(1, 0, std::to_string(robot.imu.get_rotation().in(au::degrees)));
 		// MogoUtils::refreshMogo(); // CALIBRATION
-		RedRingUtil::refreshRing(); // CALIBRATION
+		// RedRingUtil::refreshRing(); // CALIBRATION
+		
+
+
 
 
 		AutoSelector::updatePath();

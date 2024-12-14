@@ -8,6 +8,8 @@ pros::ADIDigitalOut colorEject('D', LOW);
 pros::ADIDigitalOut cornerSweep('C', LOW);
 pros::ADIDigitalOut odomLift('0', LOW); ///?
 pros::ADIDigitalOut rushingClamp('G', LOW);
+pros::ADIDigitalOut hangOut('H', LOW);
+
 
 // Declares all members of PistonControl which is the wrapper class
 PistonControl moClamp(&mogoClamp);
@@ -16,3 +18,4 @@ PistonControl cornerDeploy(&cornerSweep);
 PistonControl rushClamp(&rushingClamp);
 PistonControl odomExtract(&odomLift);
 PistonControl colorPistion(&colorEject);
+PistonControl hang(&hangOut);

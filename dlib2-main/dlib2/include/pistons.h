@@ -100,3 +100,4 @@ extern PistonControl cornerDeploy;
 extern PistonControl odomExtract;
 extern PistonControl colorPistion;
 extern PistonControl rushClamp;
+extern PistonControl hang;
