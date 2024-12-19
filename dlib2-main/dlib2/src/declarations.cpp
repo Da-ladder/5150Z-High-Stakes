@@ -1,4 +1,5 @@
 #include "declarations.h"
+#include "au/au.hpp"
 #include "pros/adi.h"
 #include "pros/adi.hpp"
 #include "pros/distance.hpp"
@@ -161,6 +162,7 @@ void Robot::turnQuasiStaticTest() {
 
 void Robot::ffwTurn(Quantity<Degrees, double> heading) {
   // EXP
+  
   /*
   dlib::PidGains turn_pid_gains{
       0, // kp, porportional gain //30
@@ -168,6 +170,11 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
       0 // kd, derivative gain
   };
   */
+
+  dlib::FeedforwardGains TurnDecelFFwdGains{
+  1.75, //1.75
+  0.7, //0.88
+  0.15}; // ka 0.2
   // EXP END
   auto start_time = au::milli(au::seconds)(pros::millis());
   auto elapsed_time = au::milli(au::seconds)(pros::millis()) - start_time;
@@ -175,7 +182,10 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
   auto reading = imu.get_rotation();
   auto prevReading = reading;
   auto startHeading = reading;
-  int maxAccel = 800; // 1400 MAX NO MOGO 1200
+  int maxAccel = 900; // 1400 MAX NO MOGO 1200
+  // 1000
+  int maxDecel = 700;
+  // 600
   int maxVelo = 400; // 520 MAX NO MOGO
 
   bool pos = true;
@@ -184,11 +194,11 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
   // turn_pid.set_gains(turn_pid_gains);
 
   turn_pid.target(target_heaidng);
-  turn_pid.update(reading, milli(seconds)(20));
+  turn_pid.update(reading, milli(seconds)(10));
 
-  double kp = 5;
-  double ki = 0;
-  double kd = 0;
+  // double kp = 5;
+  // double ki = 0;
+  // double kd = 0;
   
 
   dlib::PidGains decel_turn_gains{
@@ -206,12 +216,16 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
   dlib::TrapezoidProfile<Degrees> turnTrapProfile =
       dlib::TrapezoidProfile<Degrees>(
           (au::degrees_per_second_squared)(maxAccel),
+          (au::degrees_per_second_squared)(maxDecel),
           (au::degrees_per_second)(maxVelo), val);
 
   int cycle = 0;
-  // turnTrapProfile.stage(elapsed_time) !=
-            //  dlib::TrapezoidProfileStage::Done ||
-        //  cycle <= -1 
+
+
+  chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+  chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+  // 
+
   while (turnTrapProfile.stage(elapsed_time) != dlib::TrapezoidProfileStage::Done) {
     elapsed_time = au::milli(au::seconds)(pros::millis()) - start_time;
     reading = (au::degrees)(imu.raw.get_rotation());
@@ -228,8 +242,19 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
     }
 
     // std::cout << targVelo << std::endl;
+    if (turnTrapProfile.stage(elapsed_time) ==
+          dlib::TrapezoidProfileStage::Decelerating) {
+        // vex is cooked?
+        ffwd.set_gains(TurnDecelFFwdGains);
+        // chassis.turn_voltage(au::volts(0));
+    }
 
     auto ffwdVolts = ffwd.calculate(targVelo, targAccel);
+    
+
+    if (ffwdVolts == (au::volts)(1.75)) {
+      ffwdVolts = au::Zero();
+    }
 
     if (!pos) {
       ffwdVolts = -ffwdVolts;
@@ -237,42 +262,17 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
 
     auto pidVoltage = turn_pid.update(reading, milli(seconds)(20));
 
-    if (turnTrapProfile.stage(elapsed_time) ==
-          dlib::TrapezoidProfileStage::Decelerating) {
-        // vex is cooked?
-        chassis.turn_voltage(au::volts(0));
-    }
-
-     auto voltage = ffwdVolts; //+ pidVoltage;
+    
+    auto voltage = ffwdVolts + pidVoltage;
     chassis.turn_voltage(voltage);
     
     // Use only feedward output for now
-
-    /*
-    if (turnTrapProfile.stage(elapsed_time) ==
-        dlib::TrapezoidProfileStage::Decelerating || turnTrapProfile.stage(elapsed_time) ==
-        dlib::TrapezoidProfileStage::Done) {
-            turn_pid.set_gains(decel_turn_gains);
-            voltage = ffwd.calculate(targVelo, targAccel) + turn_pid.update(reading, milli(seconds)(20));
-            chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
-            chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
-        // chassis.brake();
-
-        if (moarBrake) {
-          chassis.turn_voltage(au::max(((au::volts)(0)), voltage)); //-11
-          pros::delay(5);
-        } else {
-          
-          
-        }
-        
-    }
-    */
-
-    
-
-    
     pros::delay(20);
+
+    
+
+    
+    
     if (turnTrapProfile.stage(elapsed_time) ==
         dlib::TrapezoidProfileStage::Decelerating) {
               std::cout << elapsed_time.in(au::milli(au::seconds)) << ", "
@@ -295,13 +295,10 @@ void Robot::ffwTurn(Quantity<Degrees, double> heading) {
         }
     
     prevReading = reading;
-
-    
   }
 
-  // chassis.turn_voltage((au::volts)(0));
-  // chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::hold);
-  // chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::hold);
+  chassis.turn_voltage((au::volts)(0));
+  // chassis.move_voltage((au::volts)(0));
   chassis.brake();
 }
 
@@ -327,9 +324,11 @@ void Robot::ffwLat(Quantity<Meters, double> displacement,
       reverse = true;
     }
     dlib::TrapezoidProfile<Meters> forwardTrapProfile =
-        dlib::TrapezoidProfile<Meters>((au::meters_per_second_squared)(maxAccel), //3
-                                       (au::meters_per_second)(1.6), //1.6
-                                       displacement);
+        dlib::TrapezoidProfile<Meters>(
+        (au::meters_per_second_squared)(maxAccel), //3
+        (au::meters_per_second_squared)(maxAccel),
+        (au::meters_per_second)(1.6), //1.6
+        displacement);
 
     // TODO: MAKE GOOD SETTLE CONDITION
     int cycle = 0;
@@ -667,9 +666,9 @@ dlib::RotationConfig rotLeft{4, inches(2.75), .8};
 // .35
 // 0.87
 dlib::FeedforwardGains TurnFFwdGains{
-  1.75, //1.2077766123397968 1.5
-  0.85, //0.997
-  0.12}; // ka 0.17 // .12
+  1.75, //1.75
+  0.88, //0.88
+  0.19}; // ka 0.20
 
 
 // 1.4724784904435986,
@@ -701,9 +700,9 @@ dlib::ErrorDerivativeSettler<Meters> move_pid_settler{
 };
 
 dlib::PidGains turn_pid_gains{
-    23, // kp, porportional gain // 23
+    0, // kp, porportional gain // 23 10 for ffwd 15 for below 60 deg
     0,  // ki, integral gain
-    1.9 // kd, derivative gain // 1.9
+    0 // kd, derivative gain // 1.9
 };
 
 // 1.5

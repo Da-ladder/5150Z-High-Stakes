@@ -55,8 +55,8 @@ void autonomous() {
 
 	// robot.move_to_point({(au::inches)(53.27), (au::inches)(61.3)}, true, false);
 
-	AutoSelector::updatePath(); // UNCOMMENT
-	AutoSelector::run(); // UNCOMMENT
+	// AutoSelector::updatePath(); // UNCOMMENT
+	// AutoSelector::run(); // UNCOMMENT
 	// pros::delay(150);
 	// robot.restOdomKeepAngle(4.5,  5.5);
 
@@ -66,10 +66,11 @@ void autonomous() {
 	// robot.ffwLat((au::inches)(40), au::milli(au::seconds)(2000));
 	// pros::delay(3000);
 	// robot.turn_with_pid(70, 2000);
-	/*
-	robot.ffwTurn((au::degrees)(800));
+	
+	robot.ffwTurn((au::degrees)(360)); // >40 deg???
 	master.clear();
 	pros::delay(150);
+	pros::delay(200);
 	master.set_text(1, 0, std::to_string(robot.imu.get_rotation().in(au::degrees)));
 
 	/**/

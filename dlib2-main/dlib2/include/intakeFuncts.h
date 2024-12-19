@@ -3,8 +3,8 @@
 #include "pistons.h"
 
 #define MAIN_LOOP_DELAY 5
-#define STUCK_DELAY_MS 200
-#define STUCK_DEG_RANGE 10
+#define STUCK_DELAY_MS 300
+#define STUCK_DEG_RANGE 7
 #define SORT_MS_EXT_DELAY 330
 
 

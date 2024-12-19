@@ -103,7 +103,7 @@ class MogoUtils {
             camDetect.set_exposure(29);
 
             // Sets mogo sig
-            pros::vision_signature_s_t MOGO_SIG = pros::c::vision_signature_from_utility(1, -2533, -1993, -2263, -7307, -6747, -7027, 5.200, 0);
+            pros::vision_signature_s_t MOGO_SIG = pros::c::vision_signature_from_utility(1, -2533, -1993, -2263, -7307, -6747, -7027, 5.800, 0);
             camDetect.set_signature(MOGO, &MOGO_SIG);
         }
 
@@ -153,11 +153,13 @@ class MogoUtils {
 
             // keep looping while mogo has not been detected in the clamp
             int none = 0;
+            master.clear();
             while (mmDis > 60) {
                 MogoUtils::refreshMogo();
 
                 disError = 50 - mmDis; // 50 is most in mogo can go on corner
 
+                /*
                 if (std::isnan(getMidX()) || std::isnan(getMidY())) {
                     break;
                 }
@@ -169,6 +171,7 @@ class MogoUtils {
                 if (none >= 3) {
                     break;
                 }
+                */
 
                 // X ERROR IS THE LEFT & RIGHT ERROR: LEFT::+ RIGHT::-
                 xErr = 0 - getMidX();
@@ -197,8 +200,9 @@ class MogoUtils {
                 if (lspeed < minSpeed) { lspeed = minSpeed; }
                 if (rspeed < minSpeed) { rspeed = minSpeed; }
 
-                pros::lcd::print(6, "LSPEED #: %f", lspeed);
-                pros::lcd::print(7, "RSPEED #: %f", rspeed);
+
+                // pros::lcd::print(6, "LSPEED #: %f", lspeed);
+                // pros::lcd::print(7, "RSPEED #: %f", rspeed);
 
                 moveDrive(lspeed, rspeed, 10); //bc mogo clamp is forwards
                 lastXerr = xErr;
@@ -207,9 +211,12 @@ class MogoUtils {
 
             }
 
+            master.set_text(1, 0, "M. x:" + std::to_string(getMidX()));
+            
             // Lets the drive contuine under residual power and clamps after 75 ms
             moveDrive(2, 2, 30);
             moveDrive(1.5, 1.5, 20);
+            master.set_text(2, 0, "M. y:" + std::to_string(getMidY()));
             moClamp.overrideState(1);
             moveDrive(0, 0, 150);
 
@@ -451,6 +458,8 @@ class RedRingUtil {
             int none = 0;
             while (yErr >= -10) {
 
+                master.clear();
+
                 if (red) {
                     RedRingUtil::refreshRing();
                 } else {
@@ -473,7 +482,7 @@ class RedRingUtil {
 
                 // base speed limiter
                 // X ERROR IS THE LEFT & RIGHT ERROR: LEFT::+ RIGHT::-
-                xErr = 0 - getMidX();
+                xErr = RING_X_TARG - getMidX();
                 if ((yErr < 90)) {
                     flatSpeed = yErr * lkP;
                 } else {
@@ -501,8 +510,10 @@ class RedRingUtil {
 
             }
 
+            master.set_text(1, 0, "R. x:" + std::to_string(getMidX()));
             // Lets the drive contuine under residual power so intake can succc
             moveDrive(-5, -5, 150);
+            master.set_text(2, 0, "R. y:" + std::to_string(getMidY()));
             moveDrive(-2, -2, 40);
             moveDrive(0, 0, 30);
         }

@@ -118,13 +118,16 @@ class Routes{
         // AutoSelector::add("Blue elim right hard", placehold1);
         // AutoSelector::add("Blue right EZ", placehold7); //placehold3 // 2&6
 
+        AutoSelector::add("Sig Ring side RED (STAKE SAFE LINE)", placehold3Mir); //
+        // AutoSelector::add("Sig Ring side BLUE (STAKE SAFE LINE)", placehold3); // ok
+
+
         AutoSelector::add("Sig Goal Rush RED", placehold13);
         AutoSelector::add("Sig Goal Rush BLUE", placehold13Mir);
 
+        AutoSelector::add("skills", skills); // ???
+        AutoSelector::add("EZ BLUE", placehold11); // ???'
 
-        AutoSelector::add("Sig Ring side RED (STAKE SAFE LINE)", placehold3Mir); //
-        AutoSelector::add("Sig Ring side BLUE (STAKE SAFE LINE)", placehold3); // ok
-        
 
         AutoSelector::add("Sig Ring side BLUE (STAKE)", placehold2); // ok
         AutoSelector::add("Sig Ring side RED (STAKE)", placehold2Mir); //
@@ -136,8 +139,7 @@ class Routes{
         AutoSelector::add("Sig Solo BLUE", placehold6); // ok
         AutoSelector::add("Sig Solo Red", placehold6Mir);
 
-        AutoSelector::add("skills", skills); // ???
-        AutoSelector::add("EZ BLUE", placehold11); // ???'
+        
         
         
 

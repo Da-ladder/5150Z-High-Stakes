@@ -17,6 +17,7 @@ template<typename Units>
 class TrapezoidProfile {
 protected:
     au::Quantity<au::Time2ndDerivative<Units>, double> max_acceleration;
+    au::Quantity<au::Time2ndDerivative<Units>, double> max_deceleration;
     au::Quantity<au::TimeDerivative<Units>, double> max_velocity;
     
     au::Quantity<Units, double> total_distance;
@@ -28,14 +29,17 @@ protected:
 public:
     TrapezoidProfile(
         au::Quantity<au::Time2ndDerivative<Units>, double> max_acceleration, 
+        au::Quantity<au::Time2ndDerivative<Units>, double> max_deceleration,
         au::Quantity<au::TimeDerivative<Units>, double> max_velocity, 
         au::Quantity<Units, double> total_distance
     )  : 
         max_acceleration(max_acceleration), 
+        max_deceleration(max_deceleration),
         max_velocity(max_velocity), 
         total_distance(total_distance) 
     {
         // flip max velocity and acceleration if the distance is negative
+        // DOES NOT WORK RN UPGRADE DLIB TO FIX THIS
         if (total_distance < au::ZERO) {
             this->max_acceleration = -max_acceleration;
             this->max_velocity = -max_velocity;
@@ -49,24 +53,29 @@ public:
         auto accel_time = max_velocity / max_acceleration;
 
         // the deceleration time is the same
-        auto decel_time = accel_time;
+        auto decel_time = max_velocity / max_deceleration;
 
         // get the acceleration distance via x = 1/2at^2
         auto accel_distance = (max_acceleration * au::int_pow<2>(accel_time)) / 2;
 
         // the deceleration distance is the same
-        auto decel_distance = accel_distance;
+        auto decel_distance = (max_deceleration * au::int_pow<2>(decel_time)) / 2;
 
         // gets coast distance by total - (accel + decel)
         auto coast_distance = total_distance - accel_distance - decel_distance;
 
         // if the coast distance is less than zero, compute the maximum acceleration we can reach in the time given
         if (coast_distance < au::ZERO) {
-            // find the accel time via the equation sqrt(2x/a) = t
-            accel_time = au::sqrt(total_distance / max_acceleration);
 
-            // decel time will be the same as accel time
-            decel_time = accel_time;
+            // find the transition velocity so that it can be asymertical
+            auto v_trans = au::sqrt((2 * total_distance * max_acceleration * max_deceleration)
+            /(max_acceleration + max_deceleration));
+
+            // find the accel time
+            accel_time = v_trans/max_acceleration;
+
+            // decel time
+            decel_time = v_trans/max_deceleration; 
 
             // no coast distance
             coast_distance = au::ZERO;
@@ -103,8 +112,8 @@ public:
         
         // integration constant for the deceleration segment
         au::Quantity<Units, double> const_2 = 
-            -max_acceleration * total_time * coast_cutoff
-            + (max_acceleration / 2) * au::int_pow<2>(coast_cutoff) 
+            -max_deceleration * total_time * coast_cutoff
+            + (max_deceleration / 2) * au::int_pow<2>(coast_cutoff) 
             + max_velocity * coast_cutoff + const_1;
         
         switch (this->stage(elapsed_time)) {
@@ -124,11 +133,11 @@ public:
                 break;
             case TrapezoidProfileStage::Decelerating:
                 return ProfileSetpoint(
-                    max_acceleration * total_time * elapsed_time 
-                    - (max_acceleration / 2) * au::int_pow<2>(elapsed_time) 
+                    max_deceleration * total_time * elapsed_time 
+                    - (max_deceleration / 2) * au::int_pow<2>(elapsed_time) 
                     + const_2,
-                    max_acceleration * (total_time - elapsed_time),
-                    -max_acceleration
+                    max_deceleration * (total_time - elapsed_time),
+                    -max_deceleration
                 );
                 break;
             case TrapezoidProfileStage::Done:
