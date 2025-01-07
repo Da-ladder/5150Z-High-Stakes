@@ -60,10 +60,13 @@ class DriverControl {
             } else if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
                 LiftMngr::setVoltage(12, true);
             } else if (master.get_digital_new_press(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
-                if (LiftMngr::getLevel() > 280) {
-                    LiftMngr::setLevel(190);
+
+                if (LiftMngr::getLevel() > 260) {
+                    LiftMngr::setLevel(245);
+                } else if (LiftMngr::getLevel() < 180) {
+                    LiftMngr::setLevel(275);
                 } else {
-                    LiftMngr::setLevel(291.62); //87.01 all under
+                    LiftMngr::setLevel(140); //140
                 }
             } else {
                 LiftMngr::setVoltage(0);

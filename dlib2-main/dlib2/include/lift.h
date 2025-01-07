@@ -14,7 +14,9 @@ class LiftMngr{
 
     public:
         inline static void setMotorPwr(double voltage) {
-            
+
+            lift.move_voltage(voltage*1000);
+            /*
             if ((prevVolt/1000) > voltage) {
                 double volt = lift.get_voltage() - 1000;
                 if (volt < voltage*1000) {
@@ -37,10 +39,11 @@ class LiftMngr{
                 lift.move_voltage(voltage*1000);
                 prevVolt = voltage;
             }
+            */
         }
 
         inline static void main() {
-            double kp = 0.2, ki = 0.00, kd = 0.1; //kp = 0.08, ki = 0.02, kd = 0.2
+            double kp = 0.4, ki = 0.0, kd = 1.4; //kp = 0.08, ki = 0.02, kd = 0.2
             double accumlator = 0;
             double lastErr = 0;
             double perVolt = 0;
@@ -53,9 +56,9 @@ class LiftMngr{
                 }
                     time += 1;
 
-                    if (time < (50)) {
+                    if (time < (30)) {
                         holdLvl = liftRot.get_position()/100.0;
-                        setMotorPwr(voltReq);
+                        setMotorPwr(0);
                         pros::delay(5);
                         continue;
                     }
@@ -68,11 +71,13 @@ class LiftMngr{
                         if (fabs(error) > 5) {
                             wantVolt = (error * kp) + (accumlator * ki) + ((error-lastErr) * kd);
                         } else {
-                            wantVolt = (error * kp) + (accumlator * ki);
+                            wantVolt = (error * kp) + (accumlator * ki) + ((error-lastErr) * kd);
                         }
+
+                        lift.move_voltage(wantVolt*1000);
                         
                         
-                        setMotorPwr(wantVolt);
+                        // setMotorPwr(wantVolt);
 
                         if (fabs(error) < 5 && fabs(error) > 0) {
                             if (error > 0) {

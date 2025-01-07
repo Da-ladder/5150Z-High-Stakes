@@ -18,6 +18,10 @@ extern pros::MotorGroup lift;
 extern pros::MotorGroup left_motors;
 extern pros::MotorGroup right_motors;
 
+// extern line sensors
+extern pros::adi::AnalogIn lineLeft;
+extern pros::adi::AnalogIn lineRight;
+
 // Rotation sensor
 extern pros::Rotation liftRot;
 

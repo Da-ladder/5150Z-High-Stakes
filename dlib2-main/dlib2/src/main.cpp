@@ -30,7 +30,7 @@ void initialize() {
 
 	pros::lcd::set_text(1, "ARMED");
 	AutoSelector::printPath();
-	master.rumble("-.-");
+	master.rumble("-.");
 }
 
 void disabled() {}
@@ -49,30 +49,30 @@ void autonomous() {
 
 	// moClamp.overrideState(1);
     // pros::delay(400);
-	// robot.turn_with_pid((au::degrees)(90));
+	// robot.turn_with_pid(90, 600);
 
 	// robot.turn_with_pid(147.8, 200);
 
 	// robot.move_to_point({(au::inches)(53.27), (au::inches)(61.3)}, true, false);
 
-	// AutoSelector::updatePath(); // UNCOMMENT
-	// AutoSelector::run(); // UNCOMMENT
+	AutoSelector::updatePath(); // UNCOMMENT
+	AutoSelector::run(); // UNCOMMENT
 	// pros::delay(150);
 	// robot.restOdomKeepAngle(4.5,  5.5);
 
 	// robot.chassis.move_voltage((au::volts)(7));
 	// robot.testStatic();
 
-	// robot.ffwLat((au::inches)(40), au::milli(au::seconds)(2000));
+	// robot.ffwLat((au::inches)(50), au::milli(au::seconds)(2000));
 	// pros::delay(3000);
 	// robot.turn_with_pid(70, 2000);
-	
-	robot.ffwTurn((au::degrees)(360)); // >40 deg???
+	/*
+	robot.ffwTurn((au::degrees)(180)); // >40 deg???
 	master.clear();
 	pros::delay(150);
 	pros::delay(200);
 	master.set_text(1, 0, std::to_string(robot.imu.get_rotation().in(au::degrees)));
-
+	*/
 	/**/
 	
 	
@@ -81,6 +81,7 @@ void autonomous() {
 
 	// TESTS
 	// robot.fwdDynoTest();
+	// robot.fwdQuasiStaticTest();
 	// robot.turnQuasiStaticTest();
 	// robot.turnDynoTest();
 	/*
@@ -101,6 +102,8 @@ void autonomous() {
 	
 }
 
+
+
 void opcontrol() {
 
 	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
@@ -109,7 +112,7 @@ void opcontrol() {
 	while(true){
 
 
-		//master.set_text(1, 0, std::to_string(robot.imu.get_rotation().in(au::degrees)));
+		master.set_text(1, 0, std::to_string(lineRight.get_value()));
 		// MogoUtils::refreshMogo(); // CALIBRATION
 		// RedRingUtil::refreshRing(); // CALIBRATION
 		

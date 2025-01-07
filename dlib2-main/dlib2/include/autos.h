@@ -91,6 +91,7 @@ class Routes{
         // They are generic names so that a name can be attached to them
         // during auto selection.
         void static placehold1(); 
+        void static placehold1Mir(); 
         void static placehold2(); 
         void static placehold2Mir(); 
         void static placehold3();
@@ -114,23 +115,24 @@ class Routes{
      inline static void initall() {
         // Autos added below are self explanatory due to the route name attached to them.
         // The names attached are within quotes
+
+        // AutoSelector::add("skills", skills); // ???
+
+        // AutoSelector::add("Sig Ring side BLUE (STAKE)", placehold2); // ok
+        AutoSelector::add("Sig Ring side RED (STAKE)", placehold2Mir); //
         
-        // AutoSelector::add("Blue elim right hard", placehold1);
-        // AutoSelector::add("Blue right EZ", placehold7); //placehold3 // 2&6
+        AutoSelector::add("Ring Rush Rush Red", placehold1);
+        AutoSelector::add("Ring Rush Rush Blue", placehold1Mir);
 
         AutoSelector::add("Sig Ring side RED (STAKE SAFE LINE)", placehold3Mir); //
-        // AutoSelector::add("Sig Ring side BLUE (STAKE SAFE LINE)", placehold3); // ok
+        AutoSelector::add("Sig Ring side BLUE (STAKE SAFE LINE)", placehold3); // ok
 
 
         AutoSelector::add("Sig Goal Rush RED", placehold13);
         AutoSelector::add("Sig Goal Rush BLUE", placehold13Mir);
 
-        AutoSelector::add("skills", skills); // ???
+        
         AutoSelector::add("EZ BLUE", placehold11); // ???'
-
-
-        AutoSelector::add("Sig Ring side BLUE (STAKE)", placehold2); // ok
-        AutoSelector::add("Sig Ring side RED (STAKE)", placehold2Mir); //
         
         AutoSelector::add("Sig Ring side RED (6 ring)", placehold12); // ???
         AutoSelector::add("Sig Ring side BLUE (6 ring)", placehold12Mir); // ???

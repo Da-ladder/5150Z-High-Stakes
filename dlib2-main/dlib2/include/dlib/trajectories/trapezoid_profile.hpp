@@ -67,15 +67,11 @@ public:
         // if the coast distance is less than zero, compute the maximum acceleration we can reach in the time given
         if (coast_distance < au::ZERO) {
 
-            // find the transition velocity so that it can be asymertical
-            auto v_trans = au::sqrt((2 * total_distance * max_acceleration * max_deceleration)
-            /(max_acceleration + max_deceleration));
+            // find the accel time via the equation sqrt(2x/a) = t
+            accel_time = au::sqrt(total_distance / max_acceleration);
 
-            // find the accel time
-            accel_time = v_trans/max_acceleration;
-
-            // decel time
-            decel_time = v_trans/max_deceleration; 
+            // decel time will be the same as accel time
+            decel_time = accel_time;
 
             // no coast distance
             coast_distance = au::ZERO;

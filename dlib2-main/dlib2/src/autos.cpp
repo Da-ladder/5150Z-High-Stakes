@@ -5,6 +5,8 @@
 #include "pistons.h"
 #include "declarations.h"
 #include "pros/abstract_motor.hpp"
+#include "pros/adi.h"
+#include "pros/adi.hpp"
 #include "pros/llemu.hpp"
 #include "pros/rtos.hpp"
 #include "pistons.h"
@@ -12,16 +14,20 @@
 #include "intakeFuncts.h"
 #include <concepts>
 
+#define ANALOG_SENSOR_PORT 1
+
 
 #define MOGO_SIDE true
 #define INTAKE_SIDE false
+#define SCORE_TIME 500
 
 std::vector<const char*> AutoSelector::routeNames = {};
 std::vector<void (*)()> AutoSelector::routePointers = {};
 
 int AutoSelector::indexToRun = 0;
 
-pros::ADIPotentiometer AutoSelector::pot = pros::ADIPotentiometer('E', pros::adi_potentiometer_type_e::E_ADI_POT_EDR);
+pros::adi::Potentiometer AutoSelector::pot = pros::adi::Potentiometer('E', pros::adi_potentiometer_type_e::E_ADI_POT_EDR);
+
 
 // Function terminates when goal is detected
 
@@ -66,7 +72,28 @@ void intakeDelay() {
 }
 
 void Routes::skills() {
-    LiftMngr::setLevel(250);
+
+    // pros::adi::Potentiometer AutoSelector::pot = pros::adi::Potentiometer('E', pros::adi_potentiometer_type_e::E_ADI_POT_EDR);
+
+    
+
+    // pros::ADIAnalogIn sensor (ANALOG_SENSOR_PORT);
+    robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::hold);
+    robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::hold);
+
+
+    while (lineLeft.get_value() > 600) {
+        moveManual(10, -8);
+    }
+    moveManual(80, 12);
+    moveManual(10, 0);
+
+
+
+
+
+
+    /*
     IntakeHelper::blueExcld(true);
     // score on stake
     IntakeHelper::voltage(12);
@@ -279,76 +306,127 @@ void Routes::placehold4() {
 
 void Routes::placehold1() {
     IntakeHelper::blueExcld(true);
-    robot.move_to_point({(au::inches)(19.0), (au::inches)(-0.48)}, false, MOGO_SIDE);
-    moveToGoal(3, 55, 400);
+    int time = 0;
+
+    // LiftMngr::setLevel(150);
+    
+    while(300 >= time*25) {
+        LiftMngr::setVoltage(-12, true);
+        time++;
+        pros::delay(25);
+    }
+    LiftMngr::setLevel(130);
+    LiftMngr::setVoltage(0, false);
+
+    // back off and get goal
+    robot.move_to_point({(au::inches)(-4.86), (au::inches)(-0)}, false, MOGO_SIDE, 0);
+    LiftMngr::setLevel(240);
+    robot.turn_with_pid(48.56, 600);
+    // robot.turn_to_point({(au::inches)(17.6), (au::inches)(13.28)}, MOGO_SIDE, 600);
+    // robot.move_to_point({(au::inches)(18.19), (au::inches)(15.13)}, false, MOGO_SIDE, 600);
+    // moveManual(500, 8);
+    robot.move_to_point({(au::inches)(26.38), (au::inches)(24.93)}, false, MOGO_SIDE, 0, 2);
     moClamp.overrideState(1);
-    pros::delay(200);
     IntakeHelper::voltage(12);
+    pros::delay(100);
 
-    // grab ring stack(safe)
-    robot.move_to_point({(au::inches)(18.47), (au::inches)(-14.13)}, true, INTAKE_SIDE, 800);
-    pros::delay(1800); //2.2k
-    moClamp.overrideState(0);
-
-    // grab center 
-    // liftIntake.overrideState(1);
-    IntakeHelper::voltage(0);
-    robot.move_to_point({(au::inches)(22.83), (au::inches)(34.26)}, true, INTAKE_SIDE, 1200, 2.3);
-
-
-    // get mogo
-    robot.move_to_point({(au::inches)(44.09), (au::inches)(40.81)}, true, MOGO_SIDE, 1200);
-    moveToGoal(3, 55, 1500);
-    moClamp.overrideState(1);
-    pros::delay(200);
+    // get mid ring
+    robot.move_to_point({(au::inches)(52.23), (au::inches)(30.39)}, true, INTAKE_SIDE, 1400, 3, 9);
+    robot.turn_with_pid(147, 650);
     IntakeHelper::voltage(12);
+    robot.move_to_point({(au::inches)(64.67), (au::inches)(23.78)}, false, INTAKE_SIDE, 900);
+
+    // curve back
+    moveManual(500, 4.2, 8);
+    moveManual(500, 6, 6);
 
     // get ring
-    robot.move_to_point({(au::inches)(72.13), (au::inches)(61.85)}, true, INTAKE_SIDE, 1300);
+    robot.turn_with_pid(136.76, 550);
+    robot.move_to_point({(au::inches)(41.98), (au::inches)(17.26)}, false, INTAKE_SIDE, 900);
 
-    robot.turn_with_pid(-289.33, 1000);
+    // go to corner
+    robot.turn_with_pid(89.97, 550);
+    robot.move_to_point({(au::inches)(40.36), (au::inches)(-24.85)}, false, INTAKE_SIDE, 900);
+    pros::delay(200);
 
-   
-    //-289.33
-    LiftMngr::setLevel(600);
-    moveManual(600, -6);
-    moveManual(700, -2);
+    // back off
+    robot.move_to_point({(au::inches)(45.92), (au::inches)(-9.1)}, false, MOGO_SIDE, 900);
+
+    // get ring
+    robot.turn_with_pid(-28.93, 850);
+    robot.move_to_point({(au::inches)(10.88), (au::inches)(10.60)}, false, INTAKE_SIDE, 900);
+    liftIntake.overrideState(1);
+    moveManual(380, -3, -6.5);
+    liftIntake.overrideState(0);
+    pros::delay(200);
+    moveManual(400, 4);
+
+    // moveManual(600, 2);
+
+
+
+
+
+
+
+
+
+
+    //
+
+
+
+
+
     /**/
+
+}
+
+void Routes::placehold1Mir() {
 
 }
 
 void Routes::placehold2() {
     IntakeHelper::blueExcld(false);
-    LiftMngr::setMotorPwr(5);
-    pros::delay(400);
+    int time = 0;
 
-    LiftMngr::setLevel(130);
-    pros::delay(600);
+    // LiftMngr::setLevel(150);
+    
+    while(300 >= time*25) {
+        LiftMngr::setVoltage(-10, true);
+        time++;
+        pros::delay(25);
+    }
+    LiftMngr::setVoltage(0, false);
+
+    LiftMngr::setLevel(120);
+    // pros::delay(600);
     robot.move_to_point({(au::inches)(28.61), (au::inches)(-0)}, false, MOGO_SIDE, 0);
     robot.turn_with_pid(-86.02, 900);
-    LiftMngr::setLevel(250);
-    MogoUtils::getMogo(7, 3);
+    LiftMngr::setLevel(275);
+    MogoUtils::getMogo(5, 3);
     IntakeHelper::voltage(12);
 
     // get mid 
     // robot.move_to_point({(au::inches)(53.19), (au::inches)(-32.42)}, true, INTAKE_SIDE, 800, 2.5); //OLD
 
     // NEW
-    robot.move_to_point({(au::inches)(51.11), (au::inches)(-31.24)}, true, INTAKE_SIDE, 800, 2.5); //49.48, -28.71
-    robot.turn_with_pid(-154.91, 600);
-    robot.move_to_point({(au::inches)(62.13), (au::inches)(-26.77)}, false, INTAKE_SIDE, 600, 2.5); // 57.37, -26.26
+    robot.move_to_point({(au::inches)(52.07), (au::inches)(-32.32)}, true, INTAKE_SIDE, 800, 2.5); //49.48, -28.71
+    robot.turn_with_pid(-150, 600); 
+    robot.move_to_point({(au::inches)(67.99), (au::inches)(-22.90)}, false, INTAKE_SIDE, 600, 2.5); // 62.13, -26.77
     // NEW
     // robot.move_to_point({(au::inches)(63.50), (au::inches)(-27.21)}, true, INTAKE_SIDE, 600, 2.5); //OLD
     pros::delay(200);
 
     // curve back
+    moveManual(100, 6);
     moveManual(500, 8, 4);
     // IntakeHelper::StopAtColor(true);
     moveManual(500, 6, 6);
     
 
     // get ring
-    robot.turn_with_pid(-141.86, 900, 9);
+    robot.turn_with_pid(-157.27, 900, 10);
     // RedRingUtil::getRing(false, 7, 3);
     // moveManual(250, -4);
 
@@ -356,33 +434,36 @@ void Routes::placehold2() {
     // robot.turn_to_point({(au::inches)(46.51), (au::inches)(-17.99)}, INTAKE_SIDE, 800);
     // IntakeHelper::StopAtColor(false);
     IntakeHelper::voltage(12);
-    // robot.move_to_point({(au::inches)(46.51), (au::inches)(-17.99)}, false, INTAKE_SIDE, 900); //OLD
-    RedRingUtil::getRing(false, 10, 3);
-    moveManual(200, -3);
+    robot.move_to_point({(au::inches)(22.40), (au::inches)(-10.99)}, false, INTAKE_SIDE, 900); //OLD
+    // RedRingUtil::getRing(false, 10, 3);
+    // moveManual(200, -3);
 
     // alliance stake ring
     // IntakeHelper::StopAtColor(true);
-    robot.turn_to_point({(au::inches)(16.20), (au::inches)(-20.24)}, INTAKE_SIDE, 900);
+    robot.turn_to_point({(au::inches)(16.20), (au::inches)(-20.24)}, INTAKE_SIDE, 1100, 9);
     // IntakeHelper::StopAtColor(false);
     IntakeHelper::voltage(12);
 
-    robot.move_to_point({(au::inches)(16.20), (au::inches)(-20.24)}, false, INTAKE_SIDE, 900);
-    robot.turn_with_pid(1.44, 300);
+    // robot.move_to_point({(au::inches)(16.20), (au::inches)(-20.24)}, false, INTAKE_SIDE, 900); // OLD PNT
+    robot.move_to_point({(au::inches)(19.65), (au::inches)(-21.33)}, false, INTAKE_SIDE, 900);
 
     liftIntake.overrideState(1);
-    moveManual(380, -5.5);
-    liftIntake.overrideState(0);
-    pros::delay(200);
-    moveManual(400, 4);
+    robot.turn_with_pid(-6.05, 450);
 
-    moveManual(600, 2);
     
+    moveManual(330, -6);
+    liftIntake.overrideState(0);
+    pros::delay(230);
+    moveManual(360, 7);
+
+
     // touch ladder base
-    /*
-    robot.turn_with_pid(83.41, 800, 10);
-    moveManual(700, -5);
+    robot.turn_with_pid(47.24, 800, 10);
+    robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+    robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+    moveManual(500, -5);
     IntakeHelper::voltage(0);
-    moveManual(700, -2.5);
+    moveManual(700, -3);
 
 
 
@@ -418,54 +499,73 @@ void Routes::placehold2() {
 
 void Routes::placehold2Mir() {
     IntakeHelper::blueExcld(true);
-    LiftMngr::setMotorPwr(5);
-    pros::delay(400);
+    int time = 0;
 
-    LiftMngr::setLevel(130);
-    pros::delay(600);
+    // LiftMngr::setLevel(150);
+    
+    while(300 >= time*25) {
+        LiftMngr::setVoltage(-10, true);
+        time++;
+        pros::delay(25);
+    }
+    LiftMngr::setVoltage(0, false);
+
+    LiftMngr::setLevel(120);
+
     robot.move_to_point({(au::inches)(28.61), (au::inches)(-0)}, false, MOGO_SIDE, 0);
-    robot.turn_with_pid(86.02, 900);
-    LiftMngr::setLevel(250);
-    MogoUtils::getMogo(6, 3); //8
+    robot.turn_with_pid(91, 1000);
+
+    LiftMngr::setLevel(275);
+    MogoUtils::getMogo(5, 3); //8
     IntakeHelper::voltage(12);
 
     // get mid 
     // robot.turn_with_pid(205.44, 800);
     robot.move_to_point({(au::inches)(48.68), (au::inches)(30.04)}, true, INTAKE_SIDE, 800, 2.5);
-    robot.turn_with_pid(157.01, 900);
-    robot.move_to_point({(au::inches)(60.97), (au::inches)(24.10)}, false, INTAKE_SIDE, 700, 2.5);
+    robot.turn_with_pid(147.08, 800);
+    robot.move_to_point({(au::inches)(63.42), (au::inches)(22.29)}, false, INTAKE_SIDE, 700, 2.5);
     pros::delay(100);
     // curve back
+    moveManual(120, 5, 5); // 2nd RING BACK
     moveManual(500, 4, 8); // 2nd RING BACK
     moveManual(500, 6, 6);
     // IntakeHelper::StopAtColor(true);
 
     // get ring
-    robot.turn_with_pid(151.33, 900);
+    robot.turn_with_pid(149.01, 900);
     // IntakeHelper::StopAtColor(false);
     IntakeHelper::voltage(12);
     // moveManual(400, -5);
     // pros::delay(200);
-    RedRingUtil::getRing(true, 10, 4);
+
+    robot.move_to_point({(au::inches)(42.54), (au::inches)(18.55)}, false, INTAKE_SIDE, 700, 2.5);
+    // RedRingUtil::getRing(true, 10, 4);
     // moveManual(150, -3);
 
 
 
     // get allaince stake ring
     robot.move_to_point({(au::inches)(11.82), (au::inches)(17.76)}, true, INTAKE_SIDE, 800, 2.5);
-    robot.turn_with_pid(-12.26, 600, 8);
+    // robot.turn_with_pid(-9.98, 400);
     liftIntake.overrideState(1);
 
 
-    moveManual(400, -6);
+    moveManual(350, -6);
     liftIntake.overrideState(0);
     // IntakeHelper::voltage(12);
-    pros::delay(250);
+    pros::delay(175);
     IntakeHelper::voltage(12);
-    moveManual(400, 4);
+    moveManual(400, 6);
+
+
 
     // BACK OFF
-    moveManual(600, 2);
+    robot.turn_with_pid(-27.90, 900);
+    /*
+    robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+    robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+    moveManual(500, -5);
+    moveManual(500, -3);
 
 
     // touch ladder cone
@@ -512,7 +612,7 @@ void Routes::placehold3() {
     pros::delay(600);
     robot.move_to_point({(au::inches)(28.61), (au::inches)(-0)}, false, MOGO_SIDE, 0);
     robot.turn_with_pid(-86.02, 800);
-    LiftMngr::setLevel(250);
+    LiftMngr::setLevel(175);
     MogoUtils::getMogo(7, 3);
     IntakeHelper::voltage(12);
 
@@ -570,7 +670,7 @@ void Routes::placehold3Mir() {
     pros::delay(400);
     robot.move_to_point({(au::inches)(28.61), (au::inches)(-0)}, false, MOGO_SIDE, 0);
     robot.turn_with_pid(86.02, 700);
-    LiftMngr::setLevel(250);
+    LiftMngr::setLevel(175);
     MogoUtils::getMogo(7, 4);
     IntakeHelper::voltage(12);
 
@@ -672,7 +772,7 @@ void Routes::placehold6() {
     LiftMngr::setLevel(130);
     pros::delay(400);
     robot.move_to_point({(au::inches)(28.61), (au::inches)(-0)}, false, MOGO_SIDE, 0);
-    LiftMngr::setLevel(250);
+    LiftMngr::setLevel(175);
     robot.turn_with_pid(-86.02, 800);
     MogoUtils::getMogo(10, 2);
     IntakeHelper::voltage(12);
@@ -756,7 +856,7 @@ void Routes::placehold6Mir() {
     LiftMngr::setLevel(130);
     pros::delay(400);
     robot.move_to_point({(au::inches)(28.61), (au::inches)(0)}, false, MOGO_SIDE, 0);
-    LiftMngr::setLevel(250);
+    LiftMngr::setLevel(175);
     robot.turn_with_pid(86.02, 800);
     MogoUtils::getMogo(10, 2);
     IntakeHelper::voltage(11);
@@ -1009,7 +1109,7 @@ void Routes::placehold11() {
 
 void Routes::placehold12() {
     IntakeHelper::blueExcld(true);
-    LiftMngr::setLevel(250);
+    LiftMngr::setLevel(175);
 
     // get goal
     MogoUtils::getMogo(11, 2);
@@ -1098,7 +1198,7 @@ void Routes::placehold13() {
     // Setup
     pros::Task intDel(intakeDelay);
     IntakeHelper::blueExcld(true);
-    LiftMngr::setLevel(250);
+    LiftMngr::setLevel(175);
     cornerDeploy.overrideState(1);
     IntakeHelper::voltage(12);
 
@@ -1184,7 +1284,7 @@ void Routes::placehold13Mir() {
     // Setup
     pros::Task intDel(intakeDelay);
     IntakeHelper::blueExcld(false);
-    LiftMngr::setLevel(250);
+    LiftMngr::setLevel(175);
     cornerDeploy.overrideState(1);
     IntakeHelper::voltage(12);
 
