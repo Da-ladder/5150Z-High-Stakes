@@ -9,7 +9,7 @@
 class PistonControl {
   private:
     pros::Controller* controller; // The controller to track the button presses on 
-    pros::ADIDigitalOut* piston; // The piston to control
+    pros::adi::DigitalOut* piston; // The piston to control
     pros::controller_digital_e_t button; // The button to track
     int pistionState = 0; // Keeps -= of the state of the piston
 
@@ -21,7 +21,7 @@ class PistonControl {
      * @param control The controller to use or will default to the master controller
      * @param digitalPress The button to monitor for presses or will default to the left button
     */
-    PistonControl(pros::ADIDigitalOut* pistonbind, pros::Controller* control = &master , 
+    PistonControl(pros::adi::DigitalOut* pistonbind, pros::Controller* control = &master , 
                   pros::controller_digital_e_t digitalPress = pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_LEFT) {
       controller = control;
       piston = pistonbind;

@@ -1,18 +1,4 @@
-#pragma once
 #include "autos.h"
-#include "au/au.hpp"
-#include "mogoDetect.h"
-#include "pistons.h"
-#include "declarations.h"
-#include "pros/abstract_motor.hpp"
-#include "pros/adi.h"
-#include "pros/adi.hpp"
-#include "pros/llemu.hpp"
-#include "pros/rtos.hpp"
-#include "pistons.h"
-#include "lift.h"
-#include "intakeFuncts.h"
-#include <concepts>
 
 #define ANALOG_SENSOR_PORT 1
 
@@ -391,32 +377,34 @@ void Routes::placehold2() {
     int time = 0;
 
     // LiftMngr::setLevel(150);
+
     
-    while(300 >= time*25) {
+    while(300 >= time*22) {
         LiftMngr::setVoltage(-10, true);
         time++;
         pros::delay(25);
     }
     LiftMngr::setVoltage(0, false);
 
-    LiftMngr::setLevel(120);
+    LiftMngr::setLevel(125);
     // pros::delay(600);
-    robot.move_to_point({(au::inches)(28.61), (au::inches)(-0)}, false, MOGO_SIDE, 0);
-    robot.turn_with_pid(-86.02, 900);
+    robot.move_to_point({(au::inches)(5.81), (au::inches)(-0)}, false, MOGO_SIDE, 0);
     LiftMngr::setLevel(275);
-    MogoUtils::getMogo(5, 3);
+    robot.turn_with_pid(-48.64, 900);
+    
+    MogoUtils::getMogo(5, 4, 7);
     IntakeHelper::voltage(12);
 
     // get mid 
     // robot.move_to_point({(au::inches)(53.19), (au::inches)(-32.42)}, true, INTAKE_SIDE, 800, 2.5); //OLD
 
     // NEW
-    robot.move_to_point({(au::inches)(52.07), (au::inches)(-32.32)}, true, INTAKE_SIDE, 800, 2.5); //49.48, -28.71
-    robot.turn_with_pid(-150, 600); 
+    robot.move_to_point({(au::inches)(52.81), (au::inches)(-34.24)}, true, INTAKE_SIDE, 1000, 2.5); //49.48, -28.71
+    robot.turn_with_pid(-150, 600);
     robot.move_to_point({(au::inches)(67.99), (au::inches)(-22.90)}, false, INTAKE_SIDE, 600, 2.5); // 62.13, -26.77
     // NEW
     // robot.move_to_point({(au::inches)(63.50), (au::inches)(-27.21)}, true, INTAKE_SIDE, 600, 2.5); //OLD
-    pros::delay(200);
+    // pros::delay(200);
 
     // curve back
     moveManual(100, 6);
@@ -427,14 +415,33 @@ void Routes::placehold2() {
 
     // get ring
     robot.turn_with_pid(-157.27, 900, 10);
-    // RedRingUtil::getRing(false, 7, 3);
-    // moveManual(250, -4);
-
-    // NOT TESTED BELOW 
-    // robot.turn_to_point({(au::inches)(46.51), (au::inches)(-17.99)}, INTAKE_SIDE, 800);
-    // IntakeHelper::StopAtColor(false);
     IntakeHelper::voltage(12);
     robot.move_to_point({(au::inches)(22.40), (au::inches)(-10.99)}, false, INTAKE_SIDE, 900); //OLD
+    // ring get!
+
+    // get corner + back off
+    robot.turn_with_pid(-86.94, 900);
+    robot.move_to_point({(au::inches)(17.62), (au::inches)(8.29)}, false, INTAKE_SIDE, 900, 2.7);
+    pros::delay(70);
+    robot.move_to_point({(au::inches)(53.67), (au::inches)(12.29)}, false, MOGO_SIDE, 0);
+
+    // turn + get ring @ alliance stake
+    robot.turn_with_pid(32.17, 1200);
+    robot.move_to_point({(au::inches)(19.49), (au::inches)(-8.68)}, false, INTAKE_SIDE, 900);
+
+    // get ring
+    liftIntake.overrideState(1);
+    // robot.turn_with_pid(-6.05, 450);
+
+    
+    moveManual(330, -6);
+    liftIntake.overrideState(0);
+    pros::delay(230);
+    moveManual(360, 7);
+
+
+
+    /*
     // RedRingUtil::getRing(false, 10, 3);
     // moveManual(200, -3);
 
@@ -513,6 +520,7 @@ void Routes::placehold2Mir() {
     LiftMngr::setLevel(120);
 
     robot.move_to_point({(au::inches)(28.61), (au::inches)(-0)}, false, MOGO_SIDE, 0);
+    /*
     robot.turn_with_pid(91, 1000);
 
     LiftMngr::setLevel(275);

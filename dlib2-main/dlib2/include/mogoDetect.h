@@ -135,11 +135,11 @@ class MogoUtils {
         }
 
         // Move to the mogo
-        inline static void getMogo(double baseSpeed = 8, double minSpeed = 1.5) {
+        inline static void getMogo(double baseSpeed = 8, double minSpeed = 1.5, double maxSpeed = 12) {
             double 
             tkP=0.05, // Turn P
             tkD=0.0, // Turn D
-            lkP=-0.02; // lateral P
+            lkP=-0.02; // lateral P 0.02
 
             double yErr=0, lastYerr=0, yTarg=0;
 
@@ -182,7 +182,7 @@ class MogoUtils {
 
                 // base speed limiter
                 xErr = 0 - getMidX();
-                if ((yErr < 0) && (fabs(xErr) <= 50)) {
+                if ((yErr <= 0) && (fabs(xErr) <= 50)) {
                     flatSpeed = disError * lkP;
                 } else {
                     flatSpeed = baseSpeed;
@@ -196,6 +196,9 @@ class MogoUtils {
 
 
                 
+                if (maxSpeed < lspeed) {lspeed = maxSpeed; }
+                if (maxSpeed < rspeed) {rspeed = maxSpeed; }
+
 
                 if (lspeed < minSpeed) { lspeed = minSpeed; }
                 if (rspeed < minSpeed) { rspeed = minSpeed; }
@@ -636,7 +639,7 @@ class StakeVision {
 
                 int index = filterSigs();
 
-                if (index = -1) {
+                if (index == -1) {
                     index = 0;
                 }
 

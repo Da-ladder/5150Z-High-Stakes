@@ -1,8 +1,19 @@
 #pragma once
 #include "declarations.h"
 #include "pros/llemu.hpp"
+#include "au/au.hpp"
 #include "mogoDetect.h"
+#include "pistons.h"
+#include "declarations.h"
+#include "pros/abstract_motor.hpp"
+#include "pros/adi.h"
+#include "pros/adi.hpp"
+#include "pros/llemu.hpp"
+#include "pros/rtos.hpp"
+#include "pistons.h"
 #include "lift.h"
+#include "intakeFuncts.h"
+#include <concepts>
 
 /**
  * @brief Creates a class so autos can be selected from the
@@ -13,7 +24,7 @@ class AutoSelector {
   private:
     // All functions and variables are static as these routes
     // should stay the same no matter what
-    static pros::ADIPotentiometer pot; // The potentiometer to use
+    static pros::adi::Potentiometer pot; // The potentiometer to use
     static std::vector<const char*> routeNames; // Vector of route names
     static std::vector<void (*)()> routePointers; // Vector of route function pointers
     static int indexToRun; // The index for the route it is currently on
@@ -118,7 +129,7 @@ class Routes{
 
         // AutoSelector::add("skills", skills); // ???
 
-        // AutoSelector::add("Sig Ring side BLUE (STAKE)", placehold2); // ok
+        AutoSelector::add("Sig Ring side BLUE (STAKE)", placehold2); // ok
         AutoSelector::add("Sig Ring side RED (STAKE)", placehold2Mir); //
         
         AutoSelector::add("Ring Rush Rush Red", placehold1);

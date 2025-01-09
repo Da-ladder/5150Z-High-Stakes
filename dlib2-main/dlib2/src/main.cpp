@@ -112,7 +112,7 @@ void opcontrol() {
 	while(true){
 
 
-		master.set_text(1, 0, std::to_string(lineRight.get_value()));
+		// master.set_text(1, 0, std::to_string(lineRight.get_value()));
 		// MogoUtils::refreshMogo(); // CALIBRATION
 		// RedRingUtil::refreshRing(); // CALIBRATION
 		

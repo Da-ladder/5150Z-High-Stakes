@@ -1,6 +1,5 @@
 #include "declarations.h"
 #include "au/au.hpp"
-#include "pros/adi.h"
 #include "pros/adi.hpp"
 #include "pros/distance.hpp"
 

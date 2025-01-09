@@ -8,8 +8,8 @@
 extern pros::Controller master;
 
 // extern button
-extern pros::ADIDigitalIn xyBut;
-extern pros::ADIDigitalIn turnBut;
+extern pros::adi::DigitalIn xyBut;
+extern pros::adi::DigitalIn turnBut;
 // extern pros::adi::DigitalIn intakeTop;
 
 // externs kicker and intake so that auto and driver can use them
