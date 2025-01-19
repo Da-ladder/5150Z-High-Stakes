@@ -91,7 +91,17 @@ class AutoSelector {
 
     // Runs the current route index it is on
     inline static void run() {
-        routePointers[indexToRun]();
+        pros::Clock::time_point start = pros::Clock::now();
+        routePointers[0]();
+        
+        pros::Clock::time_point end = pros::Clock::now();
+
+        pros::Clock::duration duration = end - start;
+        pros::delay(50);
+        master.clear();
+        pros::delay(50);
+        master.set_text(0, 1, std::to_string(duration.count()));
+        
     }
 };
 
@@ -108,6 +118,7 @@ class Routes{
         void static placehold3();
         void static placehold3Mir();
         void static placehold4();
+        void static placehold4Mir();
         void static placehold5();
         void static placehold6();
         void static placehold6Mir();
@@ -127,20 +138,27 @@ class Routes{
         // Autos added below are self explanatory due to the route name attached to them.
         // The names attached are within quotes
 
-        // AutoSelector::add("skills", skills); // ???
+        AutoSelector::add("Ring side BLUE (STAKE AWP)", placehold4); 
+        // AutoSelector::add("Ring side RED (STAKE AWP)", placehold4Mir); //not done
 
-        AutoSelector::add("Sig Ring side BLUE (STAKE)", placehold2); // ok
-        AutoSelector::add("Sig Ring side RED (STAKE)", placehold2Mir); //
+        
+        AutoSelector::add("Ring side BLUE (STAKE ELIM)", placehold2);
+        AutoSelector::add("Ring side RED (STAKE ELIM)", placehold2Mir);
+
+
+        AutoSelector::add("Goal Rush RED", placehold13);
+        AutoSelector::add("Goal Rush BLUE", placehold13Mir);
+
+
+        AutoSelector::add("Mogo side BLUE (END STAKE)", placehold5);         
         
         AutoSelector::add("Ring Rush Rush Red", placehold1);
         AutoSelector::add("Ring Rush Rush Blue", placehold1Mir);
 
-        AutoSelector::add("Sig Ring side RED (STAKE SAFE LINE)", placehold3Mir); //
-        AutoSelector::add("Sig Ring side BLUE (STAKE SAFE LINE)", placehold3); // ok
+        
 
 
-        AutoSelector::add("Sig Goal Rush RED", placehold13);
-        AutoSelector::add("Sig Goal Rush BLUE", placehold13Mir);
+        
 
         
         AutoSelector::add("EZ BLUE", placehold11); // ???'
@@ -150,24 +168,9 @@ class Routes{
 
 
         AutoSelector::add("Sig Solo BLUE", placehold6); // ok
-        AutoSelector::add("Sig Solo Red", placehold6Mir);
+        AutoSelector::add("Sig Solo Red", placehold6Mir);    
 
-        
-        
-        
-
-        
-
-        AutoSelector::add("ELIM Red RUSH", placehold3); //good
-        AutoSelector::add("ELIM blue RUSH MIRROR", placehold7); //good
-
-        AutoSelector::add("Red Solo AWP", placehold1); //good
-        AutoSelector::add("Blue Solo AWP", placehold5);
-
-        AutoSelector::add("Elims BLUE MIRROR (5 ring)", placehold10); //good-ish
-        AutoSelector::add("Elims RED (5 ring)", placehold4); //good
-
-        
+        AutoSelector::add("skills", skills); // ???
 
         
 

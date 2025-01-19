@@ -100,10 +100,10 @@ class MogoUtils {
         inline static void init() {
             camDetect.set_zero_point(pros::E_VISION_ZERO_CENTER); //set brightness to 14 (calibrate sensor on SKILLS FIELD)
             //camDetect.set_auto_white_balance(false);
-            camDetect.set_exposure(29);
+            camDetect.set_exposure(36);
 
             // Sets mogo sig
-            pros::vision_signature_s_t MOGO_SIG = pros::c::vision_signature_from_utility(1, -2533, -1993, -2263, -7307, -6747, -7027, 5.800, 0);
+            pros::vision_signature_s_t MOGO_SIG = pros::c::vision_signature_from_utility(1, -2657, -2055, -2356, -4931, -4053, -4492, 5.900, 0);
             camDetect.set_signature(MOGO, &MOGO_SIG);
         }
 
@@ -212,6 +212,11 @@ class MogoUtils {
                 lastYerr = yErr;
                 mmDis = goalOpt.get();
 
+                // if (robot.getDetectLine() && (lineLeft.get_value() < 700 || lineRight.get_value() < 700)) {
+                    // moveDrive(-8, -8, 100);
+                    // break;
+                // }
+
             }
 
             master.set_text(1, 0, "M. x:" + std::to_string(getMidX()));
@@ -256,10 +261,10 @@ class RedRingUtil {
             camRingDetect.set_exposure(29);
 
             // Sets red & blue ring sig (calibration required)
-            pros::vision_signature_s_t RED_RING_SIG = pros::c::vision_signature_from_utility(1, 8637, 12249, 10443, -1365, -525, -945, 4.000, 0);
+            pros::vision_signature_s_t RED_RING_SIG = pros::c::vision_signature_from_utility(1, 8191, 11449, 9820, -1517, -389, -954, 3.200, 0);
             camRingDetect.set_signature(RED_RING, &RED_RING_SIG);
 
-            pros::vision_signature_s_t BLUE_RING_SIG = pros::c::vision_signature_from_utility(2, -4153, -3497, -3826, 6599, 8631, 7614, 5.600, 0);
+            pros::vision_signature_s_t BLUE_RING_SIG = pros::c::vision_signature_from_utility(2, -5243, -3845, -4544, 6673, 9479, 8076, 4.200, 0);
             camRingDetect.set_signature(BLUE_RING, &BLUE_RING_SIG);
         }
 

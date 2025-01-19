@@ -5,7 +5,7 @@
 #define MAIN_LOOP_DELAY 5
 #define STUCK_DELAY_MS 300
 #define STUCK_DEG_RANGE 7
-#define SORT_MS_EXT_DELAY 330
+#define SORT_MS_EXT_DELAY 100
 
 
 
@@ -47,14 +47,30 @@ class IntakeHelper {
 
     }
 
+    inline static void reject() {
+        while (sortLimit.get_value() == 0) {
+            pros::delay(10);
+        }
+        if (true) {
+            blocking = true;
+            pros::delay(100); //80
+            intake.move_voltage(-6*1000); //-10
+            pros::delay(60);
+            intake.move_voltage(12*1000);
+            pros::delay(50);
+            blocking = false;
+        }
+    }
+
     inline static void main() {
         bool ringLiftSense = false;
         while (true) {
 
             // stuckDetect();
+            /*
 
             if (excludeBlue && (!blockSort)) {
-                if (opt.get_hue() >= 200 && opt.get_hue() <= 225/* && opt.get_proximity() >=*/) {
+                if (opt.get_hue() >= 200 && opt.get_hue() <= 225 && opt.get_proximity() >= 220) {
                     colorPistion.overrideState(1); // REJECT blue
                     pros::delay(SORT_MS_EXT_DELAY);
                 } else if (opt.get_hue() < 15) {
@@ -70,6 +86,7 @@ class IntakeHelper {
             } else {
                 colorPistion.overrideState(0); // TURN OFF SORTING
             }
+            
 
             if (stap) {
                 if (excludeBlue) {
@@ -82,7 +99,21 @@ class IntakeHelper {
                     }
                 }
             }
+            */
 
+            if (excludeBlue && (!blockSort)) {
+                if (opt.get_hue() >= 200 && opt.get_hue() <= 225 && opt.get_proximity() >= 220) {
+                    reject();
+                } else if (opt.get_hue() < 15) {
+                    // colorPistion.overrideState(0); // ACCEPT red
+                }
+            } else if ((!excludeBlue) && (!blockSort)) {
+                if (opt.get_hue() >= 200 && opt.get_hue() <= 225 && opt.get_proximity() >= 220) {
+                    // colorPistion.overrideState(0); // ACCEPT blue
+                } else if (opt.get_hue() < 15) {
+                    reject();
+                }
+            }
                 
             pros::delay(MAIN_LOOP_DELAY);
         }
@@ -136,7 +167,7 @@ class IntakeHelper {
         pros::delay(50);
         opt.set_led_pwm(100);
         // opt.set_integration_time(10);
-        pros::Task IntakeMngr(main);
+        // pros::Task IntakeMngr(main);
 
     }
 

@@ -21,12 +21,12 @@ void initialize() {
 	Routes::initall();
     DriverControl::initAll();
 	LiftMngr::initall();
-	IntakeHelper::init();
 	// IntakeHelper::sortState(false);
 	// IntakeHelper::blueExcld(true);
 
 	MogoUtils::init();
 	RedRingUtil::init();
+	IntakeHelper::init();
 
 	pros::lcd::set_text(1, "ARMED");
 	AutoSelector::printPath();
@@ -39,6 +39,8 @@ void competition_initialize() {}
 
 void autonomous() {
 	// MogoUtils::getMogo(7, 3);
+	robot.fwdDynoTest();
+	/*
 	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
     robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
 

@@ -124,7 +124,7 @@ public:
                 return ProfileSetpoint(
                     max_velocity * elapsed_time + const_1,
                     max_velocity,
-                    max_acceleration - max_acceleration // long ass way to say 0 bc complier complains
+                    max_acceleration - max_acceleration // long way to say 0 bc complier complains
                 );
                 break;
             case TrapezoidProfileStage::Decelerating:

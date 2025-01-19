@@ -7,6 +7,11 @@
 #include "intakeFuncts.h"
 #include "pros/misc.h"
 
+#define SCORE_HEIGHT 124.45
+#define STORE_HEIGHT 250
+#define IDLE_HEIGHT 290
+#define ABOVE_IN_HEIGHT 230
+
 
 /**
  * @brief Consolidates all driver required functions into one class.
@@ -22,7 +27,7 @@ class DriverControl {
             moClamp.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L2);
             liftIntake.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_Y);
             rushClamp.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_LEFT);
-            hang.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_X);
+            // hang.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_X);
             //intake.set_brake_mode(pros::v5::MotorBrake::hold);
         };
 
@@ -42,8 +47,9 @@ class DriverControl {
         // Allows for control of intake based on controller input
         inline static void updateIntake(){
             if (master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
-                IntakeHelper::sortState(!IntakeHelper::getStortState());
+                IntakeHelper::sortState(false);
                 IntakeHelper::StopAtColor(false);
+                master.rumble(".");
             }
             if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
                 IntakeHelper::voltage(12);
@@ -61,13 +67,15 @@ class DriverControl {
                 LiftMngr::setVoltage(12, true);
             } else if (master.get_digital_new_press(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
 
-                if (LiftMngr::getLevel() > 260) {
-                    LiftMngr::setLevel(245);
-                } else if (LiftMngr::getLevel() < 180) {
-                    LiftMngr::setLevel(275);
+                if (LiftMngr::getLevel() > 220 && LiftMngr::getLevel() < 270) {
+                    LiftMngr::setLevel(SCORE_HEIGHT); // score ring
+                } else if (LiftMngr::getLevel() > 275) {
+                    LiftMngr::setLevel(STORE_HEIGHT); // store ring
                 } else {
-                    LiftMngr::setLevel(140); //140
-                }
+                    LiftMngr::setLevel(IDLE_HEIGHT); // do nothing
+                }   
+            } else if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_X)) {
+                LiftMngr::setLevel(ABOVE_IN_HEIGHT);
             } else {
                 LiftMngr::setVoltage(0);
             }
@@ -143,6 +151,6 @@ class DriverControl {
             updateLift();
             clearCorner();
             openIntake();
-            giveXYTurn();
+            // giveXYTurn();
         }
 };

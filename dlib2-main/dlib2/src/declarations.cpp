@@ -10,7 +10,9 @@ pros::Controller master(pros::E_CONTROLLER_MASTER);
 
 // buttons for helping make autos
 pros::adi::DigitalIn xyBut('E');
-pros::adi::DigitalIn turnBut('F');
+pros::adi::DigitalIn turnBut('F'); //F
+pros::adi::DigitalIn sortLimit('0');
+
 
 // Line detectors
 pros::adi::AnalogIn lineLeft = pros::adi::AnalogIn('H');
@@ -18,7 +20,7 @@ pros::adi::AnalogIn lineRight = pros::adi::AnalogIn('D');
 
 
 // intake motor go brrr
-pros::Motor intake(-14, pros::v5::MotorGears::blue, pros::v5::MotorEncoderUnits::degrees);
+pros::Motor intake(-20, pros::v5::MotorGears::blue, pros::v5::MotorEncoderUnits::degrees);
 
 // lift motor
 MotorGroup lift({-9}, pros::v5::MotorGears::red,
@@ -29,31 +31,33 @@ MotorGroup lift({-9}, pros::v5::MotorGears::red,
 
 // Declares color sensor
 pros::v5::Optical camLight(0);
-pros::v5::Optical opt(1);
+pros::v5::Optical opt(0);
 
 // Declares distance sensor
-pros::v5::Distance goalOpt(10); //ohhhhh
+pros::v5::Distance goalOpt(0); //ohhhhh
 pros::v5::Distance ringOpt(0);
 pros::v5::Distance stakeFinder(0);
 
 // Declares rot sensors for odom
 // vert should increase when moving foward
-pros::Rotation vert(-4);
+pros::Rotation vert(0);
 // horz should increase when moving to the right
-pros::Rotation horiz(15);
+pros::Rotation horiz(0);
 
 // lift rot
-pros::Rotation liftRot(19);
+pros::Rotation liftRot(10);
 
 //////// EXPerimental VISION SENSOR ////////
-pros::v5::Vision camDetect(3);
-pros::v5::Vision camRingDetect(20);
+pros::v5::Vision camDetect(0);
+pros::v5::Vision camRingDetect(0);
 //////// EXPerimental VISION SENSOR ////////
 
 using namespace au;
 
 // TODO: Decide if we want to implement helper functions for some of these
-// things nehh
+
+bool Robot::detectLine = false;
+
 void Robot::initialize() {
   chassis.initialize();
   imu.initialize();
@@ -145,7 +149,7 @@ void Robot::turnQuasiStaticTest() {
     linAngle += ((((linRcurRot-linRpastRot) - (linLcurRot-linLpastRot)).in(au::inches)) / 11.25) * (180/3.1415926535897932384626);
 
 
-    if (thing % 2 == 0) {
+    if (true) {
       std::cout << elapsed_time << ", " << voltage << ", " << curRot << ", "
                 << (curRot - pastRot) / 0.02 
                 << ", "
@@ -362,6 +366,13 @@ void Robot::ffwLat(Quantity<Meters, double> displacement,
       // move_pid.get_error() << ", " << pidVoltage << ", " << ffwdVoltage <<
       // std::endl;
 
+      // LINE DETECT START
+      if (detectLine && (lineLeft.get_value() < 700 || lineRight.get_value() < 700)) {
+        break;
+      }
+      
+      // LINE DETECT END
+
       // DATA
       std::cout << elapsed_time.in(au::milli(au::seconds)) << ", "
                 << setpoint.position.in(au::inches) << ", "
@@ -406,7 +417,7 @@ void Robot::testStatic() {
                 << reading.in(au::degrees) << ", " << ffwdVoltage.in(au::volts)
                 << std::endl;
       prevReading = reading;
-      pros::delay(100);
+      pros::delay(20);
     }
   }
 
@@ -420,7 +431,7 @@ void Robot::fwdQuasiStaticTest() {
     auto curRot = rotationLeft.get_linear_displacement();
     int thing = 0;
 
-    while (voltage < (au::volts)(8)) {
+    while (voltage < (au::volts)(12)) {
       thing++;
       auto current_time = pros::millis();
       elapsed_time = current_time - start_time;
@@ -432,19 +443,23 @@ void Robot::fwdQuasiStaticTest() {
       curRot = rotationLeft.get_linear_displacement();
       auto vel = rotationLeft.get_linear_velocity();
 
-      if (thing % 2 == 0) {
+      if (false) {
         std::cout << elapsed_time << ", " << voltage << ", " << curRot << ", "
                   << vel << std::endl;
       }
 
-      pros::delay(10);
+      if (true) {
+        std::cout << "(" << voltage.in(au::volts) << ", " << vel.in(au::meters_per_second) << ")" << std::endl;
+      }
+
+      pros::delay(20);
       pastRot = curRot;
     }
     chassis.move_voltage((au::volts)(0));
   }
 
 void Robot::fwdDynoTest() {
-    auto voltage = (au::volts)(7.0);
+    auto voltage = (au::volts)(6.0);
 
     auto start_time = pros::millis();
     auto elapsed_time = 0;
@@ -469,12 +484,16 @@ void Robot::fwdDynoTest() {
       auto vel = rotationLeft.get_linear_velocity();
       auto accel = (vel - preVel) / 0.01;
 
-      if (thing % 2 == 0) {
+      if (false) {
         std::cout << elapsed_time << ", " << voltage << ", " << curRot << ", "
                   << vel << ", " << accel << std::endl;
       }
 
-      pros::delay(10);
+      if (true) {
+        std::cout << "(" << elapsed_time/1000.0 << ", " << vel.in(au::meters_per_second) << ")" << std::endl;
+      }
+
+      pros::delay(20);
       pastRot = curRot;
       preVel = vel;
     }
@@ -633,21 +652,21 @@ void Robot::restOdomKeepAngle(double x, double y) {
 
 // Create a config for everything used in the Robot class
 dlib::ChassisConfig chassis_config{
-    {11, 12, 13},    // left motor ports - + -
-    {-5, -6, -15}, // right motor ports + + -
+    {11, -12, 13},    // left motor ports - + -
+    {15, -16, -14}, // right motor ports + + -
     pros::MotorGearset::blue,
-    rpm(480),     // the drivebase rpm
+    rpm(600),     // the drivebase rpm
     inches(2.725) // the drivebase wheel diameter
 };
 
-dlib::RotationConfig rotRight{2, inches(2.75), .8};
+dlib::RotationConfig rotRight{-17, inches(2.75), 1};
 
-dlib::RotationConfig rotLeft{4, inches(2.75), .8};
+dlib::RotationConfig rotLeft{8, inches(2.75), 1};
 
 // kv: 0.017650692106976215
 //  ks: 1.4371121135741225
 //  MAX VELO: 598.4404363526928 deg/s
-// 0.91 kv for MAX potential
+// 0.91 kv for MAX potential 
 
 // .79 kv works up to 300 dps
 // .35
@@ -657,11 +676,7 @@ dlib::FeedforwardGains TurnFFwdGains{
   0.92, //0.88
   0.15}; // ka 0.20
 
-
-// 1.4724784904435986,
-//  6.225360763050551,
 // 1.026599683976744,
-//	6.021757193809706,
 //	0.4782196866053843
 dlib::FeedforwardGains LinFFwdGains{
   1.026599683976744, 
@@ -670,7 +685,7 @@ dlib::FeedforwardGains LinFFwdGains{
 };
 
 dlib::ImuConfig imu_config{
-    16,           // imu port
+    1,           // imu port
     1.00961546551 // optional imu scaling constant
 };
 

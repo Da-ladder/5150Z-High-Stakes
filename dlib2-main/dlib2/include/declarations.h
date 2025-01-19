@@ -21,6 +21,7 @@ extern pros::MotorGroup right_motors;
 // extern line sensors
 extern pros::adi::AnalogIn lineLeft;
 extern pros::adi::AnalogIn lineRight;
+extern pros::adi::DigitalIn sortLimit;
 
 // Rotation sensor
 extern pros::Rotation liftRot;
@@ -63,6 +64,8 @@ public:
 
 
 class Robot {
+	private:
+		static bool detectLine;
     public:
     dlib::Chassis chassis;
 	dlib::Imu imu;
@@ -126,6 +129,12 @@ class Robot {
 
 	}
 
+	inline void changeDetectLine(bool value) {
+		detectLine = value;
+	}
+	inline bool getDetectLine() {
+		return detectLine;
+	}
     void initialize();
     void move_with_pid(Quantity<Meters, double> displacement);
     void turnDynoTest();
