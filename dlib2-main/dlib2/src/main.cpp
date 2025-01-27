@@ -39,8 +39,8 @@ void competition_initialize() {}
 
 void autonomous() {
 
-	robot.turnQuasiStaticTest();
-	robot.turnDynoTest();
+	// robot.turnQuasiStaticTest();
+	// robot.turnDynoTest();
 	// MogoUtils::getMogo(7, 3);
 	// robot.ffwLat((au::inches)(15), (au::seconds)(2), 3.5);
 	// robot.turn_with_pid(180, 1500);

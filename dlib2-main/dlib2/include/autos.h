@@ -138,7 +138,9 @@ class Routes{
         // Autos added below are self explanatory due to the route name attached to them.
         // The names attached are within quotes
 
-        // AutoSelector::add("Ring side BLUE (ELIM)", placehold3); 
+        AutoSelector::add("skills", skills); // ???
+
+        AutoSelector::add("Ring side BLUE (ELIM)", placehold3); 
         AutoSelector::add("Ring side RED (ELIM)", placehold3Mir);
 
         AutoSelector::add("Ring side BLUE (STAKE AWP)", placehold4); 
@@ -150,7 +152,7 @@ class Routes{
         AutoSelector::add("Ring side BLUE (STAKE AWP)", placehold4); 
         AutoSelector::add("Ring side RED (STAKE AWP)", placehold4Mir);
 
-        AutoSelector::add("skills", skills); // ???
+        
         
         AutoSelector::add("Ring side BLUE (STAKE ELIM)", placehold2);
         AutoSelector::add("Ring side RED (STAKE ELIM)", placehold2Mir);

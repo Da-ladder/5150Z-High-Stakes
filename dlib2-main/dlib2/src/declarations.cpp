@@ -23,7 +23,7 @@ pros::adi::AnalogIn lineRight = pros::adi::AnalogIn('D');
 pros::Motor intake(-20, pros::v5::MotorGears::blue, pros::v5::MotorEncoderUnits::degrees);
 
 // lift motor
-MotorGroup lift({10}, pros::v5::MotorGears::red,
+MotorGroup lift({2}, pros::v5::MotorGears::red,
                 pros::v5::MotorEncoderUnits::degrees);
 
 // Declares the IMU
