@@ -569,7 +569,7 @@ void Robot::turn_to_point(dlib::Vector2d point, bool mogoSide, int to, double ma
             error = targAngle - curRotation;
           }
         } else {
-          while (error < 180) {
+          while (error < -180) {
             targAngle += 360;
 
             error = targAngle - curRotation;
@@ -590,7 +590,7 @@ void Robot::turn_to_point(dlib::Vector2d point, bool mogoSide, int to, double ma
             error = targAngle - curRotation;
           }
         } else {
-          while (error < 180) {
+          while (error < -180) {
             targAngle += 360;
 
             error = targAngle - curRotation;
