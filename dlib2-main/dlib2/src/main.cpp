@@ -38,9 +38,14 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
+
+	robot.turnQuasiStaticTest();
+	robot.turnDynoTest();
 	// MogoUtils::getMogo(7, 3);
-	robot.fwdDynoTest();
-	/*
+	// robot.ffwLat((au::inches)(15), (au::seconds)(2), 3.5);
+	// robot.turn_with_pid(180, 1500);
+
+	// RedRingUtil::getRing(true, 7, 3);
 	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
     robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
 

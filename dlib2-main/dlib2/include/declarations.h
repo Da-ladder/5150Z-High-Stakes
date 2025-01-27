@@ -1,4 +1,5 @@
 #pragma once
+#include "dlib/controllers/pid.hpp"
 #include "main.h"
 #include "dlib/dlib.hpp"
 #include "pros/distance.hpp"
@@ -98,6 +99,8 @@ class Robot {
 	dlib::FeedforwardGains ffwdTurnDecelGains;
 	dlib::Feedforward<Degrees> ffwdTurnDecel;
 
+	dlib::Pid<Meters> lin_pid;
+
 	
 
 	Robot(
@@ -111,7 +114,8 @@ class Robot {
 		dlib::RotationConfig rotLeft,
 		dlib::FeedforwardGains ffwdGains,
 		dlib::FeedforwardGains linGains,
-		dlib::FeedforwardGains ffwdTurnDecelGains
+		dlib::FeedforwardGains ffwdTurnDecelGains,
+		dlib::PidGains linPid
 	) : 
 		chassis(chassis_config), 
 		imu(imu_config),
@@ -124,7 +128,8 @@ class Robot {
 		rotationLeft(rotLeft),
 		ffwd(ffwdGains),
 		linffwd(linGains),
-		ffwdTurnDecel(ffwdTurnDecelGains)
+		ffwdTurnDecel(ffwdTurnDecelGains),
+		lin_pid(linPid)
 		{
 
 	}
@@ -141,13 +146,13 @@ class Robot {
     void turnQuasiStaticTest();
     void ffwTurn(Quantity<Degrees, double> heading);
     void ffwLat(Quantity<Meters, double> displacement,
-              Quantity<Seconds, double> timeout, double maxAccel = 3.0);
+              Quantity<Seconds, double> timeout, double maxAccel = 3.15);
     void testStatic();
     void fwdQuasiStaticTest();
     void fwdDynoTest();
     void turn_with_pid(double heading, int timeoutMS, double maxVolts = 12);
     void turn_to_point(dlib::Vector2d point, bool mogoSide, int to, double maxVolts = 12);
-    void move_to_point(dlib::Vector2d point, bool turn = true, bool fowards = true, int to = 1400, double maxAccel = 3, double maxTurnVolts = 12);
+    void move_to_point(dlib::Vector2d point, bool turn = true, bool fowards = true, int to = 1400, double maxAccel = 3.15, double maxTurnVolts = 12);
     void start_odom();
 
 	void restOdom(double x, double y, double theta);

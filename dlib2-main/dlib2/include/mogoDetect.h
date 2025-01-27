@@ -100,10 +100,10 @@ class MogoUtils {
         inline static void init() {
             camDetect.set_zero_point(pros::E_VISION_ZERO_CENTER); //set brightness to 14 (calibrate sensor on SKILLS FIELD)
             //camDetect.set_auto_white_balance(false);
-            camDetect.set_exposure(36);
+            camDetect.set_exposure(23);
 
             // Sets mogo sig
-            pros::vision_signature_s_t MOGO_SIG = pros::c::vision_signature_from_utility(1, -2657, -2055, -2356, -4931, -4053, -4492, 5.900, 0);
+            pros::vision_signature_s_t MOGO_SIG = pros::c::vision_signature_from_utility(1, -1897, -521, -1210, -6899, -5639, -6268, 3.000, 0);
             camDetect.set_signature(MOGO, &MOGO_SIG);
         }
 
@@ -154,7 +154,7 @@ class MogoUtils {
             // keep looping while mogo has not been detected in the clamp
             int none = 0;
             master.clear();
-            while (mmDis > 55) { // 60
+            while (mmDis > 41) { // 60
                 MogoUtils::refreshMogo();
 
                 disError = 50 - mmDis; // 50 is most in mogo can go on corner
@@ -222,7 +222,7 @@ class MogoUtils {
             master.set_text(1, 0, "M. x:" + std::to_string(getMidX()));
             
             // Lets the drive contuine under residual power and clamps after 75 ms
-            moveDrive(2, 2, 30);
+            moveDrive(2.7, 2.7, 40);
             moveDrive(1, 1, 20);
             master.set_text(2, 0, "M. y:" + std::to_string(getMidY()));
             // robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
@@ -261,7 +261,7 @@ class RedRingUtil {
             camRingDetect.set_exposure(29);
 
             // Sets red & blue ring sig (calibration required)
-            pros::vision_signature_s_t RED_RING_SIG = pros::c::vision_signature_from_utility(1, 8191, 11449, 9820, -1517, -389, -954, 3.200, 0);
+            pros::vision_signature_s_t RED_RING_SIG = pros::c::vision_signature_from_utility(1, 5223, 12099, 8661, -2635, -1781, -2208, 2.500, 0);
             camRingDetect.set_signature(RED_RING, &RED_RING_SIG);
 
             pros::vision_signature_s_t BLUE_RING_SIG = pros::c::vision_signature_from_utility(2, -5243, -3845, -4544, 6673, 9479, 8076, 4.200, 0);

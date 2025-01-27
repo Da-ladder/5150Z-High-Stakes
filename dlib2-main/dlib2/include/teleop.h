@@ -8,7 +8,7 @@
 #include "pros/misc.h"
 
 #define SCORE_HEIGHT 124.45
-#define STORE_HEIGHT 250
+#define STORE_HEIGHT 255 //250
 #define IDLE_HEIGHT 290
 #define ABOVE_IN_HEIGHT 230
 

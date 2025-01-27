@@ -23,7 +23,7 @@ pros::adi::AnalogIn lineRight = pros::adi::AnalogIn('D');
 pros::Motor intake(-20, pros::v5::MotorGears::blue, pros::v5::MotorEncoderUnits::degrees);
 
 // lift motor
-MotorGroup lift({-9}, pros::v5::MotorGears::red,
+MotorGroup lift({10}, pros::v5::MotorGears::red,
                 pros::v5::MotorEncoderUnits::degrees);
 
 // Declares the IMU
@@ -34,7 +34,7 @@ pros::v5::Optical camLight(0);
 pros::v5::Optical opt(0);
 
 // Declares distance sensor
-pros::v5::Distance goalOpt(0); //ohhhhh
+pros::v5::Distance goalOpt(6); //ohhhhh
 pros::v5::Distance ringOpt(0);
 pros::v5::Distance stakeFinder(0);
 
@@ -45,11 +45,11 @@ pros::Rotation vert(0);
 pros::Rotation horiz(0);
 
 // lift rot
-pros::Rotation liftRot(10);
+pros::Rotation liftRot(9);
 
 //////// EXPerimental VISION SENSOR ////////
-pros::v5::Vision camDetect(0);
-pros::v5::Vision camRingDetect(0);
+pros::v5::Vision camDetect(5);
+pros::v5::Vision camRingDetect(4);
 //////// EXPerimental VISION SENSOR ////////
 
 using namespace au;
@@ -90,6 +90,8 @@ void Robot::turnDynoTest() {
   auto vel = (curRot - pastRot) / 0.01;
   auto preVel = vel;
 
+  std::cout << "DYNO TEST @ " << voltage.in(au::volts) << " volts for 10 secs" << std::endl;
+
   while (elapsed_time < 10000) {
     thing++;
     auto current_time = pros::millis();
@@ -98,13 +100,17 @@ void Robot::turnDynoTest() {
     // volts/sec ramp
     chassis.turn_voltage(voltage); // deltaAngle/delT
     curRot = imu.get_rotation();
-    auto vel = (curRot - pastRot) / 0.01;
-    auto accel = (vel - preVel) / 0.01;
-    if (thing % 2 == 0) {
+    auto vel = (curRot - pastRot) / 0.02;
+    auto accel = (vel - preVel) / 0.02;
+    if (false) {
       std::cout << elapsed_time << ", " << voltage << ", " << curRot << ", "
-                << (curRot - pastRot) / 0.01 << ", " << accel << std::endl;
+                << (curRot - pastRot) / 0.02 << ", " << accel << std::endl;
     }
-    pros::delay(10);
+
+    if (true) {
+        std::cout << "(" << elapsed_time/1000.0 << ", " << (curRot - pastRot) * 50 << ")" << std::endl;
+    }
+    pros::delay(20);
     pastRot = curRot;
     preVel = vel;
   }
@@ -129,13 +135,14 @@ void Robot::turnQuasiStaticTest() {
   auto pastRot = imu.get_rotation();
   auto curRot = imu.get_rotation();
   int thing = 0;
+
+  std::cout << "QUASI TEST @ 0-12 volts for 24 secs" << std::endl;
+
   while (voltage < (au::volts)(12)) {
     thing++;
     auto current_time = pros::millis();
     elapsed_time = current_time - start_time;
-    // voltage = au::milli(au::volts)(1000.0 * (elapsed_time / 1000.0)); // .5 volts/sec ramp
-    voltage = (au::volts)(1.65);
-    // velo = 50 * (elapsed_time/1000.0); // +50 rpm every sec 12 sec test
+    voltage = au::milli(au::volts)(500.0 * (elapsed_time / 1000.0)); // .5 volts/sec ramp
     
     // voltage = au::milli(au::volts)(4000);
 
@@ -146,14 +153,18 @@ void Robot::turnQuasiStaticTest() {
     linLcurRot = rotationLeft.get_linear_displacement();
     linRcurRot = rotationRight.get_linear_displacement();
 
-    linAngle += ((((linRcurRot-linRpastRot) - (linLcurRot-linLpastRot)).in(au::inches)) / 11.25) * (180/3.1415926535897932384626);
+    // linAngle += ((((linRcurRot-linRpastRot) - (linLcurRot-linLpastRot)).in(au::inches)) / 11.25) * (180/3.1415926535897932384626);
 
 
-    if (true) {
+    if (false) {
       std::cout << elapsed_time << ", " << voltage << ", " << curRot << ", "
                 << (curRot - pastRot) / 0.02 
                 << ", "
                 << (linAngle-pastLinAngle) / 0.02 << std::endl;
+    }
+
+    if (true) {
+        std::cout << "(" << voltage.in(au::volts) << ", " << (curRot-pastRot)*50 << ")" << std::endl;
     }
 
     pros::delay(20);
@@ -679,9 +690,9 @@ dlib::FeedforwardGains TurnFFwdGains{
 // 1.026599683976744,
 //	0.4782196866053843
 dlib::FeedforwardGains LinFFwdGains{
-  1.026599683976744, 
-  6.021757193809706, //6.021757193809706
-  0.9 //ka 1.1
+  1.2, 
+  5.1, //4.47078124536
+  1.1 //ka 1.2
 };
 
 dlib::ImuConfig imu_config{
@@ -690,7 +701,7 @@ dlib::ImuConfig imu_config{
 };
 
 dlib::PidGains move_pid_gains{
-    200, // kp, porportional gain 150
+    200, // kp, porportional gain 200
     0,   // ki, integral gain
     0    // kd, derivative gain
 };
@@ -699,6 +710,12 @@ dlib::ErrorDerivativeSettler<Meters> move_pid_settler{
     inches(1), // error threshold, the maximum error the pid can settle at
     meters_per_second(0.01) // derivative threshold, the maximum instantaneous
                             // error over time the pid can settle at
+};
+
+dlib::PidGains lin_pid_gains{
+  0,
+  0,
+  0
 };
 
 dlib::PidGains turn_pid_gains{
@@ -716,4 +733,4 @@ dlib::ErrorDerivativeSettler<Degrees> turn_pid_settler{
 
 Robot robot = Robot(chassis_config, imu_config, move_pid_gains,
                     move_pid_settler, turn_pid_gains, turn_pid_settler,
-                    rotRight, rotLeft, TurnFFwdGains, LinFFwdGains, {});
+                    rotRight, rotLeft, TurnFFwdGains, LinFFwdGains, {}, lin_pid_gains);

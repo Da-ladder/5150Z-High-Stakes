@@ -138,16 +138,25 @@ class Routes{
         // Autos added below are self explanatory due to the route name attached to them.
         // The names attached are within quotes
 
-        AutoSelector::add("Ring side BLUE (STAKE AWP)", placehold4); 
-        // AutoSelector::add("Ring side RED (STAKE AWP)", placehold4Mir); //not done
+        // AutoSelector::add("Ring side BLUE (ELIM)", placehold3); 
+        AutoSelector::add("Ring side RED (ELIM)", placehold3Mir);
 
+        AutoSelector::add("Ring side BLUE (STAKE AWP)", placehold4); 
+        AutoSelector::add("Ring side RED (STAKE AWP)", placehold4Mir);
+
+        AutoSelector::add("Goal Rush RED (ELIM)", placehold13);
+        AutoSelector::add("Goal Rush BLUE (ELIM)", placehold13Mir);
+
+        AutoSelector::add("Ring side BLUE (STAKE AWP)", placehold4); 
+        AutoSelector::add("Ring side RED (STAKE AWP)", placehold4Mir);
+
+        AutoSelector::add("skills", skills); // ???
         
         AutoSelector::add("Ring side BLUE (STAKE ELIM)", placehold2);
         AutoSelector::add("Ring side RED (STAKE ELIM)", placehold2Mir);
 
 
-        AutoSelector::add("Goal Rush RED", placehold13);
-        AutoSelector::add("Goal Rush BLUE", placehold13Mir);
+        
 
 
         AutoSelector::add("Mogo side BLUE (END STAKE)", placehold5);         
@@ -170,7 +179,7 @@ class Routes{
         AutoSelector::add("Sig Solo BLUE", placehold6); // ok
         AutoSelector::add("Sig Solo Red", placehold6Mir);    
 
-        AutoSelector::add("skills", skills); // ???
+        
 
         
 
