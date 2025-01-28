@@ -19,7 +19,7 @@
 #define IDLE_ARM 290
 #define SCORE_HEIGHT 124.45
 #define STORE_HEIGHT 255
-#define ABOVE_IN_HEIGHT 230
+#define ABOVE_IN_HEIGHT 222
 
 
 
@@ -74,6 +74,7 @@ void intakeDelay() {
 }
 
 void Routes::skills() {
+    pros::Task intakeThing(intakeDelay);
     // score on stake
     IntakeHelper::blueExcld(true);
     int time = 0;
@@ -98,21 +99,26 @@ void Routes::skills() {
     // move to and grab rings
     pros::delay(200);
     IntakeHelper::voltage(12);
-    robot.move_to_point({(au::inches)(24.82), (au::inches)(20.68)}, true, INTAKE_SIDE, 600);
+    // robot.move_to_point({(au::inches)(24.82), (au::inches)(20.68)}, true, INTAKE_SIDE, 600); // PREV ring get
+    robot.turn_to_point({(au::inches)(24.82), (au::inches)(20.68)}, INTAKE_SIDE, 600);
+    RedRingUtil::getRing(true, 6, 2);
 
     // move to ring & store it in lb
-    robot.move_to_point({(au::inches)(57.22), (au::inches)(38.85)}, true, INTAKE_SIDE, 600);
+    robot.move_to_point({(au::inches)(50.39), (au::inches)(40.2)}, true, INTAKE_SIDE, 600);
+    // robot.turn_to_point({(au::inches)(57.22), (au::inches)(38.85)}, INTAKE_SIDE, 600); //PREV
     LiftMngr::setLevel(STORE_HEIGHT);
-    robot.move_to_point({(au::inches)(73.73), (au::inches)(44.7)}, true, INTAKE_SIDE, 400, 3); // ring get
+    // robot.move_to_point({(au::inches)(73.73), (au::inches)(44.7)}, true, INTAKE_SIDE, 400, 3); // PREV ring get
+    robot.turn_to_point({(au::inches)(73.73), (au::inches)(44.7)}, INTAKE_SIDE, 500);
+    RedRingUtil::getRing(true, 6, 2);
 
     // Wall stake & score while intaking ring
-    robot.move_to_point({(au::inches)(52.12), (au::inches)(43.43)}, true, MOGO_SIDE, 400, 2.6);
+    robot.move_to_point({(au::inches)(54.87), (au::inches)(44.35)}, true, MOGO_SIDE, 700, 2.6);
     IntakeHelper::voltage(0);
     LiftMngr::setLevel(ABOVE_IN_HEIGHT);
-    robot.turn_with_pid(271.78, 600);
+    robot.turn_with_pid(271.4, 600);
     IntakeHelper::voltage(12);
     robot.move_to_point({(au::inches)(54.22), (au::inches)(58.44)}, false, INTAKE_SIDE, 400);
-    moveManual(400, -5);
+    moveManual(440, -5.5);
     LiftMngr::setLevel(SCORE_HEIGHT);
     pros::delay(200);
 
@@ -201,17 +207,20 @@ void Routes::skills() {
     moClamp.overrideState(0);
 
     // back off 
-    robot.move_to_point({(au::inches)(51.88), (au::inches)(-32.43)}, true, INTAKE_SIDE, 400);
+    robot.move_to_point({(au::inches)(2.88), (au::inches)(-49.68)}, true, INTAKE_SIDE, 400);
+    robot.move_to_point({(au::inches)(56.18), (au::inches)(-39.95)}, true, INTAKE_SIDE, 600);
 
     // get ring
-    robot.turn_to_point({(au::inches)(67.75), (au::inches)(-19.66)}, INTAKE_SIDE, 600);
+    robot.turn_to_point({(au::inches)(70.7), (au::inches)(-21.64)}, INTAKE_SIDE, 600);
     RedRingUtil::getRing(true, 8, 2);
-    pros::delay(100);
-    IntakeHelper::voltage(0);
+    fIntVolt = 0;
+    fIntDelay = 280;
 
 
-    // get mogo
+    // get mogo 3rd
+    // robot.turn_to_point({(au::inches)(82.81), (au::inches)(-15.22)}, MOGO_SIDE, 1200);
     robot.move_to_point({(au::inches)(77.85), (au::inches)(-10.39)}, true, MOGO_SIDE, 1000, 3);
+    // robot.move_to_point({(au::inches)(82.81), (au::inches)(-15.22)}, true, MOGO_SIDE, 1300, 2.8); OLD 
     MogoUtils::getMogo(4, 2);
     IntakeHelper::voltage(12);
 
@@ -230,7 +239,8 @@ void Routes::skills() {
     cornerDeploy.overrideState(1);
     moveManual(400, -8);
     moveManual(500, -7);
-    IntakeHelper::voltage(-12);
+    fIntVolt = -12;
+    fIntDelay = 650;
 
     // clear corner & drop
     robot.turn_with_pid(327.98, 1300, 11);
@@ -256,10 +266,10 @@ void Routes::skills() {
 
     // place
     cornerDeploy.overrideState(0);
+    moClamp.overrideState(0);
     moveManual(300, 7);
     moveManual(300, 4);
-    moClamp.overrideState(0);
-
+    
 /**/
 }
 
