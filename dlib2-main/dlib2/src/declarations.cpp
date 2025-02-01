@@ -23,7 +23,7 @@ pros::adi::AnalogIn lineRight = pros::adi::AnalogIn('D');
 pros::Motor intake(-20, pros::v5::MotorGears::blue, pros::v5::MotorEncoderUnits::degrees);
 
 // lift motor
-MotorGroup lift({3}, pros::v5::MotorGears::red,
+MotorGroup lift({4}, pros::v5::MotorGears::red,
                 pros::v5::MotorEncoderUnits::degrees);
 
 // Declares the IMU
@@ -47,9 +47,9 @@ pros::Rotation horiz(0);
 // lift rot
 pros::Rotation liftRot(9);
 
-//////// EXPerimental VISION SENSOR ////////
+//////// EXPerimental VISION SENSOR ////////  
 pros::v5::Vision camDetect(5);
-pros::v5::Vision camRingDetect(4);
+pros::v5::Vision camRingDetect(2); // REPLACED BY LB
 //////// EXPerimental VISION SENSOR ////////
 
 using namespace au;

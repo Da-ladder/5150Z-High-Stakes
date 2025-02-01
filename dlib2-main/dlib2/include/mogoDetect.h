@@ -135,7 +135,7 @@ class MogoUtils {
         }
 
         // Move to the mogo
-        inline static void getMogo(double baseSpeed = 8, double minSpeed = 1.5, double maxSpeed = 12) {
+        inline static void getMogo(double baseSpeed = 8, double minSpeed = 1.5, double maxSpeed = 12, int timeout = 0) {
             double 
             tkP=0.05, // Turn P
             tkD=0.0, // Turn D
@@ -154,7 +154,15 @@ class MogoUtils {
             // keep looping while mogo has not been detected in the clamp
             int none = 0;
             master.clear();
+            int loop = 0;
             while (mmDis > 41) { // 60
+
+                if (timeout > 10) {
+                    loop += 10;
+                    if (loop > timeout) {
+                        break;
+                    }
+                }
                 MogoUtils::refreshMogo();
 
                 disError = 50 - mmDis; // 50 is most in mogo can go on corner

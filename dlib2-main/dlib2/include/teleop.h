@@ -7,7 +7,8 @@
 #include "intakeFuncts.h"
 #include "pros/misc.h"
 
-#define SCORE_HEIGHT 124.45
+#define DESCORE_HEIGHT 130
+#define SCORE_HEIGHT 110
 #define STORE_HEIGHT 255 //250
 #define IDLE_HEIGHT 290
 #define ABOVE_IN_HEIGHT 230
@@ -20,6 +21,7 @@
 class DriverControl {
     private:
         static int times; // time since last xy cord was printed
+        static bool deScore; // toggle to score deeper
     public:
         static int onOff;
         // Changes button binding for various piston systems 
@@ -61,6 +63,15 @@ class DriverControl {
         }
 
         inline static void updateLift() {
+            if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+                deScore = !deScore;
+                if (deScore) {
+                    master.rumble("--");
+                } else {
+                    master.rumble(".");
+                }
+            }
+
             if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_A)) {
                 LiftMngr::setVoltage(-12, true);
             } else if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
@@ -68,7 +79,11 @@ class DriverControl {
             } else if (master.get_digital_new_press(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
 
                 if (LiftMngr::getLevel() > 220 && LiftMngr::getLevel() < 270) {
-                    LiftMngr::setLevel(SCORE_HEIGHT); // score ring
+                    if (deScore) {
+                        LiftMngr::setLevel(DESCORE_HEIGHT);
+                    } else {
+                        LiftMngr::setLevel(SCORE_HEIGHT); // score ring
+                    }
                 } else if (LiftMngr::getLevel() > 275) {
                     LiftMngr::setLevel(STORE_HEIGHT); // store ring
                 } else {
@@ -113,9 +128,9 @@ class DriverControl {
         inline static void giveXYTurn() {
             if (xyBut.get_value()) {
 
-                while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN)) { 
-                    pros::delay(25);
-                }
+                // while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN)) { 
+                    // pros::delay(25);
+                // }
 
                 dlib::Pose2d curPos = robot.odom.get_position();
                 master.clear();
@@ -128,9 +143,9 @@ class DriverControl {
 
             if (turnBut.get_value()) {
 
-                while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN)) { 
-                    pros::delay(25);
-                }
+                // while (!master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_DOWN)) { 
+                    // pros::delay(25);
+                // }
 
                 master.clear();
 	            pros::delay(100);

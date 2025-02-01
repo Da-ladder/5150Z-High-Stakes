@@ -4,6 +4,7 @@
 #include "autos.h"
 
 int DriverControl::times = 0;
+bool DriverControl::deScore = false;
 
 // Updates the chassis motors based on  joystick input
 void DriverControl::updateChassis() {
