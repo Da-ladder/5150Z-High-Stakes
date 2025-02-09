@@ -22,11 +22,12 @@ void initialize() {
     DriverControl::initAll();
 	LiftMngr::initall();
 	// IntakeHelper::sortState(false);
-	// IntakeHelper::blueExcld(true);
+	
 
 	MogoUtils::init();
 	RedRingUtil::init();
 	IntakeHelper::init();
+	IntakeHelper::blueExcld(true);
 
 	pros::lcd::set_text(1, "ARMED");
 	AutoSelector::printPath();
@@ -39,6 +40,44 @@ void competition_initialize() {}
 
 void autonomous() {
 
+	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+    robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+	/*
+	double start_time = pros::millis();
+	double last_rotation = robot.imu.get_rotation().in(degrees);
+	while(true){
+        double current_time = pros::millis();
+        double elapsed_time = current_time - start_time;
+        double current_rotation = robot.imu.get_rotation().in(degrees);
+        robot.chassis.turn_voltage(volts(8));
+        std::cout << "(" << elapsed_time/1000 << "," << (current_rotation - last_rotation) * 50 << "),";
+
+        last_rotation = current_rotation;
+
+        pros::delay(20);
+    }
+	*/
+	// robot.turn_ffwd(500);
+	// pros::delay(2000000);
+	double start_time = pros::millis();
+	// robot.move_to_point({(au::inches)(50), (au::inches)(-26)}, true, true, 500); //26.3
+	robot.ramseteTest({(au::inches)(50), (au::inches)(-26)});
+	double end_time = pros::millis();
+	
+	// robot.move_with_pid((au::inches)(30));
+	/*
+	robot.turn_with_pid(90, 500, 12);
+	*/
+	master.clear();
+	pros::delay(100);
+	dlib::Pose2d curPos = robot.odom.get_position();
+	master.set_text(0, 0, "x:" + std::to_string((curPos.x).in(au::inches)));
+	pros::delay(50);
+	master.set_text(1, 0, "y:" + std::to_string((curPos.y).in(au::inches)));
+	pros::delay(50);
+	master.set_text(2, 0, "T:" + std::to_string(end_time-start_time));
+	// pros::delay(50);
+	
 	// robot.turnQuasiStaticTest();
 	// robot.turnDynoTest();
 	// MogoUtils::getMogo(7, 3);
@@ -46,8 +85,7 @@ void autonomous() {
 	// robot.turn_with_pid(180, 1500);
 
 	// RedRingUtil::getRing(true, 7, 3);
-	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
-    robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+	
 
 	// IntakeHelper::voltage(12);
 
@@ -62,8 +100,8 @@ void autonomous() {
 
 	// robot.move_to_point({(au::inches)(53.27), (au::inches)(61.3)}, true, false);
 
-	AutoSelector::updatePath(); // UNCOMMENT
-	AutoSelector::run(); // UNCOMMENT
+	// AutoSelector::updatePath(); // UNCOMMENT
+	// AutoSelector::run(); // UNCOMMENT
 	// pros::delay(150);
 	// robot.restOdomKeepAngle(4.5,  5.5);
 

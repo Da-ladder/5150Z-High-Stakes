@@ -2,6 +2,7 @@
 #include "au/au.hpp"
 #include "pros/adi.hpp"
 #include "pros/distance.hpp"
+#include <cmath>
 
 using namespace pros;
 
@@ -11,11 +12,11 @@ pros::Controller master(pros::E_CONTROLLER_MASTER);
 // buttons for helping make autos
 pros::adi::DigitalIn xyBut('E');
 pros::adi::DigitalIn turnBut('F'); //F
-pros::adi::DigitalIn sortLimit('0');
+pros::adi::DigitalIn sortLimit('H');
 
 
 // Line detectors
-pros::adi::AnalogIn lineLeft = pros::adi::AnalogIn('H');
+pros::adi::AnalogIn lineLeft = pros::adi::AnalogIn('0');
 pros::adi::AnalogIn lineRight = pros::adi::AnalogIn('D');
 
 
@@ -31,7 +32,7 @@ MotorGroup lift({4}, pros::v5::MotorGears::red,
 
 // Declares color sensor
 pros::v5::Optical camLight(0);
-pros::v5::Optical opt(0);
+pros::v5::Optical opt(3);
 
 // Declares distance sensor
 pros::v5::Distance goalOpt(6); //ohhhhh
@@ -65,19 +66,21 @@ void Robot::initialize() {
 }
 
 void Robot::move_with_pid(Quantity<Meters, double> displacement) {
-  auto start_displacement = -rotationLeft.get_linear_displacement();
+  auto start_displacement = rotationLeft.get_linear_displacement();
   auto target_displacement = start_displacement + displacement;
 
-  move_pid.target(target_displacement);
+  lin_pid.target(target_displacement);
   while (!move_settler.is_settled(move_pid.get_error(),
                                   move_pid.get_derivative())) {
-    auto reading = -rotationLeft.get_linear_displacement();
-    auto voltage = move_pid.update(reading, milli(seconds)(20));
+    auto reading = rotationLeft.get_linear_displacement();
+    auto voltage = lin_pid.update(reading, milli(seconds)(20));
 
     chassis.move_voltage(voltage);
     pros::delay(20);
+    // std::cout << voltage << std::endl;
   }
-  std::cout << "thing" << std::endl;
+  std::cout << "done" << std::endl;
+  
 }
 
 void Robot::turnDynoTest() {
@@ -327,10 +330,10 @@ void Robot::ffwLat(Quantity<Meters, double> displacement,
         dlib::TrapezoidProfile<Meters>(
         (au::meters_per_second_squared)(maxAccel), //3
         (au::meters_per_second_squared)(maxAccel),
-        (au::meters_per_second)(1.6), //1.6
+        (au::meters_per_second)(1.65), //1.6 kinda low 1.7 med 1.8 high EXP!!!!
         displacement);
 
-    // TODO: MAKE GOOD SETTLE CONDITION
+    // TODO: MAKE GOOD SETTLE CONDITION 
     int cycle = 0;
     while (forwardTrapProfile.stage(elapsed_time) !=
            dlib::TrapezoidProfileStage::Done) {
@@ -402,7 +405,7 @@ void Robot::testStatic() {
     auto start_time = au::milli(au::seconds)(pros::millis());
     auto elapsed_time = au::milli(au::seconds)(pros::millis()) - start_time;
 
-    auto targetvelo = (au::degrees_per_second)(107); //9.28
+    auto targetvelo = (au::meters_per_second)(1); //9.28
 
     auto reading = imu.get_rotation();
     auto prevReading = reading;
@@ -411,23 +414,31 @@ void Robot::testStatic() {
       elapsed_time = au::milli(au::seconds)(pros::millis()) - start_time;
       reading = (au::degrees)(imu.raw.get_rotation());
 
-      // auto ffwdVoltage = ffwd.calculate((targetvelo), au::ZERO);
-      auto ffwdVoltage = (au::volts)(1.75);
+      auto ffwdVoltage = linffwd.calculate((targetvelo), au::ZERO);
+      // auto ffwdVoltage = (au::volts)(12);
 
       chassis.left_motors.raw.move_voltage( 
           ffwdVoltage.in(au::milli(au::volts)));
       chassis.right_motors.raw.move_voltage(
-          -ffwdVoltage.in(au::milli(au::volts)));
+          ffwdVoltage.in(au::milli(au::volts)));
+
+      auto vel = rotationLeft.get_linear_displacement();
+
+      if (true) {
+        std::cout << "(" << elapsed_time.in(au::milli(au::seconds))/1000.0 << ", " << vel.in(au::meters) << ")" << std::endl;
+      }
 
       // chassis.turn_voltage(ffwdVoltage);
       // ((reading-prevReading)/(au::seconds)(0.02)).in(au::degrees_per_second)
+      /*
       std::cout << elapsed_time.in(au::milli(au::seconds)) << ", "
                 << ((reading - prevReading) / (au::seconds)(0.1))
                        .in(au::degrees_per_second)
-                << ", " << targetvelo.in(au::degrees_per_second) << ", "
+                << ", " << targetvelo.in(au::meters_per_second) << ", "
                 << reading.in(au::degrees) << ", " << ffwdVoltage.in(au::volts)
                 << std::endl;
       prevReading = reading;
+      */
       pros::delay(20);
     }
   }
@@ -470,7 +481,7 @@ void Robot::fwdQuasiStaticTest() {
   }
 
 void Robot::fwdDynoTest() {
-    auto voltage = (au::volts)(6.0);
+    auto voltage = (au::volts)(12.0);
 
     auto start_time = pros::millis();
     auto elapsed_time = 0;
@@ -528,6 +539,9 @@ void Robot::turn_with_pid(double heading, int timeoutMS, double maxVolts) {
       cycle++;
       reading = imu.get_rotation();
       auto voltage = turn_pid.update(reading, milli(seconds)(20));
+      auto integral = turn_pid.get_integral();
+      std::cout << cycle*20 << ", " << turn_pid.get_error() << ", "
+                  << integral << std::endl;
 
       if (turn_settler.is_settled(turn_pid.get_error(),
                                   turn_pid.get_derivative())) {
@@ -543,7 +557,13 @@ void Robot::turn_with_pid(double heading, int timeoutMS, double maxVolts) {
         voltage = (au::volts)(-maxVolts);
       }
 
-      chassis.turn_voltage(voltage);
+      if (voltage.in(au::volts) > 0) {
+        chassis.turn_voltage(voltage + (au::volts)(0.75)); //0.8
+      } else {
+        chassis.turn_voltage(voltage - (au::volts)(0.75));
+      }
+
+      
 
       pros::delay(20);
     }
@@ -616,7 +636,244 @@ void Robot::move_to_point(dlib::Vector2d point, bool turn, bool fowards, int to,
         ffwLat(displacement, (au::seconds)(0), maxAccel);
     }
     
+}
+
+// can it use M_PI???
+double sinc(double x) {
+    if (x == 0.0) {
+        return 1.0;
+    }
+    return std::sin(x) / (x);
+}
+
+double signdetect(double num) {
+  if (std::signbit(num)) {
+    return 1;
+  } else {
+    return -1;
   }
+}
+
+Quantity<au::Degrees, double> angleFormat() {
+  return (au::degrees)(0);
+}
+
+void Robot::ramseteTest(dlib::Vector2d point) {
+
+  double track_width = 0.3; // stay in meters
+  double k_lat = 3; // btwn 2.5-3
+
+  double lastvL = 0, lastvR = 0;
+
+  // setting up PIDs
+  lin_pid.target((au::meters)(0)); // I think its supposed to be 0
+  turn_pid.target((au::degrees)(0)); // I think its supposed to be 0
+
+  // global errors in meters and degrees
+  auto theta = (au::degrees)(0.0);
+  auto x_g = (au::meters)(0.0);
+  auto y_g = (au::meters)(0.0);
+
+  // local errors in meters and degrees
+  auto e_theta = (au::degrees)(0.0);
+  auto e_x = (au::meters)(0.0);
+  auto e_y = (au::meters)(0.0);
+
+  // error from the point using pythagorean theorem
+  auto tri_error = (au::meters)(0.0);
+
+  // pid voltage outputs
+  auto v_d = (au::volts)(0.0);
+  auto a_velo = (au::volts)(0.0);
+
+  // velocity outputs??? seems like volts bro
+  double l_velo = 0.0;
+  double veloDiff = 0.0;
+
+  // no clue
+  double v_L = 0.0;
+  double v_R = 0.0;
+
+  // start el loop
+  while (true) {
+  dlib::Pose2d curPos = odom.get_position();
+  // current theta and x, y error. should be in meters!!!!
+  theta = curPos.theta;
+  x_g = point.x - curPos.x;
+  y_g = point.y - curPos.y;
+
+  // local x & y error
+  e_x = (cos(theta.in(au::radians)) * x_g) + (sin(theta.in(au::radians)) * y_g);
+  e_y = ((-sin(theta.in(au::radians))) * x_g) + (cos(theta.in(au::radians)) * y_g);
+  e_theta = (au::radians)(atan2(e_y.in(au::meters), e_x.in(au::meters)));
+
+  // WHYYYYYYYYYYYYYYYYYYYYYYYYYY FIX LATER
+  auto angle = e_theta;
+  double targAngle = angle.in(au::degrees);
+  bool mogoSide = true;
+    /*
+    if (!mogoSide) { //270
+      targAngle += 180;
+      auto curRotation = au::fmod(imu.get_rotation().in(au::degrees), 360);
+      double error = targAngle - curRotation;
+      
+      if (fabs(error) > 180) {
+        if (error > 0) {
+          while (error > 180) {
+            targAngle -= 360;
+
+            error = targAngle - curRotation;
+          }
+        } else {
+          while (error < -180) {
+            targAngle += 360;
+
+            error = targAngle - curRotation;
+          }
+        }
+      }
+    } else {
+      auto curRotation = au::fmod(imu.get_rotation().in(au::degrees), 360);
+      double error = targAngle - curRotation;
+
+      if (fabs(error) > 180) {
+        if (error > 0) {
+          while (error > 180) {
+            targAngle -= 360;
+
+            error = targAngle - curRotation;
+          }
+        } else {
+          while (error < -180) {
+            targAngle += 360;
+
+            error = targAngle - curRotation;
+          }
+        }
+      }
+    }
+    */
+  auto eTEST_theta = (au::degrees)(targAngle);
+    
+  // WHYYYYYYYYYYYYYYYYYYYYYYY
+
+
+  // PID outputs volts soooo.... gotta convert it to double so it can "act" like velo PID
+  // nvm gonna test with -12 & 12 clamp first
+  tri_error = (au::meters)((sqrt(pow(e_x.in(au::meters), 2) + pow(e_y.in(au::meters), 2)) * signdetect(cos(e_theta.in(au::radians)))));
+  v_d = lin_pid.update(tri_error, milli(seconds)(20));
+  a_velo = turn_pid.update(eTEST_theta, milli(seconds)(20)); // why is this not used???
+
+
+  l_velo = (fabs(cos(eTEST_theta.in(au::radians))) * v_d.in(au::volts));
+  veloDiff = ((a_velo.in(au::volts)/12.0) * k_lat * e_y.in(au::meters) * sinc(e_theta.in(au::radians)))/0.25; //8
+
+  veloDiff = ((a_velo.in(au::volts)/12.0) * k_lat * sinc(eTEST_theta.in(au::radians)))/0.25; //8
+
+  // veloDiff = a_velo.in(au::volts) * sinc(e_theta.in(au::radians));
+
+
+  v_L = l_velo + veloDiff; // +
+  v_R = l_velo - veloDiff; // -
+
+  // going to try & feed directly into dt to see wtf this shit does. wish me luck
+  chassis.left_motors.raw.move_voltage(v_L*1000);
+  chassis.right_motors.raw.move_voltage(v_R*1000);
+
+
+  if (fabs(tri_error.in(au::inches)) < 0.5) {
+    break;
+  }
+
+  std::cout << "(" << curPos.x.in(au::inches) << "," << curPos.y.in(au::inches) << ")" << std::endl;
+
+  pros::delay(20);
+  }
+
+  chassis.brake();
+ 
+
+  /*
+
+  double l_Accel = (v_L - lastvL) * 0.02; // to be in ms
+  double r_Accel = (v_R - lastvR) * 0.02; // to be in ms
+
+
+  // feed v_L, v_R & their accels to ffwd
+  lastvL = v_L;
+  lastvR = v_R;
+  */
+  
+
+}
+
+void Robot::turn_ffwd(double time){
+  // chassis.left_motors.raw.set_current_limit_all(2400);
+  // chassis.right_motors.raw.set_current_limit_all(2400);
+
+  /*double a = -1844.1699;
+  double k = -4.71929;*/ // for ccw 8v
+  
+  double a = 1984.88275;
+  double k = -3.99229;
+
+  time /= 1000.0;
+  
+  if(time >= 0){
+      auto start_time = pros::millis();
+
+      // turn_pid.reset();
+      turn_settler.reset();
+
+      while(true) {
+          auto elapsed_time = (pros::millis() - start_time)/1000.0;
+
+          auto heading = ((a * (std::exp(k * elapsed_time) - k * elapsed_time))) / (k * k) - (a / (k * k));
+
+          
+          auto velocity = (a / k) * (std::exp(k * time)) - a/k;
+          auto acceleration = a * (std::exp(k * time));
+          
+          auto error = degrees(heading) - imu.get_rotation();
+          auto voltage = turn_pid.update(error, milli(seconds)(20));
+          
+          std::cout 
+          << elapsed_time << ", " 
+          << heading << ", " 
+          << imu.get_rotation() << ", "
+          << error << ", " 
+          << (au::volts)(error.in(au::degrees) * 0.1) << ", "
+          << std::endl;
+          //std::cout << voltage  << std::endl;
+          
+          
+          if(elapsed_time >= time){
+              std::cout << "broke" << std::endl;
+              break;
+          }
+
+          if (elapsed_time < 0.2) {
+            chassis.turn_voltage(volts(8.0));// + (au::volts)(error.in(au::degrees) * 0.8));
+          } else {
+            // chassis.left_motors.raw.set_current_limit_all(2300);
+            // chassis.right_motors.raw.set_current_limit_all(2300);
+            chassis.turn_voltage(volts(7.5) + (au::volts)(error.in(au::degrees) * 0.1)); //0.3
+          }
+
+          
+          
+          // (au::volts)(error.in(au::degrees) * 1.5)
+
+
+          pros::delay(20);
+      }
+
+      std::cout << imu.get_rotation() << std::endl;
+      //chassis.turn_voltage(volts(12));
+      //pros::delay(60);
+      chassis.brake();
+  }
+}
 
   // Odom task
 void Robot::start_odom() {
@@ -707,27 +964,28 @@ dlib::PidGains move_pid_gains{
 };
 
 dlib::ErrorDerivativeSettler<Meters> move_pid_settler{
-    inches(1), // error threshold, the maximum error the pid can settle at
-    meters_per_second(0.01) // derivative threshold, the maximum instantaneous
+    inches(0.5), // error threshold, the maximum error the pid can settle at
+    meters_per_second(0.02) // derivative threshold, the maximum instantaneous
                             // error over time the pid can settle at
 };
 
 dlib::PidGains lin_pid_gains{
-  0,
-  0,
-  0
+  80,
+  0, //267.936887806
+  10
 };
 
 dlib::PidGains turn_pid_gains{
-    25, // kp, porportional gain // 15 10 for ffwd 15 for below 60 deg
-    0,  // ki, integral gain
-    2 // kd, derivative gain // 2.2
+    20, // kp, porportional gain 20
+    1.4,  // ki, integral gain
+    1.7, // kd, derivative gain // 2
+    0.0698132 // This is in radians rip ~10 degrees 0.0872665
 };
 
 // 1.5
 dlib::ErrorDerivativeSettler<Degrees> turn_pid_settler{
-    degrees(1.5), // error threshold, the maximum error the pid can settle at //1.5
-    degrees_per_second(0.8) // derivative threshold, the maximum instantaneous //0.8
+    degrees(1), // error threshold, the maximum error the pid can settle at //1.5
+    degrees_per_second(10) // derivative threshold, the maximum instantaneous //0.8
                             // error over time the pid can settle at
 };
 

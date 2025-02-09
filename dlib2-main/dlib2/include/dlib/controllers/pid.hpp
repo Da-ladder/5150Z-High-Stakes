@@ -15,6 +15,8 @@ struct PidGains {
     double ki = 0;
     /** The derivative gain: used to limit the speed of the controllers response */
     double kd = 0;
+    // Anti-windup: used to limit ki's impact until a certain zone
+    double aWind = 0;
 };
 
 template<typename Units>
@@ -82,6 +84,7 @@ public:
         using BaseUnits = au::UnitImpl<au::detail::DimT<Units>>;
         // calculate Pid terms
 
+        // reset to zero if it crosses
         if (p.in(BaseUnits{}) < 0 && this->i.in(au::TimeIntegral<BaseUnits>{}) > 0) {
             this->i = au::ZERO;
         } else if (p.in(BaseUnits{}) > 0 && this->i.in(au::TimeIntegral<BaseUnits>{}) < 0) {
@@ -89,10 +92,10 @@ public:
         }
 
         this->p = error;
-        if (fabs(p.in(BaseUnits{})) < 5) {
+        if (fabs(p.in(BaseUnits{})) < this->gains.aWind) {
             this->i = this->i + error * delta_time;
         } else {
-            this->i = this->i;
+            this->i = this->i-this->i; // zero
         }
         
         this->d = (delta_error / delta_time);
@@ -107,11 +110,11 @@ public:
             this->p.in(BaseUnits{}) * this->gains.kp
             + this->i.in(au::TimeIntegral<BaseUnits>{}) * this->gains.ki 
             + this->d.in(au::TimeDerivative<BaseUnits>{}) * this->gains.kd, 
-            -12.0, 12.0
+            -12.0, 12.0 // don't want clamp to be active
         );
 
         // update Pid state
-        this->last_error    = error;
+        this->last_error = error;
         this->last_derivative = derivative;
         
         return au::volts(output);
@@ -196,6 +199,11 @@ public:
     au::Quantity<au::TimeDerivative<Units>, double> get_derivative() {
         return this->last_derivative;
     }
+    
+    au::Quantity<au::TimeIntegral<Units>, double> get_integral() {
+        return this->i;
+    }
+
 protected:
     PidGains gains;
 

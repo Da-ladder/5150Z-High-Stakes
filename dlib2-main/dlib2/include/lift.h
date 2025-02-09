@@ -64,8 +64,6 @@ class LiftMngr{
                     }
                     float error = holdLvl - (liftRot.get_position()/100.0);
 
-                    pros::lcd::print(5, "err: %f", error);
-
                     if (true) { //270
                         double wantVolt = 0;
                         if (fabs(error) > 5) {
