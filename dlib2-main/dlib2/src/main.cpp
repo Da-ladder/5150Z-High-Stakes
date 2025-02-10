@@ -40,8 +40,8 @@ void competition_initialize() {}
 
 void autonomous() {
 
-	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
-    robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+	// robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+    // robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
 	/*
 	double start_time = pros::millis();
 	double last_rotation = robot.imu.get_rotation().in(degrees);
@@ -61,7 +61,7 @@ void autonomous() {
 	// pros::delay(2000000);
 	double start_time = pros::millis();
 	// robot.move_to_point({(au::inches)(50), (au::inches)(-26)}, true, true, 500); //26.3
-	robot.ramseteTest({(au::inches)(50), (au::inches)(-26)});
+	robot.ramseteTest({(au::inches)(50), (au::inches)(-26)}, true, 11, 1, 0.5);
 	double end_time = pros::millis();
 	
 	// robot.move_with_pid((au::inches)(30));

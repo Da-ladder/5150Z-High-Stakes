@@ -658,13 +658,15 @@ Quantity<au::Degrees, double> angleFormat() {
   return (au::degrees)(0);
 }
 
-// fwds false = mogo side
-void Robot::ramseteTest(dlib::Vector2d point, bool fowards) {
 
-  double track_width = 0.3; // stay in meters
+// fwds true = mogo side
+// early_exit allows for waypoints to be set up (2 inches for waypoints??? 0.25 should be target for end)
+void Robot::ramseteTest(dlib::Vector2d point, bool fowards, double max_voltage, double min_voltage, double early_exit) {
+
+  double track_width = 0.25; // stay in meters
   double k_lat = 3; // btwn 2.5-3
 
-  double lastvL = 0, lastvR = 0;
+  // double lastvL = 0, lastvR = 0;
 
   // setting up PIDs
   lin_pid.target((au::meters)(0)); // I think its supposed to be 0
@@ -687,13 +689,18 @@ void Robot::ramseteTest(dlib::Vector2d point, bool fowards) {
   auto v_d = (au::volts)(0.0);
   auto a_velo = (au::volts)(0.0);
 
-  // velocity outputs??? seems like volts bro
+  // voltage output difference
   double l_velo = 0.0;
   double veloDiff = 0.0;
 
-  // no clue
+  // final left and right voltage output
   double v_L = 0.0;
   double v_R = 0.0;
+
+  // scaling to ratio speed & voltage step rate
+  double scaling_factor;
+  double voltage_slew = 4;
+  double step = 1; // +1 volt per 20 ms so 240 ms for 12 v
 
   // start el loop
   while (true) {
@@ -707,73 +714,79 @@ void Robot::ramseteTest(dlib::Vector2d point, bool fowards) {
     e_x = (cos(theta.in(au::radians)) * x_g) + (sin(theta.in(au::radians)) * y_g);
     e_y = ((-sin(theta.in(au::radians))) * x_g) + (cos(theta.in(au::radians)) * y_g);
 
-    if (fowards) {
+    if (!fowards) {
       e_theta = (au::radians)(atan2(-e_y.in(au::meters), -e_x.in(au::meters)));
     } else {
       e_theta = (au::radians)(atan2(e_y.in(au::meters), e_x.in(au::meters)));
     }
-    
-
-    // WHYYYYYYYYYYYYYYYYYYYYYYYYYY FIX LATER
-    auto angle = e_theta;
-    double targAngle = angle.in(au::degrees);
-    bool mogoSide = false;
-    auto eTEST_theta = (au::degrees)(targAngle);
-      
-    // WHYYYYYYYYYYYYYYYYYYYYYYY
 
 
     // PID outputs volts soooo.... gotta convert it to double so it can "act" like velo PID
     // nvm gonna test with -12 & 12 clamp first
-    tri_error = (au::meters)((sqrt(pow(e_x.in(au::meters), 2) + pow(e_y.in(au::meters), 2)) * signdetect(cos(e_theta.in(au::radians))))); //was just etheta b4
+    tri_error = (au::meters)((sqrt(pow(e_x.in(au::meters), 2) + pow(e_y.in(au::meters), 2)) * signdetect(cos(e_theta.in(au::radians)))));
     v_d = lin_pid.update(tri_error, milli(seconds)(20));
-    a_velo = turn_pid.update(eTEST_theta, milli(seconds)(20)); // why is this not used???
+    a_velo = turn_pid.update(e_theta, milli(seconds)(20)); // why is this not used???
 
 
-    l_velo = (fabs(cos(eTEST_theta.in(au::radians))) * v_d.in(au::volts));
-    veloDiff = ((a_velo.in(au::volts)/12.0) * k_lat * e_y.in(au::meters) * sinc(e_theta.in(au::radians)))/0.25; //8
-
-    veloDiff = ((a_velo.in(au::volts)/12.0) * k_lat * sinc(eTEST_theta.in(au::radians)))/0.25; //8
+    l_velo = (fabs(cos(e_theta.in(au::radians))) * v_d.in(au::volts));
+    // veloDiff = ((a_velo.in(au::volts)/12.0) * k_lat * e_y.in(au::meters) * sinc(e_theta.in(au::radians)))/0.25; //8
+    veloDiff = ((a_velo.in(au::volts)/12.0) * k_lat * sinc(e_theta.in(au::radians)))/track_width; //8
 
     // veloDiff = a_velo.in(au::volts) * sinc(e_theta.in(au::radians));
 
-    if (fowards) {
+    if (!fowards) {
       v_L = -l_velo + veloDiff; // l_velo should be - for intake side
       v_R = -l_velo - veloDiff; // l_velo should be - for intake side
     } else {
       v_L = l_velo + veloDiff;
       v_R = l_velo - veloDiff;
     }
-    
+
+    // slew rate control voltage slew over time
+    voltage_slew += step;
+
+    if (voltage_slew > max_voltage) {
+      voltage_slew = max_voltage;
+    }
+
+
+    // Ratio left and right voltages if it exceeds user max_voltage
+    // also ratios it if it is lower than min_voltage
+    // possible for voltage to exceed user defined max_voltage or min_voltage
+    // but it is more important to keep them at the same ratio than under the same limit.
+    if ((fabs(v_L) > voltage_slew) || (fabs(v_R) > voltage_slew)) {
+      if (v_L > voltage_slew) {
+        scaling_factor = voltage_slew / fabs(v_L);
+      } else {
+        scaling_factor = voltage_slew / fabs(v_R);
+      }
+      v_L = v_L * scaling_factor;
+      v_R = v_R * scaling_factor;
+    } else if ((fabs(v_L) < min_voltage) || (fabs(v_R) < min_voltage)) {
+      if (v_L < min_voltage) {
+        scaling_factor = min_voltage / fabs(v_L);
+      } else {
+        scaling_factor = min_voltage / fabs(v_R);
+      }
+      v_L = v_L * scaling_factor;
+      v_R = v_R * scaling_factor;
+    }
 
     // move the motors
     chassis.left_motors.raw.move_voltage(v_L*1000);
     chassis.right_motors.raw.move_voltage(v_R*1000);
 
-
-    if (fabs(tri_error.in(au::inches)) < 0.5) {
+    
+    // Settle condition? -> nah Try to reduce error to .25 or +-.25 in either x or y
+    if (fabs(tri_error.in(au::inches)) < early_exit) {
       break;
     }
 
-    // std::cout << "(" << curPos.x.in(au::inches) << "," << curPos.y.in(au::inches) << ")" << std::endl; //targAngle
-    std::cout << "(" << targAngle << ")" << std::endl; //targAngle
+    // std::cout << "(" << curPos.x.in(au::inches) << "," << curPos.y.in(au::inches) << ")" << std::endl;
+    std::cout << "(" << e_theta << ")" << std::endl;
     pros::delay(20);
   }
-
-  chassis.brake();
- 
-
-  /*
-
-  double l_Accel = (v_L - lastvL) * 0.02; // to be in ms
-  double r_Accel = (v_R - lastvR) * 0.02; // to be in ms
-
-
-  // feed v_L, v_R & their accels to ffwd
-  lastvL = v_L;
-  lastvR = v_R;
-  */
-  
+  chassis.brake(); // should be coast?
 
 }
 
