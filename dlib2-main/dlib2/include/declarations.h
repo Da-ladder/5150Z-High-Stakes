@@ -153,7 +153,7 @@ class Robot {
     void turn_with_pid(double heading, int timeoutMS, double maxVolts = 12);
     void turn_to_point(dlib::Vector2d point, bool mogoSide, int to, double maxVolts = 12);
     void move_to_point(dlib::Vector2d point, bool turn = true, bool fowards = true, int to = 1400, double maxAccel = 3.15, double maxTurnVolts = 12);
-	void ramseteTest(dlib::Vector2d point);
+	void ramseteTest(dlib::Vector2d point, bool fowards = false);
     void start_odom();
 	void turn_ffwd(double time);
 

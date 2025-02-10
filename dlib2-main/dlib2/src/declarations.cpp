@@ -658,7 +658,8 @@ Quantity<au::Degrees, double> angleFormat() {
   return (au::degrees)(0);
 }
 
-void Robot::ramseteTest(dlib::Vector2d point) {
+// fwds false = mogo side
+void Robot::ramseteTest(dlib::Vector2d point, bool fowards) {
 
   double track_width = 0.3; // stay in meters
   double k_lat = 3; // btwn 2.5-3
@@ -696,98 +697,67 @@ void Robot::ramseteTest(dlib::Vector2d point) {
 
   // start el loop
   while (true) {
-  dlib::Pose2d curPos = odom.get_position();
-  // current theta and x, y error. should be in meters!!!!
-  theta = curPos.theta;
-  x_g = point.x - curPos.x;
-  y_g = point.y - curPos.y;
+    dlib::Pose2d curPos = odom.get_position();
+    // current theta and x, y error. should be in meters!!!!
+    theta = curPos.theta;
+    x_g = point.x - curPos.x;
+    y_g = point.y - curPos.y;
 
-  // local x & y error
-  e_x = (cos(theta.in(au::radians)) * x_g) + (sin(theta.in(au::radians)) * y_g);
-  e_y = ((-sin(theta.in(au::radians))) * x_g) + (cos(theta.in(au::radians)) * y_g);
-  e_theta = (au::radians)(atan2(e_y.in(au::meters), e_x.in(au::meters)));
+    // local x & y error
+    e_x = (cos(theta.in(au::radians)) * x_g) + (sin(theta.in(au::radians)) * y_g);
+    e_y = ((-sin(theta.in(au::radians))) * x_g) + (cos(theta.in(au::radians)) * y_g);
 
-  // WHYYYYYYYYYYYYYYYYYYYYYYYYYY FIX LATER
-  auto angle = e_theta;
-  double targAngle = angle.in(au::degrees);
-  bool mogoSide = true;
-    /*
-    if (!mogoSide) { //270
-      targAngle += 180;
-      auto curRotation = au::fmod(imu.get_rotation().in(au::degrees), 360);
-      double error = targAngle - curRotation;
-      
-      if (fabs(error) > 180) {
-        if (error > 0) {
-          while (error > 180) {
-            targAngle -= 360;
-
-            error = targAngle - curRotation;
-          }
-        } else {
-          while (error < -180) {
-            targAngle += 360;
-
-            error = targAngle - curRotation;
-          }
-        }
-      }
+    if (fowards) {
+      e_theta = (au::radians)(atan2(-e_y.in(au::meters), -e_x.in(au::meters)));
     } else {
-      auto curRotation = au::fmod(imu.get_rotation().in(au::degrees), 360);
-      double error = targAngle - curRotation;
-
-      if (fabs(error) > 180) {
-        if (error > 0) {
-          while (error > 180) {
-            targAngle -= 360;
-
-            error = targAngle - curRotation;
-          }
-        } else {
-          while (error < -180) {
-            targAngle += 360;
-
-            error = targAngle - curRotation;
-          }
-        }
-      }
+      e_theta = (au::radians)(atan2(e_y.in(au::meters), e_x.in(au::meters)));
     }
-    */
-  auto eTEST_theta = (au::degrees)(targAngle);
     
-  // WHYYYYYYYYYYYYYYYYYYYYYYY
+
+    // WHYYYYYYYYYYYYYYYYYYYYYYYYYY FIX LATER
+    auto angle = e_theta;
+    double targAngle = angle.in(au::degrees);
+    bool mogoSide = false;
+    auto eTEST_theta = (au::degrees)(targAngle);
+      
+    // WHYYYYYYYYYYYYYYYYYYYYYYY
 
 
-  // PID outputs volts soooo.... gotta convert it to double so it can "act" like velo PID
-  // nvm gonna test with -12 & 12 clamp first
-  tri_error = (au::meters)((sqrt(pow(e_x.in(au::meters), 2) + pow(e_y.in(au::meters), 2)) * signdetect(cos(e_theta.in(au::radians)))));
-  v_d = lin_pid.update(tri_error, milli(seconds)(20));
-  a_velo = turn_pid.update(eTEST_theta, milli(seconds)(20)); // why is this not used???
+    // PID outputs volts soooo.... gotta convert it to double so it can "act" like velo PID
+    // nvm gonna test with -12 & 12 clamp first
+    tri_error = (au::meters)((sqrt(pow(e_x.in(au::meters), 2) + pow(e_y.in(au::meters), 2)) * signdetect(cos(e_theta.in(au::radians))))); //was just etheta b4
+    v_d = lin_pid.update(tri_error, milli(seconds)(20));
+    a_velo = turn_pid.update(eTEST_theta, milli(seconds)(20)); // why is this not used???
 
 
-  l_velo = (fabs(cos(eTEST_theta.in(au::radians))) * v_d.in(au::volts));
-  veloDiff = ((a_velo.in(au::volts)/12.0) * k_lat * e_y.in(au::meters) * sinc(e_theta.in(au::radians)))/0.25; //8
+    l_velo = (fabs(cos(eTEST_theta.in(au::radians))) * v_d.in(au::volts));
+    veloDiff = ((a_velo.in(au::volts)/12.0) * k_lat * e_y.in(au::meters) * sinc(e_theta.in(au::radians)))/0.25; //8
 
-  veloDiff = ((a_velo.in(au::volts)/12.0) * k_lat * sinc(eTEST_theta.in(au::radians)))/0.25; //8
+    veloDiff = ((a_velo.in(au::volts)/12.0) * k_lat * sinc(eTEST_theta.in(au::radians)))/0.25; //8
 
-  // veloDiff = a_velo.in(au::volts) * sinc(e_theta.in(au::radians));
+    // veloDiff = a_velo.in(au::volts) * sinc(e_theta.in(au::radians));
+
+    if (fowards) {
+      v_L = -l_velo + veloDiff; // l_velo should be - for intake side
+      v_R = -l_velo - veloDiff; // l_velo should be - for intake side
+    } else {
+      v_L = l_velo + veloDiff;
+      v_R = l_velo - veloDiff;
+    }
+    
+
+    // move the motors
+    chassis.left_motors.raw.move_voltage(v_L*1000);
+    chassis.right_motors.raw.move_voltage(v_R*1000);
 
 
-  v_L = l_velo + veloDiff; // +
-  v_R = l_velo - veloDiff; // -
+    if (fabs(tri_error.in(au::inches)) < 0.5) {
+      break;
+    }
 
-  // going to try & feed directly into dt to see wtf this shit does. wish me luck
-  chassis.left_motors.raw.move_voltage(v_L*1000);
-  chassis.right_motors.raw.move_voltage(v_R*1000);
-
-
-  if (fabs(tri_error.in(au::inches)) < 0.5) {
-    break;
-  }
-
-  std::cout << "(" << curPos.x.in(au::inches) << "," << curPos.y.in(au::inches) << ")" << std::endl;
-
-  pros::delay(20);
+    // std::cout << "(" << curPos.x.in(au::inches) << "," << curPos.y.in(au::inches) << ")" << std::endl; //targAngle
+    std::cout << "(" << targAngle << ")" << std::endl; //targAngle
+    pros::delay(20);
   }
 
   chassis.brake();
