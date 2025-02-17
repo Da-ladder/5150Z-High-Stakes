@@ -13,6 +13,7 @@
 
 class IntakeHelper {
     private:
+        static bool stuckCheck;
         static bool excludeBlue;
         static bool blockSort;
         static int intakePos;
@@ -41,7 +42,7 @@ class IntakeHelper {
         // reverse intake if it detects it is stuck
         if (stuckTime >= (STUCK_DELAY_MS/MAIN_LOOP_DELAY)) {
             intake.move_voltage(-12000);
-            pros::delay(100);
+            pros::delay(200);
             intake.move_voltage(12000);
             stuckTime = 0;
         }
@@ -97,29 +98,11 @@ class IntakeHelper {
     inline static void main() {
         bool ringLiftSense = false;
         while (true) {
-
-            stuckDetect();
-            /*
-
-            if (excludeBlue && (!blockSort)) {
-                if (opt.get_hue() >= 200 && opt.get_hue() <= 225 && opt.get_proximity() >= 220) {
-                    colorPistion.overrideState(1); // REJECT blue
-                    pros::delay(SORT_MS_EXT_DELAY);
-                } else if (opt.get_hue() < 15) {
-                    colorPistion.overrideState(0); // ACCEPT red
-                }
-            } else if ((!excludeBlue) && (!blockSort)) {
-                if (opt.get_hue() >= 200 && opt.get_hue() <= 225) {
-                    colorPistion.overrideState(0); // ACCEPT blue
-                } else if (opt.get_hue() < 15) {
-                    colorPistion.overrideState(1); // REJECT red
-                    pros::delay(SORT_MS_EXT_DELAY);
-                }
-            } else {
-                colorPistion.overrideState(0); // TURN OFF SORTING
+            if (stuckCheck) {
+                stuckDetect();
             }
             
-
+            
             if (stap) {
                 if (excludeBlue) {
                     if (opt.get_hue() < 15) {
@@ -131,7 +114,7 @@ class IntakeHelper {
                     }
                 }
             }
-            */
+            
 
             if (excludeBlue && (!blockSort)) {
                 if (opt.get_hue() >= 200 && opt.get_hue() <= 230 && opt.get_proximity() >= 255) {
@@ -150,6 +133,10 @@ class IntakeHelper {
                 
             pros::delay(MAIN_LOOP_DELAY);
         }
+    }
+
+    inline static void stuckCheckChange (bool var) {
+        stuckCheck = var;
     }
 
     inline static void StopAtColor(bool var) {

@@ -3,6 +3,7 @@
 #include "pros/adi.hpp"
 #include "pros/distance.hpp"
 #include <cmath>
+#include <string>
 
 using namespace pros;
 
@@ -12,11 +13,11 @@ pros::Controller master(pros::E_CONTROLLER_MASTER);
 // buttons for helping make autos
 pros::adi::DigitalIn xyBut('E');
 pros::adi::DigitalIn turnBut('F'); //F
-pros::adi::DigitalIn sortLimit('H');
+pros::adi::DigitalIn sortLimit('0');
 
 
 // Line detectors
-pros::adi::AnalogIn lineLeft = pros::adi::AnalogIn('0');
+pros::adi::AnalogIn lineLeft = pros::adi::AnalogIn('H');
 pros::adi::AnalogIn lineRight = pros::adi::AnalogIn('D');
 
 
@@ -32,7 +33,7 @@ MotorGroup lift({4}, pros::v5::MotorGears::red,
 
 // Declares color sensor
 pros::v5::Optical camLight(0);
-pros::v5::Optical opt(3);
+pros::v5::Optical opt(10);
 
 // Declares distance sensor
 pros::v5::Distance goalOpt(6); //ohhhhh
@@ -316,6 +317,11 @@ void Robot::ffwLat(Quantity<Meters, double> displacement,
     auto reading = start_displacement;
     bool reverse = false;
 
+    // Write to USB
+
+    // FILE* usd_file_write = fopen("/usd/lastRoute.txt", "a");
+	  // fputs("Start ffwLat", usd_file_write);
+
     move_pid.target(target_displacement); //Making all negative
     move_pid.update(reading, milli(seconds)(20));
 
@@ -388,6 +394,7 @@ void Robot::ffwLat(Quantity<Meters, double> displacement,
       // LINE DETECT END
 
       // DATA
+      /*
       std::cout << elapsed_time.in(au::milli(au::seconds)) << ", "
                 << setpoint.position.in(au::inches) << ", "
                 << (rotationLeft.get_linear_velocity().in(au::meters_per_second) +
@@ -395,8 +402,17 @@ void Robot::ffwLat(Quantity<Meters, double> displacement,
                 << ", " << setpoint.velocity.in(au::meters_per_second) << ", "
                 << move_pid.get_error().in(au::inches) << ", "
                 << voltage.in(au::volts) << std::endl;
+      /*
+      dlib::Pose2d curPos = odom.get_position();
+      fprintf(usd_file_write, "%s", (std::to_string(curPos.x.in(au::inches)) + ", " +
+                              std::to_string(curPos.y.in(au::inches)) + ", " +
+                              std::to_string(curPos.theta.in(au::degrees)) + ", " +
+                              std::to_string(elapsed_time.in(au::milli(au::seconds))))
+                              .data());
+      */
     }
-
+    // fputs(("End ffwLat: " + std::to_string(elapsed_time.in(au::milli(au::seconds)))).data(), usd_file_write);
+    // fclose(usd_file_write);
     chassis.move_voltage((au::volts)(0));
     chassis.brake();
   }
@@ -530,18 +546,27 @@ void Robot::turn_with_pid(double heading, int timeoutMS, double maxVolts) {
 
     turn_pid.target(target_heaidng);
     turn_pid.update(reading, milli(seconds)(20));
+
+    // permaTest
+    if (fabs(turn_pid.get_error().in(au::degrees)) <= 120 && timeoutMS < 680) {
+      timeoutMS = 680;
+    }
     int cycle = 0;
     int corCycle = 0;
+    chassis.left_motors.raw.set_current_limit_all(2000); //???
+    chassis.right_motors.raw.set_current_limit_all(2000); // ???
 
-    pros::delay(20);
+    // FILE* usd_file_write = fopen("/usd/lastRoute.txt", "a");
+	  // fputs("Start turn_with_pid", usd_file_write);
+
+    // pros::delay(20); // wut is this for?
 
     while (!turn_settler.is_settled(turn_pid.get_error(), turn_pid.get_derivative()) && timeoutMS > cycle*20) {
       cycle++;
       reading = imu.get_rotation();
       auto voltage = turn_pid.update(reading, milli(seconds)(20));
       auto integral = turn_pid.get_integral();
-      std::cout << cycle*20 << ", " << turn_pid.get_error() << ", "
-                  << integral << std::endl;
+      // std::cout << cycle*20 << ", " << turn_pid.get_error() << ", " << turn_pid.get_integral() << std::endl;
 
       if (turn_settler.is_settled(turn_pid.get_error(),
                                   turn_pid.get_derivative())) {
@@ -558,17 +583,28 @@ void Robot::turn_with_pid(double heading, int timeoutMS, double maxVolts) {
       }
 
       if (voltage.in(au::volts) > 0) {
-        chassis.turn_voltage(voltage + (au::volts)(0.75)); //0.8
+        chassis.turn_voltage(voltage + (au::volts)(0.6)); //0.75
       } else {
-        chassis.turn_voltage(voltage - (au::volts)(0.75));
+        chassis.turn_voltage(voltage - (au::volts)(0.6));
       }
 
-      
-
+      /*
+      dlib::Pose2d curPos = odom.get_position();
+      fprintf(usd_file_write, "%s", (std::to_string(curPos.x.in(au::inches)) + ", " +
+                              std::to_string(curPos.y.in(au::inches)) + ", " +
+                              std::to_string(curPos.theta.in(au::degrees)) + ", " +
+                              std::to_string(cycle*20))
+                              .data());
+      */
+    
       pros::delay(20);
     }
-
+    // fputs(("End turn_with_pid: " + std::to_string(cycle*20)).data(), usd_file_write);
+    // fclose(usd_file_write);
+  
     chassis.move(0);
+    chassis.left_motors.raw.set_current_limit_all(2500); //???
+    chassis.right_motors.raw.set_current_limit_all(2500); // ???
   }
 
 void Robot::turn_to_point(dlib::Vector2d point, bool mogoSide, int to, double maxVolts) {
@@ -654,17 +690,14 @@ double signdetect(double num) {
   }
 }
 
-Quantity<au::Degrees, double> angleFormat() {
-  return (au::degrees)(0);
-}
-
-
 // fwds true = mogo side
 // early_exit allows for waypoints to be set up (2 inches for waypoints??? 0.25 should be target for end)
-void Robot::ramseteTest(dlib::Vector2d point, bool fowards, double max_voltage, double min_voltage, double early_exit) {
+void Robot::ramseteTest(dlib::Vector2d point, bool fowards, double max_voltage, double min_voltage, double early_exit, double slewStart, bool brake) {
 
   double track_width = 0.25; // stay in meters
-  double k_lat = 3; // btwn 2.5-3
+  double k_lat = 2.3; // btwn 2.5-3
+  chassis.left_motors.raw.set_current_limit_all(2200); //???
+  chassis.right_motors.raw.set_current_limit_all(2200); // ???
 
   // double lastvL = 0, lastvR = 0;
 
@@ -690,8 +723,8 @@ void Robot::ramseteTest(dlib::Vector2d point, bool fowards, double max_voltage, 
   auto a_velo = (au::volts)(0.0);
 
   // voltage output difference
-  double l_velo = 0.0;
-  double veloDiff = 0.0;
+  double l_volt = 0.0;
+  double voltDiff = 0.0;
 
   // final left and right voltage output
   double v_L = 0.0;
@@ -699,10 +732,10 @@ void Robot::ramseteTest(dlib::Vector2d point, bool fowards, double max_voltage, 
 
   // scaling to ratio speed & voltage step rate
   double scaling_factor;
-  double voltage_slew = 4;
-  double step = 1; // +1 volt per 20 ms so 240 ms for 12 v
+  double voltage_slew = slewStart; //4
+  double step = 1.5; // +1 volt per 20 ms so 240 ms for 12 v
 
-  // start el loop
+  // start the loop
   while (true) {
     dlib::Pose2d curPos = odom.get_position();
     // current theta and x, y error. should be in meters!!!!
@@ -714,6 +747,7 @@ void Robot::ramseteTest(dlib::Vector2d point, bool fowards, double max_voltage, 
     e_x = (cos(theta.in(au::radians)) * x_g) + (sin(theta.in(au::radians)) * y_g);
     e_y = ((-sin(theta.in(au::radians))) * x_g) + (cos(theta.in(au::radians)) * y_g);
 
+    // local theta error dependent on which side of the bot we want facing the point
     if (!fowards) {
       e_theta = (au::radians)(atan2(-e_y.in(au::meters), -e_x.in(au::meters)));
     } else {
@@ -721,25 +755,21 @@ void Robot::ramseteTest(dlib::Vector2d point, bool fowards, double max_voltage, 
     }
 
 
-    // PID outputs volts soooo.... gotta convert it to double so it can "act" like velo PID
-    // nvm gonna test with -12 & 12 clamp first
+    // PID outputs volts
     tri_error = (au::meters)((sqrt(pow(e_x.in(au::meters), 2) + pow(e_y.in(au::meters), 2)) * signdetect(cos(e_theta.in(au::radians)))));
     v_d = lin_pid.update(tri_error, milli(seconds)(20));
-    a_velo = turn_pid.update(e_theta, milli(seconds)(20)); // why is this not used???
+    a_velo = turn_pid.update(e_theta, milli(seconds)(20));
 
-
-    l_velo = (fabs(cos(e_theta.in(au::radians))) * v_d.in(au::volts));
-    // veloDiff = ((a_velo.in(au::volts)/12.0) * k_lat * e_y.in(au::meters) * sinc(e_theta.in(au::radians)))/0.25; //8
-    veloDiff = ((a_velo.in(au::volts)/12.0) * k_lat * sinc(e_theta.in(au::radians)))/track_width; //8
-
-    // veloDiff = a_velo.in(au::volts) * sinc(e_theta.in(au::radians));
+    // calculates linear and angular voltages  
+    l_volt = (fabs(cos(e_theta.in(au::radians))) * v_d.in(au::volts));
+    voltDiff = ((a_velo.in(au::volts)/12.0) * k_lat * sinc(e_theta.in(au::radians)))/track_width;
 
     if (!fowards) {
-      v_L = -l_velo + veloDiff; // l_velo should be - for intake side
-      v_R = -l_velo - veloDiff; // l_velo should be - for intake side
+      v_L = -l_volt + voltDiff; // l_velo should be - for intake side
+      v_R = -l_volt - voltDiff; // l_velo should be - for intake side
     } else {
-      v_L = l_velo + veloDiff;
-      v_R = l_velo - veloDiff;
+      v_L = l_volt + voltDiff;
+      v_R = l_volt - voltDiff;
     }
 
     // slew rate control voltage slew over time
@@ -755,7 +785,7 @@ void Robot::ramseteTest(dlib::Vector2d point, bool fowards, double max_voltage, 
     // possible for voltage to exceed user defined max_voltage or min_voltage
     // but it is more important to keep them at the same ratio than under the same limit.
     if ((fabs(v_L) > voltage_slew) || (fabs(v_R) > voltage_slew)) {
-      if (v_L > voltage_slew) {
+      if (fabs(v_L) > voltage_slew && fabs(v_L) > fabs(v_R)) {
         scaling_factor = voltage_slew / fabs(v_L);
       } else {
         scaling_factor = voltage_slew / fabs(v_R);
@@ -777,18 +807,76 @@ void Robot::ramseteTest(dlib::Vector2d point, bool fowards, double max_voltage, 
     chassis.right_motors.raw.move_voltage(v_R*1000);
 
     
-    // Settle condition? -> nah Try to reduce error to .25 or +-.25 in either x or y
+    // "Settle" condition. Try to reduce error to .25 or +-.25 in either x or y
     if (fabs(tri_error.in(au::inches)) < early_exit) {
       break;
     }
-
+    
+    // debug statements
     // std::cout << "(" << curPos.x.in(au::inches) << "," << curPos.y.in(au::inches) << ")" << std::endl;
     std::cout << "(" << e_theta << ")" << std::endl;
     pros::delay(20);
   }
-  chassis.brake(); // should be coast?
+
+  if (brake) {
+    chassis.brake(); // test with coast
+  }
+  chassis.left_motors.raw.set_current_limit_all(2500); //???
+  chassis.right_motors.raw.set_current_limit_all(2500); // ???
 
 }
+
+// test how far lookahead should be
+void Robot::ramseteFollow(std::vector<dlib::Vector2d>* pointList, int timeout, double lookahead, bool fowards, double maxSpeed, double minSpeed) {
+  int start_time = pros::millis();
+
+  robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+  robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+
+  // run ramsete for each point
+  for (dlib::Vector2d point : *pointList) {
+    if (point.x == pointList->back().x && point.y == pointList->back().y) {
+      // sets brake to coast
+      robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+      robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+
+      ramseteTest(point, fowards, maxSpeed, minSpeed, 0.7, maxSpeed); // end off 0.7 inches from the pt
+    } else {
+      double slewStr = (pros::millis() - start_time)/20.0 * 1.5 + 4;
+      if (slewStr > maxSpeed) {
+        slewStr = maxSpeed;
+      }
+      ramseteTest(point, fowards, maxSpeed, minSpeed, lookahead, slewStr, false);
+    }
+  }
+}
+
+// uses path from jerry.io
+
+void Robot::refinedFollow(std::vector<dlib::Pose2d>* pointList, int timeout, double lookahead, bool fowards, double maxSpeed, double minSpeed) {
+  int start_time = pros::millis();
+
+  // run ramsete for each point with degrees as the max voltage
+  for (dlib::Pose2d point : *pointList) {
+    if (point.x == pointList->back().x && point.y == pointList->back().y) {
+      maxSpeed = point.theta.in(au::degrees)/100.0 * 12;
+      ramseteTest({point.x, point.y}, fowards, maxSpeed, minSpeed, 0.7, maxSpeed); // end off 0.7 inches from the pt
+    } else {
+      maxSpeed = point.theta.in(au::degrees)/100.0 * 12;
+      double slewStr = (pros::millis() - start_time)/20.0 * 1.5 + 4;
+      if (slewStr > maxSpeed) {
+        slewStr = maxSpeed;
+      }
+      ramseteTest({point.x, point.y}, fowards, maxSpeed, minSpeed, lookahead, slewStr);
+    }
+  }
+  robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+  robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+  chassis.brake();
+}
+
+
+
 
 void Robot::turn_ffwd(double time){
   // chassis.left_motors.raw.set_current_limit_all(2400);
@@ -953,22 +1041,22 @@ dlib::ErrorDerivativeSettler<Meters> move_pid_settler{
 };
 
 dlib::PidGains lin_pid_gains{
-  80,
-  0, //267.936887806
-  10
+  72, //80
+  0,
+  10 //10
 };
 
 dlib::PidGains turn_pid_gains{
     20, // kp, porportional gain 20
-    1.4,  // ki, integral gain
-    1.7, // kd, derivative gain // 2
-    0.0698132 // This is in radians rip ~10 degrees 0.0872665
+    1.8,  // ki, integral gain //1.4
+    1.7, // kd, derivative gain // 1.7
+    0.0698132 // This is in radians rip ~10 degrees 0.0698132
 };
 
 // 1.5
 dlib::ErrorDerivativeSettler<Degrees> turn_pid_settler{
-    degrees(1), // error threshold, the maximum error the pid can settle at //1.5
-    degrees_per_second(10) // derivative threshold, the maximum instantaneous //0.8
+    degrees(1), // error threshold, the maximum error the pid can settle at //1
+    degrees_per_second(8) // derivative threshold, the maximum instantaneous //8
                             // error over time the pid can settle at
 };
 

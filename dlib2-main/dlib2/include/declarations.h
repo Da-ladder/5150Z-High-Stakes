@@ -153,8 +153,10 @@ class Robot {
     void turn_with_pid(double heading, int timeoutMS, double maxVolts = 12);
     void turn_to_point(dlib::Vector2d point, bool mogoSide, int to, double maxVolts = 12);
     void move_to_point(dlib::Vector2d point, bool turn = true, bool fowards = true, int to = 1400, double maxAccel = 3.15, double maxTurnVolts = 12);
-	void ramseteTest(dlib::Vector2d point, bool fowards = true, double max_voltage = 12, double min_voltage = 0, double early_exit = 0.5);
-    void start_odom();
+	void ramseteTest(dlib::Vector2d point, bool fowards = true, double max_voltage = 12, double min_voltage = 0, double early_exit = 0.5, double slewStart = 4, bool brake = true);
+    void ramseteFollow(std::vector<dlib::Vector2d>* pointList, int timeout, double lookahead, bool fowards = true, double maxSpeed = 12, double minSpeed = 0);
+	void refinedFollow(std::vector<dlib::Pose2d>* pointList, int timeout, double lookahead, bool fowards = true, double maxSpeed = 12, double minSpeed = 0);
+	void start_odom();
 	void turn_ffwd(double time);
 
 	void restOdom(double x, double y, double theta);

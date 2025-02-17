@@ -1,5 +1,6 @@
 #include "intakeFuncts.h"
 
+bool IntakeHelper::stuckCheck = false;
 bool IntakeHelper::excludeBlue = false;
 bool IntakeHelper::blockSort = false;
 int IntakeHelper::intakePos = 0;

@@ -11,7 +11,7 @@
 #define SCORE_HEIGHT 110
 #define STORE_HEIGHT 255 //250
 #define IDLE_HEIGHT 290
-#define ABOVE_IN_HEIGHT 230
+#define ABOVE_IN_HEIGHT 223 //230
 
 
 /**
@@ -80,8 +80,10 @@ class DriverControl {
 
                 if (LiftMngr::getLevel() > 220 && LiftMngr::getLevel() < 270) {
                     if (deScore) {
+                        IntakeHelper::voltage(-9);
                         LiftMngr::setLevel(DESCORE_HEIGHT);
                     } else {
+                        IntakeHelper::voltage(-9);
                         LiftMngr::setLevel(SCORE_HEIGHT); // score ring
                     }
                 } else if (LiftMngr::getLevel() > 275) {
@@ -90,6 +92,7 @@ class DriverControl {
                     LiftMngr::setLevel(IDLE_HEIGHT); // do nothing
                 }   
             } else if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_X)) {
+                IntakeHelper::voltage(-12);
                 LiftMngr::setLevel(ABOVE_IN_HEIGHT);
             } else {
                 LiftMngr::setVoltage(0);

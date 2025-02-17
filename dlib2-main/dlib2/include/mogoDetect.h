@@ -1,4 +1,5 @@
 #pragma once
+#include "autos.h"
 #include "declarations.h"
 #include "pistons.h"
 #include "lift.h"
@@ -155,10 +156,14 @@ class MogoUtils {
             int none = 0;
             master.clear();
             int loop = 0;
-            while (mmDis > 41) { // 60
 
+            // FILE* usd_file_write = fopen("/usd/lastRoute.txt", "a");
+	        // fputs("Start getMogo", usd_file_write);
+
+            while (mmDis > 41) { // 60
+                
+                loop += 10;
                 if (timeout > 10) {
-                    loop += 10;
                     if (loop > timeout) {
                         break;
                     }
@@ -219,13 +224,25 @@ class MogoUtils {
                 lastXerr = xErr;
                 lastYerr = yErr;
                 mmDis = goalOpt.get();
+                
 
                 // if (robot.getDetectLine() && (lineLeft.get_value() < 700 || lineRight.get_value() < 700)) {
                     // moveDrive(-8, -8, 100);
                     // break;
                 // }
+                /*
+                dlib::Pose2d curPos;//odom.get_position();
+                fprintf(usd_file_write, "%s", (std::to_string(curPos.x.in(au::inches)) + ", " +
+                              std::to_string(curPos.y.in(au::inches)) + ", " +
+                              std::to_string(curPos.theta.in(au::degrees)) + ", " +
+                              std::to_string(loop))
+                              .data());
+                              */
 
             }
+
+            // fputs(("End getMogo: " + std::to_string(loop)).data(), usd_file_write);
+            // fclose(usd_file_write);
 
             master.set_text(1, 0, "M. x:" + std::to_string(getMidX()));
             

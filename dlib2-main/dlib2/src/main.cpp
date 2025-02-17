@@ -1,6 +1,7 @@
 #include "main.h"
 #include "au/au.hpp"
 #include "declarations.h"
+#include "pistons.h"
 #include "teleop.h"
 #include "main.h"
 #include "lift.h"
@@ -9,6 +10,8 @@
 #include "pros/llemu.hpp"
 #include "mogoDetect.h"
 #include <string>
+
+#include "paths.h"
 
 using namespace au;
 
@@ -22,7 +25,6 @@ void initialize() {
     DriverControl::initAll();
 	LiftMngr::initall();
 	// IntakeHelper::sortState(false);
-	
 
 	MogoUtils::init();
 	RedRingUtil::init();
@@ -38,10 +40,13 @@ void disabled() {}
 
 void competition_initialize() {}
 
-void autonomous() {
+PurePursuit pursuitPath;
 
-	// robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
-    // robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+void autonomous() {
+	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+    robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);\
+	// moClamp.overrideState(1);
+	// pros::delay(300);
 	/*
 	double start_time = pros::millis();
 	double last_rotation = robot.imu.get_rotation().in(degrees);
@@ -59,15 +64,22 @@ void autonomous() {
 	*/
 	// robot.turn_ffwd(500);
 	// pros::delay(2000000);
-	double start_time = pros::millis();
-	// robot.move_to_point({(au::inches)(50), (au::inches)(-26)}, true, true, 500); //26.3
-	robot.ramseteTest({(au::inches)(50), (au::inches)(-26)}, true, 11, 1, 0.5);
-	double end_time = pros::millis();
+	// double start_time = pros::millis();
+	// robot.turn_with_pid(-24, 680);
+	// IntakeHelper::voltage(12);
+	// robot.ramseteFollow(&pursuitPath.test, 10000, 7, false, 4.3);
+	// robot.move_to_point({(au::inches)(61), (au::inches)(-26)}, true, true, 680); //26.3
+	// robot.move_to_point({(au::inches)(0), (au::inches)(0)}, true, false, 680); //26.3
+	// robot.ramseteTest({(au::inches)(61), (au::inches)(-26)}, true, 7, 0, 0.7); //0.7 min?
+	// robot.turn_to_point({(au::inches)(0), (au::inches)(0)}, false, 680); //26.3
+	// robot.ramseteTest({(au::inches)(0), (au::inches)(0)}, false, 7, 0, 0.7); //0.7 min?
+	// double end_time = pros::millis();
+	// robot.chassis.brake();
 	
 	// robot.move_with_pid((au::inches)(30));
+	
+	// robot.turn_with_pid(90, 500, 12);
 	/*
-	robot.turn_with_pid(90, 500, 12);
-	*/
 	master.clear();
 	pros::delay(100);
 	dlib::Pose2d curPos = robot.odom.get_position();
@@ -76,6 +88,7 @@ void autonomous() {
 	master.set_text(1, 0, "y:" + std::to_string((curPos.y).in(au::inches)));
 	pros::delay(50);
 	master.set_text(2, 0, "T:" + std::to_string(end_time-start_time));
+	*/
 	// pros::delay(50);
 	
 	// robot.turnQuasiStaticTest();
@@ -100,8 +113,8 @@ void autonomous() {
 
 	// robot.move_to_point({(au::inches)(53.27), (au::inches)(61.3)}, true, false);
 
-	// AutoSelector::updatePath(); // UNCOMMENT
-	// AutoSelector::run(); // UNCOMMENT
+	AutoSelector::updatePath(); // UNCOMMENT
+	AutoSelector::run(); // UNCOMMENT
 	// pros::delay(150);
 	// robot.restOdomKeepAngle(4.5,  5.5);
 
@@ -160,6 +173,8 @@ void opcontrol() {
 		// master.set_text(1, 0, std::to_string(lineRight.get_value()));
 		// MogoUtils::refreshMogo(); // CALIBRATION
 		// RedRingUtil::refreshRing(); // CALIBRATION
+		// dlib::Pose2d curPos = robot.odom.get_position();
+		// std::cout << "{" << "(au::inches)(" << curPos.x.in(au::inches) << "), " << "(au::inches)(" << curPos.y.in(au::inches) << ")}" << std::endl;
 		
 
 
