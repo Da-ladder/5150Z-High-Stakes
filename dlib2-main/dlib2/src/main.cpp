@@ -40,7 +40,7 @@ void disabled() {}
 
 void competition_initialize() {}
 
-PurePursuit pursuitPath;
+// PurePursuit pursuitPath;
 
 void autonomous() {
 	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
@@ -173,8 +173,8 @@ void opcontrol() {
 		// master.set_text(1, 0, std::to_string(lineRight.get_value()));
 		// MogoUtils::refreshMogo(); // CALIBRATION
 		// RedRingUtil::refreshRing(); // CALIBRATION
-		// dlib::Pose2d curPos = robot.odom.get_position();
-		// std::cout << "{" << "(au::inches)(" << curPos.x.in(au::inches) << "), " << "(au::inches)(" << curPos.y.in(au::inches) << ")}" << std::endl;
+		dlib::Pose2d curPos = robot.odom.get_position();
+		std::cout << "{" << "(au::inches)(" << curPos.x.in(au::inches) << "), " << "(au::inches)(" << curPos.y.in(au::inches) << ")}" << std::endl;
 		
 
 

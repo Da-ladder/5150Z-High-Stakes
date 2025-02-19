@@ -25,7 +25,7 @@ pros::adi::AnalogIn lineRight = pros::adi::AnalogIn('D');
 pros::Motor intake(-20, pros::v5::MotorGears::blue, pros::v5::MotorEncoderUnits::degrees);
 
 // lift motor
-MotorGroup lift({4}, pros::v5::MotorGears::red,
+MotorGroup lift({10}, pros::v5::MotorGears::red,
                 pros::v5::MotorEncoderUnits::degrees);
 
 // Declares the IMU
@@ -33,7 +33,7 @@ MotorGroup lift({4}, pros::v5::MotorGears::red,
 
 // Declares color sensor
 pros::v5::Optical camLight(0);
-pros::v5::Optical opt(10);
+pros::v5::Optical opt(2); //10
 
 // Declares distance sensor
 pros::v5::Distance goalOpt(6); //ohhhhh
@@ -51,7 +51,7 @@ pros::Rotation liftRot(9);
 
 //////// EXPerimental VISION SENSOR ////////  
 pros::v5::Vision camDetect(5);
-pros::v5::Vision camRingDetect(2); // REPLACED BY LB
+pros::v5::Vision camRingDetect(3); // REPLACED BY LB
 //////// EXPerimental VISION SENSOR ////////
 
 using namespace au;
@@ -541,14 +541,14 @@ void Robot::fwdDynoTest() {
 
 void Robot::turn_with_pid(double heading, int timeoutMS, double maxVolts) {
     auto target_heaidng = (au::degrees)(heading);
-    auto reading = imu.get_rotation();
+    auto reading = odom.get_position().theta;
     
 
     turn_pid.target(target_heaidng);
     turn_pid.update(reading, milli(seconds)(20));
 
     // permaTest
-    if (fabs(turn_pid.get_error().in(au::degrees)) <= 120 && timeoutMS < 680) {
+    if (fabs(turn_pid.get_error().in(au::degrees)) <= 120 && timeoutMS < 680 && timeoutMS > 300) {
       timeoutMS = 680;
     }
     int cycle = 0;
@@ -563,7 +563,7 @@ void Robot::turn_with_pid(double heading, int timeoutMS, double maxVolts) {
 
     while (!turn_settler.is_settled(turn_pid.get_error(), turn_pid.get_derivative()) && timeoutMS > cycle*20) {
       cycle++;
-      reading = imu.get_rotation();
+      reading = odom.get_position().theta;
       auto voltage = turn_pid.update(reading, milli(seconds)(20));
       auto integral = turn_pid.get_integral();
       // std::cout << cycle*20 << ", " << turn_pid.get_error() << ", " << turn_pid.get_integral() << std::endl;
@@ -692,7 +692,7 @@ double signdetect(double num) {
 
 // fwds true = mogo side
 // early_exit allows for waypoints to be set up (2 inches for waypoints??? 0.25 should be target for end)
-void Robot::ramseteTest(dlib::Vector2d point, bool fowards, double max_voltage, double min_voltage, double early_exit, double slewStart, bool brake) {
+void Robot::ramseteTest(dlib::Vector2d point, bool fowards, double max_voltage, double min_voltage, double early_exit, double slewStart, bool brake, int timeout) {
 
   double track_width = 0.25; // stay in meters
   double k_lat = 2.3; // btwn 2.5-3
@@ -704,6 +704,10 @@ void Robot::ramseteTest(dlib::Vector2d point, bool fowards, double max_voltage, 
   // setting up PIDs
   lin_pid.target((au::meters)(0)); // I think its supposed to be 0
   turn_pid.target((au::degrees)(0)); // I think its supposed to be 0
+
+  // timeout stuffs
+  int start_time = pros::millis();
+
 
   // global errors in meters and degrees
   auto theta = (au::degrees)(0.0);
@@ -737,6 +741,10 @@ void Robot::ramseteTest(dlib::Vector2d point, bool fowards, double max_voltage, 
 
   // start the loop
   while (true) {
+
+    if (pros::millis() - start_time > timeout) {
+      break;
+    }
     dlib::Pose2d curPos = odom.get_position();
     // current theta and x, y error. should be in meters!!!!
     theta = curPos.theta;
@@ -860,14 +868,17 @@ void Robot::refinedFollow(std::vector<dlib::Pose2d>* pointList, int timeout, dou
   for (dlib::Pose2d point : *pointList) {
     if (point.x == pointList->back().x && point.y == pointList->back().y) {
       maxSpeed = point.theta.in(au::degrees)/100.0 * 12;
-      ramseteTest({point.x, point.y}, fowards, maxSpeed, minSpeed, 0.7, maxSpeed); // end off 0.7 inches from the pt
+      ramseteTest({point.x, point.y}, fowards, maxSpeed, minSpeed, 0.7, maxSpeed, true, timeout - (pros::millis() - start_time)); // end off 0.7 inches from the pt
     } else {
+      if (pros::millis() - start_time > timeout) {
+        break;
+      }
       maxSpeed = point.theta.in(au::degrees)/100.0 * 12;
       double slewStr = (pros::millis() - start_time)/20.0 * 1.5 + 4;
       if (slewStr > maxSpeed) {
         slewStr = maxSpeed;
       }
-      ramseteTest({point.x, point.y}, fowards, maxSpeed, minSpeed, lookahead, slewStr);
+      ramseteTest({point.x, point.y}, fowards, maxSpeed, minSpeed, lookahead, slewStr, true, timeout - (pros::millis() - start_time));
     }
   }
   robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
@@ -951,9 +962,9 @@ void Robot::start_odom() {
 
     chassis.initialize();
     rotationLeft.initialize();
-    rotationLeft.raw.set_data_rate(10);
+    rotationLeft.raw.set_data_rate(5); //10
     rotationRight.initialize();
-    rotationRight.raw.set_data_rate(10);
+    rotationRight.raw.set_data_rate(5); //10
 
     odom_updater = std::make_unique<pros::Task>([this]() {
       while (true) {

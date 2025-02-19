@@ -4,7 +4,7 @@
 #include "pistons.h"
 #include <string>
 
-#define MAIN_LOOP_DELAY 5
+#define MAIN_LOOP_DELAY 10 //5
 #define STUCK_DELAY_MS 400
 #define STUCK_DEG_RANGE 7
 #define SORT_MS_EXT_DELAY 100
@@ -183,7 +183,7 @@ class IntakeHelper {
     }
 
     inline static void init() {
-        opt.set_integration_time(50);
+        opt.set_integration_time(20); //50 b4
         pros::delay(50);
         opt.set_led_pwm(100);
         // opt.set_integration_time(10);
