@@ -136,7 +136,7 @@ class MogoUtils {
         }
 
         // Move to the mogo
-        inline static void getMogo(double baseSpeed = 8, double minSpeed = 1.5, double maxSpeed = 12, int timeout = 0) {
+        inline static void getMogo(double baseSpeed = 8, double minSpeed = 1.5, double maxSpeed = 12, int timeout = 0, int triggerDis = 41) {
             double 
             tkP=0.05, // Turn P
             tkD=0.0, // Turn D
@@ -160,7 +160,7 @@ class MogoUtils {
             // FILE* usd_file_write = fopen("/usd/lastRoute.txt", "a");
 	        // fputs("Start getMogo", usd_file_write);
 
-            while (mmDis > 41) { // 60
+            while (mmDis > triggerDis) { // 60
                 
                 loop += 10;
                 if (timeout > 10) {
@@ -194,7 +194,6 @@ class MogoUtils {
 
 
                 // base speed limiter
-                xErr = 0 - getMidX();
                 if ((yErr <= 0) && (fabs(xErr) <= 50)) {
                     flatSpeed = disError * lkP;
                 } else {
@@ -244,18 +243,107 @@ class MogoUtils {
             // fputs(("End getMogo: " + std::to_string(loop)).data(), usd_file_write);
             // fclose(usd_file_write);
 
-            master.set_text(1, 0, "M. x:" + std::to_string(getMidX()));
+            if (triggerDis > 10) {
+                master.set_text(1, 0, "M. x:" + std::to_string(getMidX()));
             
-            // Lets the drive contuine under residual power and clamps after 75 ms
-            moveDrive(2.7, 2.7, 40);
-            moveDrive(1, 1, 20);
-            master.set_text(2, 0, "M. y:" + std::to_string(getMidY()));
-            // robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
-            // robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
-            moClamp.overrideState(1);
-            moveDrive(0, 0, 150);
+                // Lets the drive contuine under residual power and clamps after 75 ms
+                moveDrive(2.7, 2.7, 40);
+                moveDrive(1, 1, 20);
+                master.set_text(2, 0, "M. y:" + std::to_string(getMidY()));
+                // robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+                // robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+                moClamp.overrideState(1);
+                moveDrive(0, 0, 150);
+            }
+
+            
             robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
             robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+
+        }
+
+        inline static void angleTwdsMogo(double baseSpeed = 8, double minSpeed = 1.5, double maxSpeed = 12, int timeout = 0, int angleRange = 6) {
+            double 
+            tkP=0.4, // Turn P 0.5
+            tkD=0.0, // Turn D
+            lkP=-0.02; // lateral P 0.02
+
+            double yErr=0, lastYerr=0, yTarg=0;
+
+            // xTarg is the bottom of the camera
+            double xErr=9999, lastXerr=0, xTarg=200;
+
+            double flatSpeed, lspeed, rspeed;
+            double disError;
+
+            int mmDis = 9999; // default for when nothing is detected
+
+            // keep looping while mogo has not been detected in the clamp
+            int none = 0;
+            master.clear();
+            int loop = 0;
+
+            // FILE* usd_file_write = fopen("/usd/lastRoute.txt", "a");
+	        // fputs("Start getMogo", usd_file_write);
+
+            while (abs(xErr) > angleRange) { // 60
+                
+                loop += 10;
+                if (timeout > 10) {
+                    if (loop > timeout) {
+                        break;
+                    }
+                }
+                MogoUtils::refreshMogo();
+
+                disError = 50 - mmDis; // 50 is most in mogo can go on corner
+
+                // X ERROR IS THE LEFT & RIGHT ERROR: LEFT::+ RIGHT::-
+                xErr = 0 - getMidX();
+                // Y ERROR GIVES distance (SWITCH TO DISTANCE FOR FOWARDS CONTROL HIGHER THAN -40) or when yErr is smaller than zero!
+                // NOTE: -50 & 50 is range of distance sensor
+                yErr = 0 - getMidY(); //-10
+
+
+                // base speed limiter
+                xErr = 0 - getMidX();
+                if ((yErr <= 0) && (fabs(xErr) <= 50)) {
+                    flatSpeed = disError * lkP;
+                } else {
+                    flatSpeed = baseSpeed;
+                }
+
+
+                
+                // Turning controls (only left and right turning control)
+                lspeed = -(xErr*tkP + ((xErr-lastXerr) * tkD));
+                rspeed = (xErr*tkP + ((xErr-lastXerr) * tkD));
+
+
+                
+                if (maxSpeed < lspeed) {lspeed = maxSpeed; }
+                if (maxSpeed < rspeed) {rspeed = maxSpeed; }
+
+                if (lspeed < minSpeed) { lspeed = minSpeed; }
+                if (rspeed < minSpeed) { rspeed = minSpeed; }
+
+
+                // std::cout << "error" << xErr << std::endl;
+
+                moveDrive(lspeed, rspeed, 10); //bc mogo clamp is forwards
+                lastXerr = xErr;
+                lastYerr = yErr;
+                mmDis = goalOpt.get();
+            }
+            master.set_text(1, 0, "M. x:" + std::to_string(getMidX()));
+            master.set_text(2, 0, "M. y:" + std::to_string(getMidY()));
+
+
+            // robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+            // robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+            robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+            robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+            robot.chassis.brake();
 
         }
           
@@ -286,7 +374,7 @@ class RedRingUtil {
             camRingDetect.set_exposure(29);
 
             // Sets red & blue ring sig (calibration required)
-            pros::vision_signature_s_t RED_RING_SIG = pros::c::vision_signature_from_utility(1, 5223, 12099, 8661, -2635, -1781, -2208, 2.500, 0);
+            pros::vision_signature_s_t RED_RING_SIG = pros::c::vision_signature_from_utility(1, 8119, 9819, 8968, -1731, -765, -1248, 3.800, 0);
             camRingDetect.set_signature(RED_RING, &RED_RING_SIG);
 
             pros::vision_signature_s_t BLUE_RING_SIG = pros::c::vision_signature_from_utility(2, -5243, -3845, -4544, 6673, 9479, 8076, 4.200, 0);

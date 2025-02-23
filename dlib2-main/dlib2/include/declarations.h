@@ -93,7 +93,7 @@ class Robot {
 	dlib::Rotation rotationLeft;
 
 	dlib::FeedforwardGains ffwdGains;
-	dlib::Feedforward<Degrees> ffwd;
+	dlib::Feedforward<Meters> ffwd;
 
 	dlib::FeedforwardGains linGains;
 	dlib::Feedforward<Meters> linffwd;
@@ -157,9 +157,9 @@ class Robot {
     void move_to_point(dlib::Vector2d point, bool turn = true, bool fowards = true, int to = 1400, double maxAccel = 3.15, double maxTurnVolts = 12);
 	void ramseteTest(dlib::Vector2d point, bool fowards = true, double max_voltage = 12, double min_voltage = 0, double early_exit = 0.5, double slewStart = 4, bool brake = true, int timeout = 99999999);
     void ramseteFollow(std::vector<dlib::Vector2d>* pointList, int timeout, double lookahead, bool fowards = true, double maxSpeed = 12, double minSpeed = 0);
-	void refinedFollow(std::vector<dlib::Pose2d>* pointList, int timeout, double lookahead, bool fowards = true, double maxSpeed = 12, double minSpeed = 0);
+	void refinedFollow(std::vector<dlib::Pose2d>* pointList, int timeout, double lookahead, bool fowards = true, double maxSpeed = 12, double minSpeed = 0, double exit_inches = 0.7);
 	void start_odom();
-	void turn_ffwd(double time);
+	void ffw_turn(Quantity<Degrees, double> heading);
 
 	void restOdom(double x, double y, double theta);
 	void restOdomKeepAngle(double x, double y);

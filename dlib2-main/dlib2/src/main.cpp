@@ -2,6 +2,7 @@
 #include "au/au.hpp"
 #include "declarations.h"
 #include "pistons.h"
+#include "pros/rtos.hpp"
 #include "teleop.h"
 #include "main.h"
 #include "lift.h"
@@ -44,7 +45,7 @@ void competition_initialize() {}
 
 void autonomous() {
 	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
-    robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);\
+    robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
 	// moClamp.overrideState(1);
 	// pros::delay(300);
 	/*
@@ -65,8 +66,10 @@ void autonomous() {
 	// robot.turn_ffwd(500);
 	// pros::delay(2000000);
 	// double start_time = pros::millis();
+	// robot.ffwTurn((au::degrees)(180));
 	// robot.turn_with_pid(-24, 680);
 	// IntakeHelper::voltage(12);
+	// robot.ffw_turn((au::degrees)(800));
 	// robot.ramseteFollow(&pursuitPath.test, 10000, 7, false, 4.3);
 	// robot.move_to_point({(au::inches)(61), (au::inches)(-26)}, true, true, 680); //26.3
 	// robot.move_to_point({(au::inches)(0), (au::inches)(0)}, true, false, 680); //26.3
@@ -79,11 +82,12 @@ void autonomous() {
 	// robot.move_with_pid((au::inches)(30));
 	
 	// robot.turn_with_pid(90, 500, 12);
+	
 	/*
 	master.clear();
 	pros::delay(100);
 	dlib::Pose2d curPos = robot.odom.get_position();
-	master.set_text(0, 0, "x:" + std::to_string((curPos.x).in(au::inches)));
+	master.set_text(0, 0, "x:" + std::to_string((curPos.theta).in(au::degrees)));
 	pros::delay(50);
 	master.set_text(1, 0, "y:" + std::to_string((curPos.y).in(au::inches)));
 	pros::delay(50);
@@ -112,6 +116,8 @@ void autonomous() {
 	// robot.turn_with_pid(147.8, 200);
 
 	// robot.move_to_point({(au::inches)(53.27), (au::inches)(61.3)}, true, false);
+
+	
 
 	AutoSelector::updatePath(); // UNCOMMENT
 	AutoSelector::run(); // UNCOMMENT
@@ -173,8 +179,8 @@ void opcontrol() {
 		// master.set_text(1, 0, std::to_string(lineRight.get_value()));
 		// MogoUtils::refreshMogo(); // CALIBRATION
 		// RedRingUtil::refreshRing(); // CALIBRATION
-		dlib::Pose2d curPos = robot.odom.get_position();
-		std::cout << "{" << "(au::inches)(" << curPos.x.in(au::inches) << "), " << "(au::inches)(" << curPos.y.in(au::inches) << ")}" << std::endl;
+		// dlib::Pose2d curPos = robot.odom.get_position();
+		// std::cout << "{" << "(au::inches)(" << curPos.x.in(au::inches) << "), " << "(au::inches)(" << curPos.y.in(au::inches) << ")}" << std::endl;
 		
 
 

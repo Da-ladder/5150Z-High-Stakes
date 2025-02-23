@@ -43,7 +43,7 @@ class LiftMngr{
         }
 
         inline static void main() {
-            double kp = 0.20, ki = 0.0, kd = 0.8; //kp = 0.4, ki = 0.0, kd = 1.4
+            double kp = 0.15, ki = 0.0, kd = 0.4; //
             double accumlator = 0;
             double lastErr = 0;
             double perVolt = 0;

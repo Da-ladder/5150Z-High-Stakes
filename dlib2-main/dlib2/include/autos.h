@@ -136,21 +136,26 @@ class Routes{
     
      inline static void initall() {
         // Autos added below are self explanatory due to the route name attached to them.
-        // The names attached are within quotes        
-
-        // AutoSelector::add("Goal Rush RED (ELIM)", placehold13);
-        AutoSelector::add("Goal Rush BLUE (ELIM)", placehold13Mir); 
+        // The names attached are within quotes  
+        
+        // AutoSelector::add("Regional Solo BLUE (coke line)", placehold6); // ok
+        AutoSelector::add("Regional Solo Red (coke line)", placehold6Mir); // ok
 
         AutoSelector::add("Ring side BLUE (ELIM)", placehold3); 
         AutoSelector::add("Ring side RED (ELIM)", placehold3Mir);
 
-        AutoSelector::add("Regional Solo BLUE", placehold6); // ok
-        AutoSelector::add("Regional Solo Red", placehold6Mir); // ok
+        AutoSelector::add("skills", skills);
+
+        AutoSelector::add("Goal Rush RED (ELIM)", placehold13);
+        AutoSelector::add("Goal Rush BLUE (ELIM)", placehold13Mir); 
+        
+        
+        
 
         // AutoSelector::add("Sig Ring side RED (6 ring)", placehold12); // NOT IN USE
         // AutoSelector::add("Sig Ring side BLUE (6 ring)", placehold12Mir); // NOT IN USE
 
-        AutoSelector::add("skills", skills); // ???        
+         // ???        
 
         AutoSelector::add("Ring side BLUE (STAKE AWP)", placehold4); 
         AutoSelector::add("Ring side RED (STAKE AWP)", placehold4Mir);

@@ -257,7 +257,7 @@
     "upload_options": {
       "icon": "pros",
       "description": "Hi!",
-      "after": "run"
+      "after": "screen"
     },
     "use_early_access": false
   }
