@@ -7,6 +7,8 @@
 #include "intakeFuncts.h"
 #include "pros/misc.h"
 
+
+#define STRAIGHT_ARM 90
 #define DESCORE_HEIGHT 130
 #define SCORE_HEIGHT 110
 #define STORE_HEIGHT 250 //250
@@ -22,13 +24,14 @@ class DriverControl {
     private:
         static int times; // time since last xy cord was printed
         static bool deScore; // toggle to score deeper
+        static double voltage; // voltage to use for LB
     public:
         static int onOff;
         // Changes button binding for various piston systems 
         inline static void initAll(){
             moClamp.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L2);
             liftIntake.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_Y);
-            rushClamp.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_LEFT);
+            // rushClamp.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_LEFT);
             // hang.changeButton(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_X);
             //intake.set_brake_mode(pros::v5::MotorBrake::hold);
         };
@@ -55,8 +58,10 @@ class DriverControl {
             }
             if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
                 IntakeHelper::voltage(12);
+                voltage = 6.0;
             } else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
                 IntakeHelper::voltage(-12);
+                voltage = 6.0;
             } else {
                 IntakeHelper::voltage(0);
             }
@@ -71,28 +76,44 @@ class DriverControl {
                     master.rumble(".");
                 }
             }
-
+            /*
+            if (master.get_digital_new_press(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_LEFT)) {
+                if (voltage == 12.0) {
+                    master.rumble(".");
+                    voltage = 6.0;
+                } else {
+                    master.rumble("-");
+                    voltage = 12.0;
+                }
+            }
+            */
+            
             if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_A)) {
-                LiftMngr::setVoltage(-12, true);
+                LiftMngr::setVoltage(-voltage, true);
             } else if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
-                LiftMngr::setVoltage(12, true);
+                LiftMngr::setVoltage(voltage, true);
             } else if (master.get_digital_new_press(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
 
                 if (LiftMngr::getLevel() > 220 && LiftMngr::getLevel() < 270) {
                     if (deScore) {
                         IntakeHelper::voltage(-9);
+                        LiftMngr::setMaxVolts(12);
                         LiftMngr::setLevel(DESCORE_HEIGHT);
                     } else {
                         IntakeHelper::voltage(-9);
+                        LiftMngr::setMaxVolts(12);
                         LiftMngr::setLevel(SCORE_HEIGHT); // score ring
                     }
                 } else if (LiftMngr::getLevel() > 275) {
+                    LiftMngr::setMaxVolts(12);
                     LiftMngr::setLevel(STORE_HEIGHT); // store ring
                 } else {
+                    LiftMngr::setMaxVolts(12);
                     LiftMngr::setLevel(IDLE_HEIGHT); // do nothing
                 }   
             } else if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_X)) {
                 IntakeHelper::voltage(-12);
+                LiftMngr::setMaxVolts(12);
                 LiftMngr::setLevel(ABOVE_IN_HEIGHT);
             } else {
                 LiftMngr::setVoltage(0);

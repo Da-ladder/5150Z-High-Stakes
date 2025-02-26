@@ -11,6 +11,7 @@ class LiftMngr{
         static int time; // time since voltReq was executed and at zero
         static double prevVolt; // previous voltage, used for slew rate
                                 // accel and decel control
+        static double maxVolt; // max voltage limiter
 
     public:
         inline static void setMotorPwr(double voltage) {
@@ -71,8 +72,13 @@ class LiftMngr{
                         } else {
                             wantVolt = (error * kp) + (accumlator * ki) + ((error-lastErr) * kd);
                         }
-
-                        lift.move_voltage(wantVolt*1000);
+                        
+                        if (wantVolt > maxVolt) {
+                            lift.move_voltage(maxVolt*1000);
+                        } else {
+                            lift.move_voltage(wantVolt*1000);
+                        }
+                        
                         
                         
                         // setMotorPwr(wantVolt);
@@ -97,6 +103,10 @@ class LiftMngr{
 
                 pros::delay(10); //slightly longer than main thread delay 5
             }
+        }
+
+        inline static void setMaxVolts(double v) {
+            maxVolt = v;
         }
 
         inline static int getCurLevel() {

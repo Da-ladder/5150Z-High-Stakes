@@ -46,6 +46,7 @@ void competition_initialize() {}
 void autonomous() {
 	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
     robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+	
 	// moClamp.overrideState(1);
 	// pros::delay(300);
 	/*
@@ -169,12 +170,13 @@ void autonomous() {
 
 
 void opcontrol() {
-
+	IntakeHelper::StopAtColor(false);
+	IntakeHelper::sortState(false);
+	IntakeHelper::stuckCheckChange(false);
 	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
     robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
 
 	while(true){
-
 
 		// master.set_text(1, 0, std::to_string(lineRight.get_value()));
 		// MogoUtils::refreshMogo(); // CALIBRATION

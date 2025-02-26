@@ -122,6 +122,8 @@ class Routes{
         void static placehold5();
         void static placehold6();
         void static placehold6Mir();
+        void static oldplacehold6();
+        void static oldplacehold6Mir();
         void static placehold7();
         void static placehold8();
         void static placehold9();
@@ -136,20 +138,22 @@ class Routes{
     
      inline static void initall() {
         // Autos added below are self explanatory due to the route name attached to them.
-        // The names attached are within quotes  
+        // The names attached are within quotes
         
-        // AutoSelector::add("Regional Solo BLUE (coke line)", placehold6); // ok
-        AutoSelector::add("Regional Solo Red (coke line)", placehold6Mir); // ok
-
         AutoSelector::add("Ring side BLUE (ELIM)", placehold3); 
         AutoSelector::add("Ring side RED (ELIM)", placehold3Mir);
 
-        AutoSelector::add("skills", skills);
 
         AutoSelector::add("Goal Rush RED (ELIM)", placehold13);
-        AutoSelector::add("Goal Rush BLUE (ELIM)", placehold13Mir); 
+        AutoSelector::add("Goal Rush BLUE (ELIM)", placehold13Mir);
         
+        AutoSelector::add("Regional Solo BLUE (HOME)", oldplacehold6); // hotel huh?
+        AutoSelector::add("Regional Solo Red (HOME)", oldplacehold6Mir);    
+
+        AutoSelector::add("skills", skills); 
         
+        // AutoSelector::add("Regional Solo BLUE (HOTEL)", placehold6); // ok
+        // AutoSelector::add("Regional Solo Red (HOTEL)", placehold6Mir); // ok        
         
 
         // AutoSelector::add("Sig Ring side RED (6 ring)", placehold12); // NOT IN USE

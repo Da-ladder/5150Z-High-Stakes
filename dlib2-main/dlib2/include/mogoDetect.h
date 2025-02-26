@@ -104,7 +104,7 @@ class MogoUtils {
             camDetect.set_exposure(23);
 
             // Sets mogo sig
-            pros::vision_signature_s_t MOGO_SIG = pros::c::vision_signature_from_utility(1, -1897, -521, -1210, -6899, -5639, -6268, 3.000, 0);
+            pros::vision_signature_s_t MOGO_SIG = pros::c::vision_signature_from_utility(1, -3003, -2519, -2760, -6055, -4995, -5524, 3.500, 0);
             camDetect.set_signature(MOGO, &MOGO_SIG);
         }
 
@@ -136,7 +136,7 @@ class MogoUtils {
         }
 
         // Move to the mogo
-        inline static void getMogo(double baseSpeed = 8, double minSpeed = 1.5, double maxSpeed = 12, int timeout = 0, int triggerDis = 41) {
+        inline static void getMogo(double baseSpeed = 8, double minSpeed = 1.5, double maxSpeed = 12, int timeout = 0, int triggerDis = 30) {
             double 
             tkP=0.05, // Turn P
             tkD=0.0, // Turn D
@@ -374,7 +374,7 @@ class RedRingUtil {
             camRingDetect.set_exposure(29);
 
             // Sets red & blue ring sig (calibration required)
-            pros::vision_signature_s_t RED_RING_SIG = pros::c::vision_signature_from_utility(1, 8119, 9819, 8968, -1731, -765, -1248, 3.800, 0);
+            pros::vision_signature_s_t RED_RING_SIG = pros::c::vision_signature_from_utility(1, 8119, 9819, 8968, -1731, -765, -1248, 5.3, 0);
             camRingDetect.set_signature(RED_RING, &RED_RING_SIG);
 
             pros::vision_signature_s_t BLUE_RING_SIG = pros::c::vision_signature_from_utility(2, -5243, -3845, -4544, 6673, 9479, 8076, 4.200, 0);

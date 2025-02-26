@@ -5,3 +5,4 @@ bool LiftMngr::blockLiftThread = false;
 double LiftMngr::holdLvl = 0;
 int LiftMngr::time = 0;
 double LiftMngr::prevVolt = 0;
+double LiftMngr::maxVolt = 12;

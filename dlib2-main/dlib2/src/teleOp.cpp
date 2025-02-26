@@ -5,6 +5,7 @@
 
 int DriverControl::times = 0;
 bool DriverControl::deScore = false;
+double DriverControl::voltage = 12;
 
 // Updates the chassis motors based on  joystick input
 void DriverControl::updateChassis() {

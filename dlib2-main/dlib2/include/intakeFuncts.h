@@ -60,6 +60,7 @@ class IntakeHelper {
             intake.move_voltage(-12000);
             pros::delay(140);
         }
+        // intake.move_voltage(12000);
         /*
         while (sortLimit.get_value() == 0) {
             pros::delay(10);
