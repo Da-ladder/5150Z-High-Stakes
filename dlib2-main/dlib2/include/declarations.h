@@ -42,6 +42,7 @@ extern pros::v5::Distance ringOpt;
 // exp stuff
 extern pros::v5::Vision camDetect;
 extern pros::v5::Vision camRingDetect;
+extern pros::adi::AnalogIn lightDetect;
 
 // chassis
 

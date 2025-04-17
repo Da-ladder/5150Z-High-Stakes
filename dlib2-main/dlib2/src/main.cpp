@@ -10,6 +10,7 @@
 #include "pros/abstract_motor.hpp"
 #include "pros/llemu.hpp"
 #include "mogoDetect.h"
+#include <iostream>
 #include <string>
 
 #include "paths.h"
@@ -30,7 +31,7 @@ void initialize() {
 	MogoUtils::init();
 	RedRingUtil::init();
 	IntakeHelper::init();
-	IntakeHelper::blueExcld(true);
+	// IntakeHelper::blueExcld(true);
 
 	pros::lcd::set_text(1, "ARMED");
 	AutoSelector::printPath();
@@ -47,44 +48,12 @@ void autonomous() {
 	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
     robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
 	
-	// moClamp.overrideState(1);
-	// pros::delay(300);
 	/*
 	double start_time = pros::millis();
-	double last_rotation = robot.imu.get_rotation().in(degrees);
-	while(true){
-        double current_time = pros::millis();
-        double elapsed_time = current_time - start_time;
-        double current_rotation = robot.imu.get_rotation().in(degrees);
-        robot.chassis.turn_voltage(volts(8));
-        std::cout << "(" << elapsed_time/1000 << "," << (current_rotation - last_rotation) * 50 << "),";
+	robot.turn_with_pid(90, 2000);
+	
 
-        last_rotation = current_rotation;
-
-        pros::delay(20);
-    }
-	*/
-	// robot.turn_ffwd(500);
-	// pros::delay(2000000);
-	// double start_time = pros::millis();
-	// robot.ffwTurn((au::degrees)(180));
-	// robot.turn_with_pid(-24, 680);
-	// IntakeHelper::voltage(12);
-	// robot.ffw_turn((au::degrees)(800));
-	// robot.ramseteFollow(&pursuitPath.test, 10000, 7, false, 4.3);
-	// robot.move_to_point({(au::inches)(61), (au::inches)(-26)}, true, true, 680); //26.3
-	// robot.move_to_point({(au::inches)(0), (au::inches)(0)}, true, false, 680); //26.3
-	// robot.ramseteTest({(au::inches)(61), (au::inches)(-26)}, true, 7, 0, 0.7); //0.7 min?
-	// robot.turn_to_point({(au::inches)(0), (au::inches)(0)}, false, 680); //26.3
-	// robot.ramseteTest({(au::inches)(0), (au::inches)(0)}, false, 7, 0, 0.7); //0.7 min?
-	// double end_time = pros::millis();
-	// robot.chassis.brake();
-	
-	// robot.move_with_pid((au::inches)(30));
-	
-	// robot.turn_with_pid(90, 500, 12);
-	
-	/*
+	double end_time = pros::millis();
 	master.clear();
 	pros::delay(100);
 	dlib::Pose2d curPos = robot.odom.get_position();
@@ -96,48 +65,12 @@ void autonomous() {
 	*/
 	// pros::delay(50);
 	
-	// robot.turnQuasiStaticTest();
-	// robot.turnDynoTest();
-	// MogoUtils::getMogo(7, 3);
-	// robot.ffwLat((au::inches)(15), (au::seconds)(2), 3.5);
-	// robot.turn_with_pid(180, 1500);
-
-	// RedRingUtil::getRing(true, 7, 3);
-	
-
-	// IntakeHelper::voltage(12);
-
-	// MogoUtils::getMogo(10, 2);
-	// LiftMngr::setLevel(500);
-
-	// moClamp.overrideState(1);
-    // pros::delay(400);
-	// robot.turn_with_pid(90, 600);
-
-	// robot.turn_with_pid(147.8, 200);
-
-	// robot.move_to_point({(au::inches)(53.27), (au::inches)(61.3)}, true, false);
-
-	
 
 	AutoSelector::updatePath(); // UNCOMMENT
 	AutoSelector::run(); // UNCOMMENT
-	// pros::delay(150);
-	// robot.restOdomKeepAngle(4.5,  5.5);
 
 	// robot.chassis.move_voltage((au::volts)(7));
 	// robot.testStatic();
-
-	// robot.ffwLat((au::inches)(50), au::milli(au::seconds)(2000));
-	// pros::delay(3000);
-	// robot.turn_with_pid(70, 2000);
-	/*
-	robot.ffwTurn((au::degrees)(180)); // >40 deg???
-	master.clear();
-	pros::delay(150);
-	pros::delay(200);
-	master.set_text(1, 0, std::to_string(robot.imu.get_rotation().in(au::degrees)));
-	*/
 	/**/
 	
 	
@@ -149,36 +82,21 @@ void autonomous() {
 	// robot.fwdQuasiStaticTest();
 	// robot.turnQuasiStaticTest();
 	// robot.turnDynoTest();
-	/*
-	auto start_time = pros::millis();
-
-	robot.start_odom();
-
-	while (true) {
-		auto left_disp = robot.chassis.left_motors_displacement();
-		auto right_disp = robot.chassis.right_motors_displacement();
-		auto heading = (left_disp - right_disp) / track_width;
-
-		robot.chassis.turn_voltage(volts(7));
-		std::cout << "heading from wheels: " << heading << ", heading from imu: " << imu.get_rotation() << "\n";
-		pros::delay(20);
-	}
-	*/
-	
 }
 
 
 
 void opcontrol() {
 	IntakeHelper::StopAtColor(false);
+	IntakeHelper::blueExcld(false);
 	IntakeHelper::sortState(false);
 	IntakeHelper::stuckCheckChange(false);
 	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
     robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+	// pros::delay(50);
 
 	while(true){
-
-		// master.set_text(1, 0, std::to_string(lineRight.get_value()));
+		// master.set_text(1, 0, std::to_string(lineRight.get_value())); hjh
 		// MogoUtils::refreshMogo(); // CALIBRATION
 		// RedRingUtil::refreshRing(); // CALIBRATION
 		// dlib::Pose2d curPos = robot.odom.get_position();

@@ -2,12 +2,14 @@
 #include "declarations.h"
 #include "liblvgl/llemu.hpp"
 #include "pistons.h"
+#include <cmath>
 #include <string>
 
 #define MAIN_LOOP_DELAY 10 //5
 #define STUCK_DELAY_MS 400
-#define STUCK_DEG_RANGE 7
+#define STUCK_DEG_RANGE 4
 #define SORT_MS_EXT_DELAY 100
+#define ROT_PER_CYCLE 5.75 //5.73
 
 
 
@@ -28,9 +30,20 @@ class IntakeHelper {
     public:
 
     inline static void stuckDetect() {
-
         int curIntakePos = intake.get_position();
+        /*
 
+        double min_threshold = intake.get_target_velocity()/4.0;
+
+        if (fabs(intake.get_actual_velocity()) < fabs(min_threshold) && intakeState == 1) {
+            intake.move_voltage(-12000);
+            pros::delay(100);
+            intake.move_voltage(12000);
+        }
+
+        */
+
+        
         if (intakeState == 1 && abs(curIntakePos - intakePos) < STUCK_DEG_RANGE) {
             intakePos = curIntakePos;
             stuckTime ++;
@@ -46,94 +59,112 @@ class IntakeHelper {
             intake.move_voltage(12000);
             stuckTime = 0;
         }
+        
 
 
     }
 
     inline static void reject() {
         blocking = true;
-        while (opt.get_proximity() > 40) {
-            while (opt.get_proximity() > 40) {
-                intake.move_voltage(11000);
-                pros::delay(10);
+        // intake.move_voltage(0);
+        // pros::delay(400);
+
+        //.37 - .67 first eject
+        // 2.21 - 2.60 second
+        // 4.13 - 4.48 third
+
+        double current_rot = fmod(intake.get_position(), ROT_PER_CYCLE);
+        intake.move_voltage(12000);
+        pros::delay(60); //0
+        int passed = 0;
+
+        while(true) {
+            current_rot = fmod(intake.get_position(), ROT_PER_CYCLE);
+            if (current_rot >= .57 && current_rot <= .67) {
+                if (passed != 1 && passed > 0) {
+                    break;
+                }
+                break;
+                passed = 1;
+            } else if (current_rot >= 2.41 && current_rot <= 2.60) {
+                if (passed != 2 && passed > 0) {
+                    break;
+                }
+                break;
+                passed = 2;
+            } else if (current_rot >= 4.33 && current_rot <= 4.48) {
+                if (passed != 3 && passed > 0) {
+                    break;
+                }
+                break;
+                passed = 3;
             }
-            intake.move_voltage(-12000);
-            pros::delay(140);
-        }
-        // intake.move_voltage(12000);
-        /*
-        while (sortLimit.get_value() == 0) {
-            pros::delay(10);
-        }
-        while (sortLimit.get_value() == 1) {
+            std::cout << current_rot << std::endl;
             pros::delay(5);
         }
-        pros::delay(10);
-        intake.move_voltage(-10000);
-        pros::delay(180);
-        if (sortLimit.get_value() == 1) {
-            intake.move_voltage(-12000);
-            pros::delay(300);
-        }
-        intake.move_voltage(12000);
+        intake.move_voltage(-12000);
+        pros::delay(100);
+        intake.move_voltage(0);
+
+        /*
+        while (lightDetect.get_value() < 250) {
+            pros::delay(5);
+        } 
+        // intake.move_voltage(0);
+        pros::delay(40);
+        intake.move_voltage(-6);
+        pros::delay(100);
+        intake.move_voltage(0);
+        pros::delay(500);
         */
         blocking = false;
-        
-        
-        /*
-        while (sortLimit.get_value() == 0) {
-            pros::delay(10);
-        }
-        if (true) {
-            blocking = true;
-            pros::delay(100); //80
-            intake.move_voltage(-6*1000); //-10
-            pros::delay(60);
-            intake.move_voltage(12*1000);
-            pros::delay(50);
-            blocking = false;
-        }
-        */
+        intake.move_voltage(12000);
     }
 
     inline static void main() {
         bool ringLiftSense = false;
         while (true) {
             if (stuckCheck) {
-                stuckDetect();
+                // stuckDetect();
             }
             
             
             if (stap) {
                 if (excludeBlue) {
-                    if (opt.get_hue() < 21) {
-                        
+                    if (opt.get_hue() < 21/* || opt.get_hue() > 340*/) {
+                        blocking = true;
+                        IntakeHelper::voltage(-12);
+                        pros::delay(20);
                         IntakeHelper::voltage(0);
-                        
+                        blocking = false;
+
                     }
                 } else if (!excludeBlue) {
-                    if (opt.get_hue() >= 200 && opt.get_hue() <= 225) {
+                    if (opt.get_hue() >= 200 && opt.get_hue() <= 235) {
+                        blocking = true;
+                        IntakeHelper::voltage(-12);
+                        pros::delay(20);
                         IntakeHelper::voltage(0);
-                        
+                        blocking = false;
                     }
                 }
             }
             
 
             if (excludeBlue && (!blockSort)) {
-                if (opt.get_hue() >= 200 && opt.get_hue() <= 230 && opt.get_proximity() >= 255) {
+                if (opt.get_hue() >= 200 && opt.get_hue() <= 235 && opt.get_proximity() >= 255) {
                     reject();
-                } else if (opt.get_hue() < 21) {
+                } else if (opt.get_hue() < 21 || opt.get_hue() > 340) {
                     // colorPistion.overrideState(0); // ACCEPT red
                 }
             } else if ((!excludeBlue) && (!blockSort)) {
-                if (opt.get_hue() >= 200 && opt.get_hue() <= 230 && opt.get_proximity() >= 255) {
+                if (opt.get_hue() >= 200 && opt.get_hue() <= 235/* && opt.get_proximity() >= 255*/) {
                     // colorPistion.overrideState(0); // ACCEPT blue
-                } else if (opt.get_hue() < 21) {
+                } else if (opt.get_hue() < 21 /*|| opt.get_hue() > 340*/ && opt.get_proximity() >= 255) {
                     reject();
                 }
             }
-            pros::lcd::set_text(5, "err: " + std::to_string(opt.get_proximity()));
+            // pros::lcd::set_text(5, "err: " + std::to_string(opt.get_proximity()));
                 
             pros::delay(MAIN_LOOP_DELAY);
         }
@@ -180,6 +211,7 @@ class IntakeHelper {
                 intakeState = 2;
             }
         } else {
+            // blocking = false;
             // do nothing
         }
         
@@ -187,7 +219,7 @@ class IntakeHelper {
     }
 
     inline static void init() {
-        opt.set_integration_time(20); //50 b4
+        opt.set_integration_time(50); //50 b4
         pros::delay(50);
         opt.set_led_pwm(100);
         // opt.set_integration_time(10);

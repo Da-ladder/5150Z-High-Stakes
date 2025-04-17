@@ -12,7 +12,7 @@ pros::Controller master(pros::E_CONTROLLER_MASTER);
 
 // buttons for helping make autos
 pros::adi::DigitalIn xyBut('E');
-pros::adi::DigitalIn turnBut('F'); //F
+pros::adi::DigitalIn turnBut('0'); //F
 pros::adi::DigitalIn sortLimit('0');
 
 
@@ -22,18 +22,18 @@ pros::adi::AnalogIn lineRight = pros::adi::AnalogIn('D');
 
 
 // intake motor go brrr
-pros::Motor intake(-20, pros::v5::MotorGears::blue, pros::v5::MotorEncoderUnits::degrees);
+pros::Motor intake(-20, pros::v5::MotorGears::blue, pros::v5::MotorEncoderUnits::rotations);
 
 // lift motor
 MotorGroup lift({19}, pros::v5::MotorGears::red,
                 pros::v5::MotorEncoderUnits::degrees);
 
 // Declares the IMU
-// pros::IMU imu(0);
+// pros::IMU imu(0);a
 
 // Declares color sensor
 pros::v5::Optical camLight(0);
-pros::v5::Optical opt(2); //10
+pros::v5::Optical opt(2); //2
 
 // Declares distance sensor
 pros::v5::Distance goalOpt(6); //ohhhhh
@@ -53,6 +53,10 @@ pros::Rotation liftRot(9);
 pros::v5::Vision camDetect(5);
 pros::v5::Vision camRingDetect(18); // REPLACED BY LB
 //////// EXPerimental VISION SENSOR ////////
+
+// 
+// light sensor
+pros::adi::AnalogIn lightDetect('F');
 
 using namespace au;
 
@@ -553,12 +557,12 @@ void Robot::turn_with_pid(double heading, int timeoutMS, double maxVolts) {
 
     // permaTest
     if (fabs(turn_pid.get_error().in(au::degrees)) <= 120 && timeoutMS < 680 && timeoutMS > 300) {
-      timeoutMS = 680;
+      // timeoutMS = 680;
     }
     int cycle = 0;
     int corCycle = 0;
-    chassis.left_motors.raw.set_current_limit_all(2000); //???
-    chassis.right_motors.raw.set_current_limit_all(2000); // ???
+    chassis.left_motors.raw.set_current_limit_all(4000); //???
+    chassis.right_motors.raw.set_current_limit_all(4000); // ???
 
     // FILE* usd_file_write = fopen("/usd/lastRoute.txt", "a");
 	  // fputs("Start turn_with_pid", usd_file_write);
@@ -607,8 +611,8 @@ void Robot::turn_with_pid(double heading, int timeoutMS, double maxVolts) {
     // fclose(usd_file_write);
   
     chassis.move(0);
-    chassis.left_motors.raw.set_current_limit_all(2500); //???
-    chassis.right_motors.raw.set_current_limit_all(2500); // ???
+    // chassis.left_motors.raw.set_current_limit_all(2500); //???
+    // chassis.right_motors.raw.set_current_limit_all(2500); // ???
   }
 
 void Robot::turn_to_point(dlib::Vector2d point, bool mogoSide, int to, double maxVolts) {
@@ -1082,7 +1086,7 @@ dlib::ChassisConfig chassis_config{
     inches(2.725) // the drivebase wheel diameter
 };
 
-dlib::RotationConfig rotRight{-17, inches(2.75), 1};
+dlib::RotationConfig rotRight{17, inches(2.75), 1};
 
 dlib::RotationConfig rotLeft{8, inches(2.75), 1};
 
@@ -1132,16 +1136,16 @@ dlib::PidGains lin_pid_gains{
 };
 
 dlib::PidGains turn_pid_gains{
-    20, // kp, porportional gain 20
-    1.8,  // ki, integral gain //1.4
-    1.7, // kd, derivative gain // 1.7
+    15.5, // kp, porportional gain 15.5 
+    0.8,  // ki, integral gain //1.8
+    1.65, // kd, derivative gain // 1.55 no mogo
     0.0698132 // This is in radians rip ~10 degrees 0.0698132
 };
 
 // 1.5
 dlib::ErrorDerivativeSettler<Degrees> turn_pid_settler{
-    degrees(1), // error threshold, the maximum error the pid can settle at //1
-    degrees_per_second(8) // derivative threshold, the maximum instantaneous //8
+    degrees(1.5), // error threshold, the maximum error the pid can settle at //1
+    degrees_per_second(10) // derivative threshold, the maximum instantaneous //8
                             // error over time the pid can settle at
 };
 

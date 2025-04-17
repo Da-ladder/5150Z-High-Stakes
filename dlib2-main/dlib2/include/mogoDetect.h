@@ -104,7 +104,7 @@ class MogoUtils {
             camDetect.set_exposure(23);
 
             // Sets mogo sig
-            pros::vision_signature_s_t MOGO_SIG = pros::c::vision_signature_from_utility(1, -3003, -2519, -2760, -6055, -4995, -5524, 3.500, 0);
+            pros::vision_signature_s_t MOGO_SIG = pros::c::vision_signature_from_utility(1, -1551, -601, -1076, -5857, -5147, -5502, 2.600, 0);
             camDetect.set_signature(MOGO, &MOGO_SIG);
         }
 
@@ -136,7 +136,7 @@ class MogoUtils {
         }
 
         // Move to the mogo
-        inline static void getMogo(double baseSpeed = 8, double minSpeed = 1.5, double maxSpeed = 12, int timeout = 0, int triggerDis = 30) {
+        inline static void getMogo(double baseSpeed = 8, double minSpeed = 1.5, double maxSpeed = 12, int timeout = 0, int triggerDis = 24) {
             double 
             tkP=0.05, // Turn P
             tkD=0.0, // Turn D
