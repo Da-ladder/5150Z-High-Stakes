@@ -87,7 +87,7 @@ void autonomous() {
 
 
 void opcontrol() {
-	IntakeHelper::StopAtColor(false);
+	IntakeHelper::StopAtColor(true);
 	IntakeHelper::blueExcld(false);
 	IntakeHelper::sortState(false);
 	IntakeHelper::stuckCheckChange(false);

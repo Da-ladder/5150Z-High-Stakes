@@ -655,11 +655,15 @@ void Routes::placehold1() {
     LiftMngr::setLevel(STRAIGHT_ARM);
 
     // get goal + reset lb
-    moveManual(250, 6);
+    moveManual(300, 7); //250
     LiftMngr::setLevel(IDLE_ARM);
-    moveManual(350, 0, 6); // 1, 9
-    moveManual(120, 8, 8); //9
-    MogoUtils::getMogo(5, 3, 6, 550, 25);
+    pros::delay(50);
+    robot.turn_with_pid(55.29, 300);
+    pros::delay(40);
+    // moveManual(350, 1, 9); // 1, 9 old
+    moveManual(120, 9.5, 9.5); //9 old
+    MogoUtils::getMogo(5, 3, 6, 550, 24);
+    /*
     IntakeHelper::voltage(12);
 
     // grab mid ring @ alliance stake
@@ -674,7 +678,7 @@ void Routes::placehold1() {
     pros::delay(50);
 
     // turn twds other ring
-    // robot.turn_to_point({(au::inches)(27.63), (au::inches)(-10.97)}, INTAKE_SIDE, 800); //800
+    // robot.turn_to_point({(au::inches)(31.52), (au::inches)(16.68)}, INTAKE_SIDE, 800); /* //800
     robot.move_to_point({(au::inches)(31.52), (au::inches)(16.68)}, true, INTAKE_SIDE, 700, 2.9);
 
     // go twds corner
@@ -705,7 +709,7 @@ void Routes::placehold1() {
     // get second ring
     moveManual(400, 2); // 500
     liftIntake.overrideState(1);
-    pros::delay(100); //60
+    // pros::delay(100); //60
     
     moveManual(200, -2);
     moveManual(340, -3.75);
@@ -998,7 +1002,7 @@ void Routes::placehold3() {
     // get second ring
     moveManual(320, 3); // 350
     liftIntake.overrideState(1);
-    pros::delay(100); //60
+    // pros::delay(100); //60
     moveManual(300, -4);
     moveManual(200, -4);
     liftIntake.overrideState(0);
@@ -1064,7 +1068,7 @@ void Routes::placehold3Mir() {
     // get second ring
     moveManual(250, 3.7); // 300
     liftIntake.overrideState(1);
-    pros::delay(100); //60
+    // pros::delay(100); //60
     moveManual(300, -4);
     moveManual(200, -4);
     liftIntake.overrideState(0);
@@ -1868,14 +1872,14 @@ void Routes::placehold12Mir() {
 
     // first ring
     IntakeHelper::voltage(12);
-    moveManual(300, -2);
+    moveManual(300, -3);
     moveManual(700, -3); //700
     // moveManual(500, -5.5);
 
     // get second ring
     moveManual(400, 2); // 500
     liftIntake.overrideState(1);
-    pros::delay(100); //60
+    // pros::delay(100); //60
     
     moveManual(200, -2);
     moveManual(340, -3.75);
@@ -1885,7 +1889,6 @@ void Routes::placehold12Mir() {
 
     IntakeHelper::voltage(12);
 
-    
     
     // place goal in corner
     cornerDeploy.overrideState(1);

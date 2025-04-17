@@ -143,14 +143,16 @@ class Routes{
         AutoSelector::add("Alliance Stake Goal Side BLUE", placehold1);
         AutoSelector::add("Alliance Stake Goal Side RED", placehold1Mir);
 
+        AutoSelector::add("RED Goal SIDE 5 ring (ELIM)", placehold12); //uhh
+        AutoSelector::add("BLUE Goal SIDE 5 ring (ELIM)", placehold12Mir); // Match batt only >60%
+
         AutoSelector::add("Regional Solo BLUE (HOME)", oldplacehold6); // ok
         AutoSelector::add("Regional Solo Red (HOME)", oldplacehold6Mir); // ok
 
         AutoSelector::add("Ring side RED (ELIM 5+1)", placehold3Mir);
         AutoSelector::add("Ring side BLUE (ELIM 5+1)", placehold3);         
         
-        AutoSelector::add("RED Goal SIDE 5 ring (ELIM)", placehold12); //uhh
-        AutoSelector::add("BLUE Goal SIDE 5 ring (ELIM)", placehold12Mir); //uhh
+        
 
         AutoSelector::add("Goal Rush RED (ELIM)", placehold13);
         AutoSelector::add("Goal Rush BLUE (ELIM)", placehold13Mir); //ok?  
