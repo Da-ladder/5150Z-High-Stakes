@@ -1309,7 +1309,7 @@ void Routes::oldplacehold6() {
 
     // get goal + reset lb
     moveManual(250, 6);
-    LiftMngr::setLevel(IDLE_ARM);
+    LiftMngr::setLevel(235); //IDLE_ARM
     moveManual(350, 9, 1);
     moveManual(120, 8, 8); //9
     MogoUtils::getMogo(5, 3, 6, 500);
@@ -1332,12 +1332,13 @@ void Routes::oldplacehold6() {
     robot.move_to_point({(au::inches)(34.39), (au::inches)(-19.38)}, false, INTAKE_SIDE, 0, 2.8);
 
     // get center stack & curve?
-    robot.turn_to_point({(au::inches)(2.75), (au::inches)(-23.26)}, INTAKE_SIDE, 750); //660
+    robot.turn_with_pid(4, 750);
+    // robot.turn_to_point({(au::inches)(2.75), (au::inches)(-23.26)}, INTAKE_SIDE, 750); //660
     liftIntake.overrideState(1);
     // IntakeHelper::blueExcld(true);
     // IntakeHelper::StopAtColor(true);
     // IntakeHelper::voltage(12); //{(au::inches)(1.53), (au::inches)(-18.3)} //OLD {(au::inches)(1.13), (au::inches)(-22.15)} //NEW
-    robot.move_to_point({(au::inches)(2.75), (au::inches)(-23.26)}, false, INTAKE_SIDE, 0, 2.8);
+    robot.move_to_point({(au::inches)(-1.46), (au::inches)(-23.26)}, false, INTAKE_SIDE, 0, 2.8);
 
     pros::delay(300); //300
     moveManual(400, -8, -4);
@@ -1355,8 +1356,9 @@ void Routes::oldplacehold6() {
 
     // get ring
     IntakeHelper::voltage(12);
-    // robot.turn_to_point({(au::inches)(-27.1), (au::inches)(-61.87)}, INTAKE_SIDE, 680);
-    robot.move_to_point({(au::inches)(-27.1), (au::inches)(-61.87)}, true, INTAKE_SIDE, 680, 2.8);
+    // robot.turn_to_point({(au::inches)(-27.1), (au::inches)(-61.87)}, INTAKE_SIDE, 680); /*
+    robot.turn_with_pid(47.29, 700);
+    robot.move_to_point({(au::inches)(-27.19), (au::inches)(-60.07)}, false, INTAKE_SIDE, 680, 2.8);
 
     // touch ladder
     robot.turn_with_pid(181.01, 890);
@@ -1387,7 +1389,7 @@ void Routes::oldplacehold6Mir() {
 
     // get goal + reset lb
     moveManual(250, 6);
-    LiftMngr::setLevel(IDLE_ARM);
+    LiftMngr::setLevel(235); //IDLE_ARM
     moveManual(350, 1, 9);
     moveManual(120, 8, 8); //9
     MogoUtils::getMogo(5, 3, 6, 550, 25);
@@ -1411,17 +1413,16 @@ void Routes::oldplacehold6Mir() {
     IntakeHelper::voltage(0);
 
     // get center stack & curve?
-    robot.turn_to_point({(au::inches)(3.095), (au::inches)(23.751)}, INTAKE_SIDE, 750); //660
+    robot.turn_with_pid(-4.25, 750);
+    // robot.turn_to_point({(au::inches)(3.095), (au::inches)(23.751)}, INTAKE_SIDE, 750); //660
     // IntakeHelper::StopAtColor(false);
     IntakeHelper::voltage(12);
-
-    
     liftIntake.overrideState(1);
     // IntakeHelper::blueExcld(true);
     // IntakeHelper::StopAtColor(true);
     // IntakeHelper::voltage(12); //{(au::inches)(1.53), (au::inches)(-18.3)} //OLD {(au::inches)(1.13), (au::inches)(-22.15)} //NEW
     
-    robot.move_to_point({(au::inches)(3.095), (au::inches)(23.751)}, false, INTAKE_SIDE, 0, 2.8); //2.75, 23.26
+    robot.move_to_point({(au::inches)(0.73), (au::inches)(23.29)}, false, INTAKE_SIDE, 0, 2.8); //2.75, 23.26
 
     pros::delay(300); //300
     moveManual(400, -4, -8);
