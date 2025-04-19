@@ -140,14 +140,19 @@ class Routes{
         // Autos added below are self explanatory due to the route name attached to them.
         // The names attached are within quotes
 
+        AutoSelector::add("Regional Solo BLUE (HOME)", oldplacehold6); // ok
+        AutoSelector::add("Regional Solo Red (HOME)", oldplacehold6Mir); // ok
+
+        // AutoSelector::add("Solo BLUE (Safe)", placehold2);
+        // AutoSelector::add("Solo RED (Safe)", placehold2Mir);
+
         AutoSelector::add("Alliance Stake Goal Side BLUE", placehold1);
         AutoSelector::add("Alliance Stake Goal Side RED", placehold1Mir);
 
         AutoSelector::add("RED Goal SIDE 5 ring (ELIM)", placehold12); //uhh
         AutoSelector::add("BLUE Goal SIDE 5 ring (ELIM)", placehold12Mir); // Match batt only >60%
 
-        AutoSelector::add("Regional Solo BLUE (HOME)", oldplacehold6); // ok
-        AutoSelector::add("Regional Solo Red (HOME)", oldplacehold6Mir); // ok
+        
 
         AutoSelector::add("Ring side RED (ELIM 5+1)", placehold3Mir);
         AutoSelector::add("Ring side BLUE (ELIM 5+1)", placehold3);         
@@ -163,9 +168,6 @@ class Routes{
         AutoSelector::add("Ring side RED (STAKE AWP 5+1)", placehold4Mir);
 
         // vvvvvvvv NOT IN USE vvvvvvvv
-        
-        AutoSelector::add("Ring side BLUE (STAKE ELIM)", placehold2);
-        AutoSelector::add("Ring side RED (STAKE ELIM)", placehold2Mir);
 
         AutoSelector::add("Mogo side BLUE (END STAKE)", placehold5);         
         
