@@ -985,7 +985,7 @@ void Routes::placehold3Mir() {
     
     int time = 0;
 
-    while(325 >= time*22) {
+    while(350 >= time*22) {
         LiftMngr::setVoltage(-10, true);
         time++;
         pros::delay(25);
@@ -996,7 +996,7 @@ void Routes::placehold3Mir() {
 
     // get goal + reset lb
     moveManual(350, 1, 9);
-    LiftMngr::setLevel(IDLE_ARM);
+    LiftMngr::setLevel(STRAIGHT_ARM+30);
     moveManual(150, 9, 9);
     MogoUtils::getMogo(5, 3, 6);
     IntakeHelper::voltage(12);
@@ -1027,46 +1027,36 @@ void Routes::placehold3Mir() {
 
     // first ring
     IntakeHelper::voltage(12);
-    moveManual(300, -3);
+    moveManual(300, -3); //-2
     moveManual(700, -3); //700
-    // moveManual(500, -5.5);
-
+    
     // get second ring
-    moveManual(400, 2); // 500
+    moveManual(500, 2); // 400, 2
     liftIntake.overrideState(1);
-    // pros::delay(100); //60
-        
+    
     moveManual(200, -2);
     moveManual(340, -3.75);
     liftIntake.overrideState(0);
     moveManual(200, -4);
-    moveManual(540, 3);
-    
-    IntakeHelper::voltage(12);
-    /*
-    // touch ladder
-    IntakeHelper::stuckCheckChange(true);
-    IntakeHelper::StopAtColor(false); //144.04
-    IntakeHelper::voltage(12);
-    robot.turn_with_pid(144.04, 850, 9);
-    pros::delay(80);
+    moveManual(300, 3);
+    IntakeHelper::blueExcld(true);
+    moveManual(300, 3);
 
-    fIntMogoUpDown = 0;
-    fIntMogoDelay = 150;
-    // robot.turn_to_point({(au::inches)(21.8), (au::inches)(15.65)}, INTAKE_SIDE, 1000);
-    // IntakeHelper::StopAtColor(false);
-    moveManual(300, 6);
-    moveManual(1200, 10.6);
-    // LiftMngr::setLevel(125); //{(au::inches)(21.8), (au::inches)(15.65)}
-    // robot.ramseteTest({(au::inches)(21.35), (au::inches)(17.19)}, INTAKE_SIDE, 11.5, 2, 2, 4, true, 1400);
-    // moveManual(500, -3);
-    /*
-    fIntPisUpDown = 1;
-    fIntPisDelay = 500;
-    
-    moveManual(250, -6); // 160, -6
+    robot.turn_with_pid(-37.95, 700);
+    IntakeHelper::voltage(12);
+    liftIntake.overrideState(1);
+    IntakeHelper::StopAtColor(false);
+    IntakeHelper::blueExcld(true);
+    robot.move_to_point({(au::inches)(10.5), (au::inches)(7)}, false, INTAKE_SIDE, 700, 3); //900
+
+    // touch ladder
+    robot.turn_with_pid(-93.5, 670);
     liftIntake.overrideState(0);
-    moveManual(600, 5);
+    // LiftMngr::setLevel(STRAIGHT_ARM+30);
+    robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+    robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+    moveManual(400, -6);
+
     /**/
 }
 
@@ -1135,6 +1125,126 @@ void Routes::placehold5() {
     // get on mid stake
     LiftMngr::setLevel(140);
     robot.move_to_point({(au::inches)(-40.48), (au::inches)(3.79)}, false, INTAKE_SIDE, 900);
+
+    /**/
+}
+
+void Routes::placehold5Mir() {
+    /*
+    pros::Task clampthing(mogoPistonDelay);
+    IntakeHelper::blueExcld(true);
+    IntakeHelper::sortState(false);
+    IntakeHelper::stuckCheckChange(true);
+    
+    int time = 0;
+
+    while(350 >= time*22) {
+        LiftMngr::setVoltage(-10, true);
+        time++;
+        pros::delay(25);
+    }
+    LiftMngr::setVoltage(0, false);
+
+    LiftMngr::setLevel(STRAIGHT_ARM);
+
+    // get goal + reset lb
+    moveManual(350, 1, 9);
+    LiftMngr::setLevel(STRAIGHT_ARM+90);
+    moveManual(150, 9, 9);
+    MogoUtils::getMogo(5, 3, 6);
+    IntakeHelper::voltage(12);
+
+    // get mid line
+    robot.move_to_point({(au::inches)(48.61), (au::inches)(30.18)}, true, INTAKE_SIDE, 700, 2.9); 
+    robot.turn_with_pid(154.42, 600); //660
+    robot.move_to_point({(au::inches)(58.04), (au::inches)(25.14)}, false, INTAKE_SIDE, 0, 3); 
+
+    // curve back and get other ring
+    moveManual(150, 6, 6); // 2nd RING BACK 150
+    moveManual(400, 2, 9); // 2nd RING BACK
+    moveManual(240, 5, 5); //240
+    pros::delay(70);
+
+    // get ring
+    robot.turn_with_pid(146.47, 640);
+    robot.move_to_point({(au::inches)(43.55), (au::inches)(16.32)}, false, INTAKE_SIDE, 0, 2.8);
+
+    // get corner
+    robot.turn_to_point({(au::inches)(36.41), (au::inches)(-15.99)},  INTAKE_SIDE, 700); //OLD
+    robot.move_to_point({(au::inches)(36.41), (au::inches)(-15.99)}, false, INTAKE_SIDE, 700, 3); //900
+    robot.turn_with_pid(99.66, 510);
+    IntakeHelper::blueExcld(false);
+    IntakeHelper::stuckCheckChange(false);
+    IntakeHelper::StopAtColor(true);
+    
+
+
+    // first ring
+    IntakeHelper::voltage(12);
+    moveManual(300, -3); //-2
+    moveManual(700, -3); //700
+    
+    // get second ring
+    moveManual(500, 2); // 400, 2
+    liftIntake.overrideState(1);
+    
+    moveManual(200, -2);
+    moveManual(340, -3.75);
+    liftIntake.overrideState(0);
+    moveManual(200, -4);
+    moveManual(300, 3);
+    IntakeHelper::blueExcld(true);
+    IntakeHelper::stuckCheckChange(true);
+    moveManual(300, 3);
+
+    // line up twds mid ring
+    robot.turn_with_pid(-37.95, 700);
+    IntakeHelper::voltage(12);
+    liftIntake.overrideState(1);
+
+    // intake stuffs
+    IntakeHelper::sortState(false);
+    IntakeHelper::StopAtColor(false);
+    IntakeHelper::blueExcld(true);
+
+    // go twds ring
+    robot.move_to_point({(au::inches)(10.5), (au::inches)(7)}, false, INTAKE_SIDE, 700, 3); //900
+    pros::delay(50);
+    IntakeHelper::blueExcld(false);
+    IntakeHelper::StopAtColor(true);
+    pros::delay(200);
+    // liftIntake.overrideState(0);
+    */
+
+    // go twds corner
+    robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+    robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+    moveManual(600, -12);
+    moveManual(350, 12, -12);
+    pros::delay(50);
+    // moveManual(150, 12, 3);
+    moveManual(200, 12, 6);
+
+    
+    // pros::delay(250);
+
+    // get goal into corner
+    /*
+    robot.turn_with_pid(-204.34, 900);
+    moClamp.overrideState(0);
+    pros::delay(20);
+    robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+    robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+    moveManual(500, 12);
+
+    /*
+    // touch ladder
+    robot.turn_with_pid(-93.5, 670);
+    liftIntake.overrideState(0);
+    // LiftMngr::setLevel(STRAIGHT_ARM+30);
+    robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+    robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+    moveManual(400, -6);
 
     /**/
 }

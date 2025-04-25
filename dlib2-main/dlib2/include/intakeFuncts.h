@@ -133,26 +133,29 @@ class IntakeHelper {
                 if (excludeBlue) {
                     if (opt.get_hue() < 21/* || opt.get_hue() > 340*/) {
                         blocking = true;
-                        IntakeHelper::voltage(-12);
+                        intake.move_voltage(-12000);
                         pros::delay(20);
-                        IntakeHelper::voltage(0);
+                        intake.move_voltage(0);
                         blocking = false;
-
+                        stap = false;
                     }
                 } else if (!excludeBlue) {
+                    pros::lcd::set_text(6, "STOP READY: BLUE");
                     if (opt.get_hue() >= 200 && opt.get_hue() <= 235) {
+                        pros::lcd::set_text(7, "STOPPED");
                         blocking = true;
-                        IntakeHelper::voltage(-12);
+                        intake.move_voltage(-12000);
                         pros::delay(20);
-                        IntakeHelper::voltage(0);
+                        intake.move_voltage(0);
                         blocking = false;
+                        stap = false;
                     }
                 }
             }
             
 
             if (excludeBlue && (!blockSort)) {
-                if (opt.get_hue() >= 200 && opt.get_hue() <= 235 && opt.get_proximity() >= 255) {
+                if (opt.get_hue() >= 200 && opt.get_hue() <= 235 && opt.get_proximity() >= 150) {
                     reject();
                 } else if (opt.get_hue() < 21 || opt.get_hue() > 340) {
                     // colorPistion.overrideState(0); // ACCEPT red
@@ -160,11 +163,11 @@ class IntakeHelper {
             } else if ((!excludeBlue) && (!blockSort)) {
                 if (opt.get_hue() >= 200 && opt.get_hue() <= 235/* && opt.get_proximity() >= 255*/) {
                     // colorPistion.overrideState(0); // ACCEPT blue
-                } else if (opt.get_hue() < 21 /*|| opt.get_hue() > 340*/ && opt.get_proximity() >= 255) {
+                } else if (opt.get_hue() < 21 /*|| opt.get_hue() > 340*/ && opt.get_proximity() >= 150) {
                     reject();
                 }
             }
-            // pros::lcd::set_text(5, "err: " + std::to_string(opt.get_proximity()));
+            pros::lcd::set_text(5, "err: " + std::to_string(opt.get_hue()));
                 
             pros::delay(MAIN_LOOP_DELAY);
         }
