@@ -89,7 +89,7 @@ void autonomous() {
 void opcontrol() {
 	IntakeHelper::StopAtColor(false);
 	IntakeHelper::blueExcld(true);
-	IntakeHelper::sortState(true);
+	IntakeHelper::sortState(false);
 	IntakeHelper::stuckCheckChange(false);
 	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
     robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);

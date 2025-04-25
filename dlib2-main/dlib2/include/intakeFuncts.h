@@ -133,8 +133,8 @@ class IntakeHelper {
                 if (excludeBlue) {
                     if (opt.get_hue() < 21/* || opt.get_hue() > 340*/) {
                         blocking = true;
-                        intake.move_voltage(-12000);
-                        pros::delay(20);
+                        // intake.move_voltage(-12000);
+                        // pros::delay(20);
                         intake.move_voltage(0);
                         blocking = false;
                         stap = false;
@@ -144,8 +144,8 @@ class IntakeHelper {
                     if (opt.get_hue() >= 200 && opt.get_hue() <= 235) {
                         pros::lcd::set_text(7, "STOPPED");
                         blocking = true;
-                        intake.move_voltage(-12000);
-                        pros::delay(20);
+                        // intake.move_voltage(-12000);
+                        // pros::delay(20);
                         intake.move_voltage(0);
                         blocking = false;
                         stap = false;

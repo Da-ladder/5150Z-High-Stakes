@@ -1130,10 +1130,9 @@ void Routes::placehold5() {
 }
 
 void Routes::placehold5Mir() {
-    /*
     pros::Task clampthing(mogoPistonDelay);
     IntakeHelper::blueExcld(true);
-    IntakeHelper::sortState(false);
+    IntakeHelper::sortState(true);
     IntakeHelper::stuckCheckChange(true);
     
     int time = 0;
@@ -1173,6 +1172,7 @@ void Routes::placehold5Mir() {
     robot.turn_to_point({(au::inches)(36.41), (au::inches)(-15.99)},  INTAKE_SIDE, 700); //OLD
     robot.move_to_point({(au::inches)(36.41), (au::inches)(-15.99)}, false, INTAKE_SIDE, 700, 3); //900
     robot.turn_with_pid(99.66, 510);
+    IntakeHelper::sortState(false);
     IntakeHelper::blueExcld(false);
     IntakeHelper::stuckCheckChange(false);
     IntakeHelper::StopAtColor(true);
@@ -1195,6 +1195,7 @@ void Routes::placehold5Mir() {
     moveManual(300, 3);
     IntakeHelper::blueExcld(true);
     IntakeHelper::stuckCheckChange(true);
+    IntakeHelper::sortState(true);
     moveManual(300, 3);
 
     // line up twds mid ring
@@ -1203,18 +1204,19 @@ void Routes::placehold5Mir() {
     liftIntake.overrideState(1);
 
     // intake stuffs
-    IntakeHelper::sortState(false);
     IntakeHelper::StopAtColor(false);
-    IntakeHelper::blueExcld(true);
+    // IntakeHelper::blueExcld(true);
 
     // go twds ring
     robot.move_to_point({(au::inches)(10.5), (au::inches)(7)}, false, INTAKE_SIDE, 700, 3); //900
+    liftIntake.overrideState(0);
+    IntakeHelper::voltage(12);
     pros::delay(50);
     IntakeHelper::blueExcld(false);
     IntakeHelper::StopAtColor(true);
-    pros::delay(200);
+    // pros::delay(200);
     // liftIntake.overrideState(0);
-    */
+
 
     // go twds corner
     robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
@@ -1224,27 +1226,23 @@ void Routes::placehold5Mir() {
     pros::delay(50);
     // moveManual(150, 12, 3);
     moveManual(200, 12, 6);
-
-    
-    // pros::delay(250);
-
-    // get goal into corner
-    /*
-    robot.turn_with_pid(-204.34, 900);
     moClamp.overrideState(0);
-    pros::delay(20);
-    robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
-    robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
     moveManual(500, 12);
 
     /*
-    // touch ladder
-    robot.turn_with_pid(-93.5, 670);
-    liftIntake.overrideState(0);
-    // LiftMngr::setLevel(STRAIGHT_ARM+30);
+    // go twds corner v2
+    robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+    robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::brake);
+    // moveManual(600, -12);
+    moveManual(430, 12, -12);
+    // IntakeHelper::StopAtColor(false);
+    moClamp.overrideState(0);
+    pros::delay(50);
     robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
-    robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
-    moveManual(400, -6);
+    robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+    moveManual(1200, 12);
+    // moveManual(150, 12, 3);
+    // moveManual(200, 12, 6);
 
     /**/
 }
