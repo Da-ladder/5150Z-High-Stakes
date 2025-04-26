@@ -1170,6 +1170,7 @@ void Routes::placehold5Mir() {
 
     // get corner
     robot.turn_to_point({(au::inches)(36.41), (au::inches)(-15.99)},  INTAKE_SIDE, 700); //OLD
+    /*
     robot.move_to_point({(au::inches)(36.41), (au::inches)(-15.99)}, false, INTAKE_SIDE, 700, 3); //900
     robot.turn_with_pid(99.66, 510);
     IntakeHelper::sortState(false);
