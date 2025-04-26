@@ -138,7 +138,7 @@ class MogoUtils {
         // Move to the mogo
         inline static void getMogo(double baseSpeed = 8, double minSpeed = 1.5, double maxSpeed = 12, int timeout = 0, int triggerDis = 24) {
             double 
-            tkP=0.05, // Turn P
+            tkP=0.04, // Turn P 0.05
             tkD=0.0, // Turn D
             lkP=-0.02; // lateral P 0.02
 
@@ -253,7 +253,7 @@ class MogoUtils {
                 // robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
                 // robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
                 moClamp.overrideState(1);
-                moveDrive(0, 0, 150);
+                moveDrive(0, 0, 150); //???? 150
             }
 
             
