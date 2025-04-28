@@ -131,7 +131,7 @@ class IntakeHelper {
             
             if (stap) {
                 if (excludeBlue) {
-                    if (opt.get_hue() < 21/* || opt.get_hue() > 340*/) {
+                    if (opt.get_hue() < 10/* || opt.get_hue() > 340*/) {
                         blocking = true;
                         intake.move_voltage(-12000);
                         pros::delay(20);
@@ -157,13 +157,13 @@ class IntakeHelper {
             if (excludeBlue && (!blockSort)) {
                 if (opt.get_hue() >= 200 && opt.get_hue() <= 235 && opt.get_proximity() >= 150) {
                     reject();
-                } else if (opt.get_hue() < 21 || opt.get_hue() > 340) {
+                } else if (opt.get_hue() < 10) {
                     // colorPistion.overrideState(0); // ACCEPT red
                 }
             } else if ((!excludeBlue) && (!blockSort)) {
                 if (opt.get_hue() >= 200 && opt.get_hue() <= 235/* && opt.get_proximity() >= 255*/) {
                     // colorPistion.overrideState(0); // ACCEPT blue
-                } else if (opt.get_hue() < 21 /*|| opt.get_hue() > 340*/ && opt.get_proximity() >= 150) {
+                } else if (opt.get_hue() < 10 /*|| opt.get_hue() > 340*/ && opt.get_proximity() >= 150) {
                     reject();
                 }
             }

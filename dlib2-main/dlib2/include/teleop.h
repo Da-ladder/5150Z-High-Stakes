@@ -95,6 +95,8 @@ class DriverControl {
             */
             
             if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_A)) {
+                LiftMngr::setVoltage(-voltage, true);
+                /*
                 if (atStoreHeight) {
                     LiftMngr::setLevel(SECOND_STORE_HEIGHT);
                     atStoreHeight = false;
@@ -107,6 +109,7 @@ class DriverControl {
                 } else {
                     LiftMngr::setVoltage(-voltage, true);
                 }
+                */
             } else if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
                 LiftMngr::setVoltage(voltage, true);
                 atStoreHeight = false;
@@ -134,9 +137,9 @@ class DriverControl {
                     atStoreHeight = false;
                 }   
             } else if (master.get_digital(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_X)) {
-                IntakeHelper::voltage(-12);
+                IntakeHelper::voltage(-4);
                 LiftMngr::setMaxVolts(12);
-                LiftMngr::setLevel(ABOVE_IN_HEIGHT);
+                LiftMngr::setLevel(SECOND_STORE_HEIGHT);
             } else {
                 LiftMngr::setVoltage(0);
             }
