@@ -142,30 +142,29 @@ class Routes{
      inline static void initall() {
         // Autos added below are self explanatory due to the route name attached to them.
         // The names attached are within quotes
+        // AutoSelector::add("Ring side RED (ELIM 6+1)", placehold5Mir);
+        AutoSelector::add("Ring side BLUE (ELIM 6+1 OLD)", placehold5); // Qual touch?
 
-        AutoSelector::add("Ring side RED (ELIM 6+1)", placehold5Mir);
-        // AutoSelector::add("Ring side BLUE (ELIM 6+1 OLD)", placehold5); // Qual touch?
+        AutoSelector::add("Ring side RED (QUAL 6+1)", placehold3Mir);
+        AutoSelector::add("Ring side BLUE (QUAL 6+1 NEW)", placehold3); // good, but 2nd ring mid
 
-        AutoSelector::add("RED Goal SIDE 5 ring (QUAL)", placehold2); // SPLIT
-        AutoSelector::add("BLUE Goal SIDE 5 ring (QUAL)", placehold2Mir); // SPLIT
+        AutoSelector::add("Goal Rush RED (ELIM)", placehold13); // end pt? 
+        AutoSelector::add("Goal Rush BLUE (ELIM)", placehold13Mir); //ok? 
+
+        AutoSelector::add("Alliance Stake Goal Side BLUE (QUAL 1+4)", placehold1);
+        AutoSelector::add("Alliance Stake Goal Side RED (QUAL 1+4)", placehold1Mir); // corner?????????
+
+        AutoSelector::add("Alliance Stake Goal Side BLUE (ELIM 1+4)", placehold7);
+        AutoSelector::add("Alliance Stake Goal Side RED (ELIM 1+4)", placehold7Mir); // corner?????????
+
+        AutoSelector::add("RED Goal SIDE 5 ring (QUAL)", placehold2); // corner??
+        AutoSelector::add("BLUE Goal SIDE 5 ring (QUAL)", placehold2Mir); // 
+
+        AutoSelector::add("RED Goal SIDE 5 ring (ELIM)", placehold12); // good
+        AutoSelector::add("BLUE Goal SIDE 5 ring (ELIM)", placehold12Mir); // 
 
         AutoSelector::add("Regional Solo BLUE (HOME)", oldplacehold6); // ok
         AutoSelector::add("Regional Solo Red (HOME)", oldplacehold6Mir); // ok
-
-        AutoSelector::add("Alliance Stake Goal Side BLUE (QUAL 1+4)", placehold1);
-        AutoSelector::add("Alliance Stake Goal Side RED (QUAL 1+4)", placehold1Mir); //jshjsjy
-
-        AutoSelector::add("Alliance Stake Goal Side BLUE (ELIM 1+4)", placehold7);
-        AutoSelector::add("Alliance Stake Goal Side RED (ELIM 1+4)", placehold7Mir); //jshjsjy
-
-        AutoSelector::add("Ring side RED (QUAL 6+1)", placehold3Mir);
-        AutoSelector::add("Ring side BLUE (QUAL 6+1 NEW)", placehold3); 
-
-        AutoSelector::add("Goal Rush RED (ELIM)", placehold13);
-        AutoSelector::add("Goal Rush BLUE (ELIM)", placehold13Mir); //ok? 
-
-        AutoSelector::add("RED Goal SIDE 5 ring (ELIM)", placehold12); // SPLIT
-        AutoSelector::add("BLUE Goal SIDE 5 ring (ELIM)", placehold12Mir); // SPLIT
 
         AutoSelector::add("Ring side BLUE (STAKE AWP 5+1)", placehold4); 
         AutoSelector::add("Ring side RED (STAKE AWP 5+1)", placehold4Mir);

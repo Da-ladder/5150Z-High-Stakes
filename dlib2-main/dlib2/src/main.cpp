@@ -87,6 +87,7 @@ void autonomous() {
 
 
 void opcontrol() {
+	LiftMngr::setLevel(IDLE_HEIGHT);
 	IntakeHelper::StopAtColor(false);
 	IntakeHelper::blueExcld(true);
 	IntakeHelper::sortState(false);

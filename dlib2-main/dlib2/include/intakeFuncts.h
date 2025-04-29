@@ -3,11 +3,12 @@
 #include "liblvgl/llemu.hpp"
 #include "pistons.h"
 #include <cmath>
+#include <ostream>
 #include <string>
 
 #define MAIN_LOOP_DELAY 10 //5
 #define STUCK_DELAY_MS 400
-#define STUCK_DEG_RANGE 4
+#define STUCK_DEG_RANGE 2
 #define SORT_MS_EXT_DELAY 100
 #define ROT_PER_CYCLE 5.75 //5.73
 
@@ -31,22 +32,32 @@ class IntakeHelper {
 
     inline static void stuckDetect() {
         int curIntakePos = intake.get_position();
-        /*
+        
+        double min_threshold = intake.get_target_velocity()/6.0;
+        // std::cout << "MIN_VELO:" << std::to_string(min_threshold) << "|| ACT_VELO:" << std::to_string(intake.get_actual_velocity()) << "|| STUCKTIME:" << std::to_string(stuckTime) <<std::endl;
 
-        double min_threshold = intake.get_target_velocity()/4.0;
 
         if (fabs(intake.get_actual_velocity()) < fabs(min_threshold) && intakeState == 1) {
+            stuckTime ++;
+        } else {
+            stuckTime = 0;
+        }
+
+        if (stuckTime >= 10) {
+            blocking = true;
+            stuckTime = 0;
             intake.move_voltage(-12000);
             pros::delay(100);
             intake.move_voltage(12000);
+            blocking = false;
         }
-
-        */
-
         
+
+        /*
         if (intakeState == 1 && abs(curIntakePos - intakePos) < STUCK_DEG_RANGE) {
             intakePos = curIntakePos;
             stuckTime ++;
+            master.set_text(1, 0, std::to_string(stuckTime));
         } else {
             intakePos = curIntakePos;
             stuckTime = 0;
@@ -55,10 +66,11 @@ class IntakeHelper {
         // reverse intake if it detects it is stuck
         if (stuckTime >= (STUCK_DELAY_MS/MAIN_LOOP_DELAY)) {
             intake.move_voltage(-12000);
-            pros::delay(200);
+            pros::delay(500);
             intake.move_voltage(12000);
             stuckTime = 0;
         }
+            */
         
 
 
@@ -125,13 +137,13 @@ class IntakeHelper {
         bool ringLiftSense = false;
         while (true) {
             if (stuckCheck) {
-                // stuckDetect();
+                stuckDetect();
             }
             
             
             if (stap) {
                 if (excludeBlue) {
-                    if (opt.get_hue() < 10/* || opt.get_hue() > 340*/) {
+                    if (opt.get_hue() < 10 && opt.get_proximity() >= 150/* || opt.get_hue() > 340*/) {
                         blocking = true;
                         intake.move_voltage(-12000);
                         pros::delay(20);
@@ -140,9 +152,7 @@ class IntakeHelper {
                         stap = false;
                     }
                 } else if (!excludeBlue) {
-                    pros::lcd::set_text(6, "STOP READY: BLUE");
-                    if (opt.get_hue() >= 200 && opt.get_hue() <= 235) {
-                        pros::lcd::set_text(7, "STOPPED");
+                    if (opt.get_hue() >= 200 && opt.get_hue() <= 235 && opt.get_proximity() >= 150) {
                         blocking = true;
                         intake.move_voltage(-12000);
                         pros::delay(20);
@@ -167,7 +177,7 @@ class IntakeHelper {
                     reject();
                 }
             }
-            pros::lcd::set_text(5, "err: " + std::to_string(opt.get_hue()));
+            // pros::lcd::set_text(5, "err: " + std::to_string(opt.get_hue()));
                 
             pros::delay(MAIN_LOOP_DELAY);
         }
@@ -222,6 +232,7 @@ class IntakeHelper {
     }
 
     inline static void init() {
+        // master.clear();
         opt.set_integration_time(50); //50 b4
         pros::delay(50);
         opt.set_led_pwm(100);
