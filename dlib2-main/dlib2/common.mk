@@ -48,7 +48,7 @@ AR:=$(ARCHTUPLE)ar
 # Using gcc accomplishes the same thing without the extra output
 AS:=$(ARCHTUPLE)gcc
 CC:=$(ARCHTUPLE)gcc
-CXX:= ccache $(ARCHTUPLE)g++ # install ccache via chocolatey (speeds up complier by x2-4)
+CXX:= ccache $(ARCHTUPLE)g++ # install ccache via chocolatey (speeds up complier by x2-4) [let's not use it ehhh]
 LD:=$(ARCHTUPLE)g++
 OBJCOPY:=$(ARCHTUPLE)objcopy
 SIZETOOL:=$(ARCHTUPLE)size

@@ -104,7 +104,7 @@ class MogoUtils {
             camDetect.set_exposure(23);
 
             // Sets mogo sig
-            pros::vision_signature_s_t MOGO_SIG = pros::c::vision_signature_from_utility(1, -1551, -601, -1076, -5857, -5147, -5502, 2.600, 0);
+            pros::vision_signature_s_t MOGO_SIG = pros::c::vision_signature_from_utility(1, -2933, -1307, -2120, -5857, -4283, -5070, 2.600, 0);
             camDetect.set_signature(MOGO, &MOGO_SIG);
         }
 

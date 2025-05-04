@@ -17,7 +17,7 @@ pros::adi::DigitalIn sortLimit('0');
 
 
 // Line detectors
-pros::adi::AnalogIn lineLeft = pros::adi::AnalogIn('H');
+pros::adi::AnalogIn lineLeft = pros::adi::AnalogIn('F');
 pros::adi::AnalogIn lineRight = pros::adi::AnalogIn('D');
 
 
@@ -51,7 +51,7 @@ pros::Rotation liftRot(9);
 
 //////// EXPerimental VISION SENSOR ////////  
 pros::v5::Vision camDetect(5);
-pros::v5::Vision camRingDetect(18); // REPLACED BY LB
+pros::v5::Vision camRingDetect(7); // REPLACED BY LB
 //////// EXPerimental VISION SENSOR ////////
 
 // 

@@ -115,7 +115,7 @@ class DriverControl {
                 atStoreHeight = false;
             } else if (master.get_digital_new_press(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
 
-                if (LiftMngr::getLevel() > 140 && LiftMngr::getLevel() < 290) {
+                if (LiftMngr::getLevel() > 140 && LiftMngr::getLevel() < 295) {
                     if (deScore) {
                         IntakeHelper::voltage(-9);
                         LiftMngr::setMaxVolts(12);

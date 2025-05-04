@@ -142,34 +142,37 @@ class Routes{
      inline static void initall() {
         // Autos added below are self explanatory due to the route name attached to them.
         // The names attached are within quotes
-        // AutoSelector::add("Ring side RED (ELIM 6+1)", placehold5Mir);
-        AutoSelector::add("Ring side BLUE (ELIM 6+1 OLD)", placehold5); // Qual touch?
+        AutoSelector::add("Alliance Stake Goal Side BLUE (ELIM 1+4)", placehold7); //done plz
+        // Corner in is 100ms less | Back out of corner is 12v instead of 11v
+        AutoSelector::add("Alliance Stake Goal Side RED (ELIM 1+4)", placehold7Mir); // done plz
 
-        AutoSelector::add("Ring side RED (QUAL 6+1)", placehold3Mir);
-        AutoSelector::add("Ring side BLUE (QUAL 6+1 NEW)", placehold3); // good, but 2nd ring mid
+        AutoSelector::add("Alliance Stake Goal Side BLUE (QUAL 1+4)", placehold1); // done plz
+        AutoSelector::add("Alliance Stake Goal Side RED (QUAL 1+4)", placehold1Mir); // Perfect, have delay at first mid ring
 
         AutoSelector::add("Goal Rush RED (ELIM)", placehold13); // end pt? 
-        AutoSelector::add("Goal Rush BLUE (ELIM)", placehold13Mir); //ok? 
+        AutoSelector::add("Goal Rush BLUE (ELIM)", placehold13Mir); //good sometimes miss first ring 
 
-        AutoSelector::add("Alliance Stake Goal Side BLUE (QUAL 1+4)", placehold1);
-        AutoSelector::add("Alliance Stake Goal Side RED (QUAL 1+4)", placehold1Mir); // corner?????????
+        AutoSelector::add("skills", skills);  
 
-        AutoSelector::add("Alliance Stake Goal Side BLUE (ELIM 1+4)", placehold7);
-        AutoSelector::add("Alliance Stake Goal Side RED (ELIM 1+4)", placehold7Mir); // corner?????????
-
+        AutoSelector::add("Ring side RED (QUAL 6+1)", placehold3Mir); //Corner? 3/4 perfect, 1 bad corner 
+        AutoSelector::add("Ring side BLUE (QUAL 6+1 NEW)", placehold3); // good, but 2nd ring mid
+        
         AutoSelector::add("RED Goal SIDE 5 ring (QUAL)", placehold2); // corner??
-        AutoSelector::add("BLUE Goal SIDE 5 ring (QUAL)", placehold2Mir); // 
+        AutoSelector::add("BLUE Goal SIDE 5 ring (QUAL)", placehold2Mir); //Route is good, intake didnt go high enough for first ring
 
         AutoSelector::add("RED Goal SIDE 5 ring (ELIM)", placehold12); // good
         AutoSelector::add("BLUE Goal SIDE 5 ring (ELIM)", placehold12Mir); // 
 
-        AutoSelector::add("Regional Solo BLUE (HOME)", oldplacehold6); // ok
+        AutoSelector::add("Regional Solo BLUE (HOME)", oldplacehold6); // mid ring weird af
         AutoSelector::add("Regional Solo Red (HOME)", oldplacehold6Mir); // ok
+
+        AutoSelector::add("Ring side RED (ELIM 6+1)", placehold5Mir);
+        AutoSelector::add("Ring side BLUE (ELIM 6+1 OLD)", placehold5); // Qual touch?
 
         AutoSelector::add("Ring side BLUE (STAKE AWP 5+1)", placehold4); 
         AutoSelector::add("Ring side RED (STAKE AWP 5+1)", placehold4Mir);
 
-        AutoSelector::add("skills", skills);   
+         
 
         // vvvvvvvv NOT IN USE vvvvvvvv
 
