@@ -94,6 +94,10 @@ void opcontrol() {
 	IntakeHelper::stuckCheckChange(false);
 	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
     robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
+
+	// to prevent brain lcd main task crash
+	AutoSelector::updatePath();
+	AutoSelector::printPath();
 	// pros::delay(50);
 
 	while(true){
@@ -102,13 +106,6 @@ void opcontrol() {
 		// RedRingUtil::refreshRing(); // CALIBRATION
 		// dlib::Pose2d curPos = robot.odom.get_position();
 		// std::cout << "{" << "(au::inches)(" << curPos.x.in(au::inches) << "), " << "(au::inches)(" << curPos.y.in(au::inches) << ")}" << std::endl;
-		
-
-
-
-
-		AutoSelector::updatePath();
-		AutoSelector::printPath();
         DriverControl::main();
 		pros::delay(25);
 	}

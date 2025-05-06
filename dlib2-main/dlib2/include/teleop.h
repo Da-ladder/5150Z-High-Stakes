@@ -11,9 +11,9 @@
 #define STRAIGHT_ARM 90
 #define DESCORE_HEIGHT 155
 #define SCORE_HEIGHT 130 //110
-#define STORE_HEIGHT 285 //260 //242.31 2nd ary loading height 264.5
+#define STORE_HEIGHT 285.5 //260 //242.31 2nd ary loading height 264.5
 // #define STORE_HEIGHT2 266.5
-#define SECOND_STORE_HEIGHT 267.5 // for double lady prown 245
+#define SECOND_STORE_HEIGHT 266.65 // for double lady prown 245 267.5
 #define IDLE_HEIGHT 310 
 #define ABOVE_IN_HEIGHT 260 //223
 

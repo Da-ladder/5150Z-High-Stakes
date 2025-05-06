@@ -120,8 +120,8 @@ class MogoUtils {
             mogoX = mogo.x_middle_coord;
             mogoY = mogo.y_middle_coord;
 
-            pros::lcd::print(6, "mogoX #: %i", mogoX);
-            pros::lcd::print(7, "mogoY #: %i", mogoY);
+            // pros::lcd::print(6, "mogoX #: %i", mogoX);
+            // pros::lcd::print(7, "mogoY #: %i", mogoY);
 
         }
 
@@ -549,8 +549,8 @@ class RedRingUtil {
             ringX = ring.x_middle_coord;
             ringY = ring.y_middle_coord;
 
-            pros::lcd::print(6, "ringX #: %i", ringX);
-            pros::lcd::print(7, "ringY #: %i", ringY);
+            // pros::lcd::print(6, "ringX #: %i", ringX);
+            // pros::lcd::print(7, "ringY #: %i", ringY);
 
         }
 
@@ -626,8 +626,8 @@ class RedRingUtil {
                 if (lspeed < minSpeed) { lspeed = minSpeed; }
                 if (rspeed < minSpeed) { rspeed = minSpeed; }
 
-                pros::lcd::print(6, "LSPEED #: %f", lspeed);
-                pros::lcd::print(7, "RSPEED #: %f", rspeed);
+                // pros::lcd::print(6, "LSPEED #: %f", lspeed);
+                // pros::lcd::print(7, "RSPEED #: %f", rspeed);
 
                 moveDrive(-lspeed, -rspeed, 10); //bc intake is reverse
                 lastXerr = xErr;
@@ -732,12 +732,12 @@ class StakeVision {
 
             int index = filterSigs();
             if (index != -1) {
-                pros::lcd::print(5, "LOWEST STAKE Y: %i", stakeLowestY[index]);
+                // pros::lcd::print(5, "LOWEST STAKE Y: %i", stakeLowestY[index]);
                 // x_middle_coord
-                pros::lcd::print(6, "X MID #: %i", stakeMidX[index]);
-                pros::lcd::print(7, "Y MID #: %i", stakeMidY[index]); //top to bottom coord
+                // pros::lcd::print(6, "X MID #: %i", stakeMidX[index]);
+                // pros::lcd::print(7, "Y MID #: %i", stakeMidY[index]); //top to bottom coord
             } else {
-                pros::lcd::print(6, "NO OBJECTS DETECTED");
+                // pros::lcd::print(6, "NO OBJECTS DETECTED");
             }
         }
 
