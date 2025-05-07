@@ -101,10 +101,12 @@ class MogoUtils {
         inline static void init() {
             camDetect.set_zero_point(pros::E_VISION_ZERO_CENTER); //set brightness to 14 (calibrate sensor on SKILLS FIELD)
             //camDetect.set_auto_white_balance(false);
-            camDetect.set_exposure(23);
+            camDetect.set_exposure(29);
+
+            
 
             // Sets mogo sig
-            pros::vision_signature_s_t MOGO_SIG = pros::c::vision_signature_from_utility(1, -2933, -1307, -2120, -5857, -4283, -5070, 2.600, 0);
+            pros::vision_signature_s_t MOGO_SIG = pros::c::vision_signature_from_utility(1, -2721, -2053, -2388, -5899, -5125, -5512, 2.800, 0);
             camDetect.set_signature(MOGO, &MOGO_SIG);
         }
 
@@ -373,8 +375,10 @@ class RedRingUtil {
             //camRingDetect.set_auto_white_balance(false);
             camRingDetect.set_exposure(29);
 
+            
+
             // Sets red & blue ring sig (calibration required)
-            pros::vision_signature_s_t RED_RING_SIG = pros::c::vision_signature_from_utility(1, 8119, 9819, 8968, -1731, -765, -1248, 5.3, 0);
+            pros::vision_signature_s_t RED_RING_SIG = pros::c::vision_signature_from_utility(1, 11813, 13153, 12484, -2049, -1149, -1600, 5.200, 0);
             camRingDetect.set_signature(RED_RING, &RED_RING_SIG);
 
             pros::vision_signature_s_t BLUE_RING_SIG = pros::c::vision_signature_from_utility(2, -5243, -3845, -4544, 6673, 9479, 8076, 4.200, 0);

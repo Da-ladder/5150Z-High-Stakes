@@ -143,8 +143,9 @@ class IntakeHelper {
             
             if (stap) {
                 if (excludeBlue) {
-                    if (opt.get_hue() < 10 && opt.get_proximity() >= 150/* || opt.get_hue() > 340*/) {
+                    if (opt.get_hue() < 30) {
                         blocking = true;
+                        // pros::lcd::print(3, "");
                         intake.move_voltage(-12000);
                         pros::delay(20);
                         intake.move_voltage(0);
@@ -152,7 +153,7 @@ class IntakeHelper {
                         stap = false;
                     }
                 } else if (!excludeBlue) {
-                    if (opt.get_hue() >= 200 && opt.get_hue() <= 235 && opt.get_proximity() >= 150) {
+                    if (opt.get_hue() >= 200 && opt.get_hue() <= 230 && opt.get_proximity() >= 150) {
                         blocking = true;
                         intake.move_voltage(-12000);
                         pros::delay(20);
@@ -163,17 +164,18 @@ class IntakeHelper {
                 }
             }
             
+            
 
             if (excludeBlue && (!blockSort)) {
-                if (opt.get_hue() >= 200 && opt.get_hue() <= 235 && opt.get_proximity() >= 150) {
+                if (opt.get_hue() >= 200 && opt.get_hue() <= 230 && opt.get_proximity() >= 150) {
                     reject();
-                } else if (opt.get_hue() < 10) {
+                } else if (opt.get_hue() < 10 && opt.get_proximity() >= 340) {
                     // colorPistion.overrideState(0); // ACCEPT red
                 }
             } else if ((!excludeBlue) && (!blockSort)) {
-                if (opt.get_hue() >= 200 && opt.get_hue() <= 235/* && opt.get_proximity() >= 255*/) {
+                if (opt.get_hue() >= 200 && opt.get_hue() <= 250) {
                     // colorPistion.overrideState(0); // ACCEPT blue
-                } else if (opt.get_hue() < 10 /*|| opt.get_hue() > 340*/ && opt.get_proximity() >= 150) {
+                } else if (opt.get_hue() < 10) {
                     reject();
                 }
             }

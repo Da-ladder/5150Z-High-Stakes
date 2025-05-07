@@ -556,9 +556,10 @@ void Robot::turn_with_pid(double heading, int timeoutMS, double maxVolts) {
     turn_pid.update(reading, milli(seconds)(20));
 
     // permaTest
-    if (fabs(turn_pid.get_error().in(au::degrees)) <= 120 && timeoutMS < 680 && timeoutMS > 300) {
+    
+    // if (fabs(turn_pid.get_error().in(au::degrees)) <= 120 && timeoutMS < 680 && timeoutMS > 300) {
       // timeoutMS = 680;
-    }
+    // }
     int cycle = 0;
     int corCycle = 0;
     chassis.left_motors.raw.set_current_limit_all(4000); //???

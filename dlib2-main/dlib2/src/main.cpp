@@ -21,9 +21,15 @@ void on_center_button() {}
 
 void initialize() {
 	pros::lcd::initialize();
-	robot.initialize();
-
 	Routes::initall();
+
+	// displays paths
+	// to prevent brain lcd main task crash
+	AutoSelector::updatePath();
+	AutoSelector::printPath();
+	// end of path printing
+
+	robot.initialize();
     DriverControl::initAll();
 	LiftMngr::initall();
 	// IntakeHelper::sortState(false);
@@ -34,7 +40,7 @@ void initialize() {
 	// IntakeHelper::blueExcld(true);
 
 	pros::lcd::set_text(1, "ARMED");
-	AutoSelector::printPath();
+	// AutoSelector::printPath();
 	master.rumble("-.");
 }
 
@@ -94,10 +100,6 @@ void opcontrol() {
 	IntakeHelper::stuckCheckChange(false);
 	robot.chassis.left_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
     robot.chassis.right_motors.raw.set_brake_mode_all(pros::MotorBrake::coast);
-
-	// to prevent brain lcd main task crash
-	AutoSelector::updatePath();
-	AutoSelector::printPath();
 	// pros::delay(50);
 
 	while(true){

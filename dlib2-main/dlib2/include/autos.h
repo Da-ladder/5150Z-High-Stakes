@@ -143,20 +143,29 @@ class Routes{
      inline static void initall() {
         // Autos added below are self explanatory due to the route name attached to them.
         // The names attached are within quotes
-        AutoSelector::add("Regional Solo BLUE (HOME)", oldplacehold6); // done plz
-        AutoSelector::add("Regional Solo Red (HOME)", oldplacehold6Mir); // done plz
+        // AutoSelector::add("Ring side RED (QUAL 6+1)", placehold3Mir); // ending sketch. done? | need verification
+        AutoSelector::add("Ring side BLUE (QUAL 6+1 NEW)", placehold3); // good
 
-        AutoSelector::add("Ring side RED (QUAL 6+1)", placehold3Mir); // ending sketch. done? 
-        AutoSelector::add("Ring side BLUE (QUAL 6+1 NEW)", placehold3); // ending sketch. done?
-
-        AutoSelector::add("Ring side RED (ELIM 6+1)", placehold5Mir); // done plz
-        AutoSelector::add("Ring side BLUE (ELIM 6+1 OLD)", placehold5); // done plz
-
-        AutoSelector::add("RED Goal SIDE 5 ring (ELIM WALL STAKE END)", placehold8); // ???
-        AutoSelector::add("BLUE Goal SIDE 5 ring (ELIM WALL STAKE END)", placehold8Mir); // ???
+        AutoSelector::add("Alliance Stake Goal Side BLUE (QUAL 1+4)", placehold1); // good
+        AutoSelector::add("Alliance Stake Goal Side RED (QUAL 1+4)", placehold1Mir); // doinker drop delay?
         
         AutoSelector::add("RED Goal SIDE 5 ring (QUAL)", placehold2); // Done plz
         AutoSelector::add("BLUE Goal SIDE 5 ring (QUAL)", placehold2Mir); // Done plz
+
+        AutoSelector::add("Regional Solo BLUE (HOME)", oldplacehold6); // done plz | need verification
+        AutoSelector::add("Regional Solo Red (HOME)", oldplacehold6Mir); // done plz
+
+
+        AutoSelector::add("skills", skills); // done plz
+
+        AutoSelector::add("Goal Rush RED (ELIM)", placehold13); // end pt? 
+        AutoSelector::add("Goal Rush BLUE (ELIM)", placehold13Mir); //good sometimes miss first ring 
+
+        AutoSelector::add("Ring side RED (ELIM 6+1)", placehold5Mir); // done plz | need verification
+        AutoSelector::add("Ring side BLUE (ELIM 6+1 OLD)", placehold5); // done plz | test body
+
+        AutoSelector::add("RED Goal SIDE 5 ring (ELIM WALL STAKE END)", placehold8); // ???
+        AutoSelector::add("BLUE Goal SIDE 5 ring (ELIM WALL STAKE END)", placehold8Mir); // ???
 
         AutoSelector::add("RED Goal SIDE 5 ring (ELIM)", placehold12); // Done plz
         AutoSelector::add("BLUE Goal SIDE 5 ring (ELIM)", placehold12Mir); // Done plz
@@ -164,14 +173,6 @@ class Routes{
         AutoSelector::add("Alliance Stake Goal Side BLUE (ELIM 1+4)", placehold7); //done plz
         // Corner in is 100ms less | Back out of corner is 12v instead of 11v
         AutoSelector::add("Alliance Stake Goal Side RED (ELIM 1+4)", placehold7Mir); // done plz
-
-        AutoSelector::add("Alliance Stake Goal Side BLUE (QUAL 1+4)", placehold1); // done plz
-        AutoSelector::add("Alliance Stake Goal Side RED (QUAL 1+4)", placehold1Mir); // done plz
-
-        AutoSelector::add("Goal Rush RED (ELIM)", placehold13); // end pt? 
-        AutoSelector::add("Goal Rush BLUE (ELIM)", placehold13Mir); //good sometimes miss first ring 
-
-        AutoSelector::add("skills", skills); // done plz
          
 
         // vvvvvvvv NOT IN USE vvvvvvvv
