@@ -579,10 +579,10 @@ void Robot::turn_with_pid(double heading, int timeoutMS, double maxVolts) {
 
       if (turn_settler.is_settled(turn_pid.get_error(),
                                   turn_pid.get_derivative())) {
-        pros::lcd::set_text(6, "TURN SETTLED " + std::to_string(cycle));
+        // pros::lcd::set_text(6, "TURN SETTLED " + std::to_string(cycle));
         corCycle++;
       } else {
-        pros::lcd::set_text(6, "TURN NOT SETTLED " + std::to_string(cycle));
+        // pros::lcd::set_text(6, "TURN NOT SETTLED " + std::to_string(cycle));
         corCycle = 0;
       }
       if (voltage.in(au::volts) > maxVolts) {
@@ -1058,6 +1058,8 @@ void Robot::start_odom() {
                          (curPos.y).in(au::inches)); // print the y position
         pros::lcd::print(2, "heading: %f",
                          (curPos.theta).in(au::degrees)); // print the heading
+        
+        pros::lcd::set_text(4, "HUE: " + std::to_string(opt.get_hue()));
 
         pros::delay(10);
       }

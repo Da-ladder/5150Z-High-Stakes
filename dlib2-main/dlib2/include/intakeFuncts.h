@@ -2,6 +2,10 @@
 #include "declarations.h"
 #include "liblvgl/llemu.hpp"
 #include "pistons.h"
+#include "pros/device.hpp"
+#include "pros/llemu.hpp"
+#include "pros/misc.hpp"
+#include "pros/rtos.hpp"
 #include <cmath>
 #include <ostream>
 #include <string>
@@ -85,12 +89,19 @@ class IntakeHelper {
         // 2.21 - 2.60 second
         // 4.13 - 4.48 third
 
+        if (pros::competition::is_disabled()) {
+            return;
+        }
+
         double current_rot = fmod(intake.get_position(), ROT_PER_CYCLE);
         intake.move_voltage(12000);
         pros::delay(60); //0
         int passed = 0;
 
+        int loopsLooped = 0;
+
         while(true) {
+            loopsLooped++;
             current_rot = fmod(intake.get_position(), ROT_PER_CYCLE);
             if (current_rot >= .57 && current_rot <= .67) {
                 if (passed != 1 && passed > 0) {
@@ -111,7 +122,10 @@ class IntakeHelper {
                 break;
                 passed = 3;
             }
-            std::cout << current_rot << std::endl;
+            if (loopsLooped*5 > 300) { // if over 250 ms, cut it out
+                break;
+            }
+            // std::cout << current_rot << std::endl;
             pros::delay(5);
         }
         intake.move_voltage(-12000);
@@ -136,27 +150,32 @@ class IntakeHelper {
     inline static void main() {
         bool ringLiftSense = false;
         while (true) {
+            // while (pros::competition::is_disabled() || !pros::competition::is_autonomous()) {
+                // pros::delay(10);
+            // }
             if (stuckCheck) {
                 stuckDetect();
             }
+            // pros::lcd::set_text(4, "HUE: " + std::to_string(opt.get_hue()));
             
             
-            if (stap) {
+            if (stap && !pros::competition::is_disabled()) {
                 if (excludeBlue) {
-                    if (opt.get_hue() < 30) {
+                    if (opt.get_hue() < 20) {
+                        // pros::lcd::print(5, "RED STOP TRIGGERED");
                         blocking = true;
-                        // pros::lcd::print(3, "");
-                        intake.move_voltage(-12000);
-                        pros::delay(20);
+                        intake.move_voltage(-4000);
+                        pros::delay(25);
                         intake.move_voltage(0);
                         blocking = false;
                         stap = false;
                     }
                 } else if (!excludeBlue) {
-                    if (opt.get_hue() >= 200 && opt.get_hue() <= 230 && opt.get_proximity() >= 150) {
+                    if (opt.get_hue() >= 190 && opt.get_hue() <= 230 && opt.get_proximity() >= 150) {
+                        // pros::lcd::print(5, "BLUE STOP TRIGGERED");
                         blocking = true;
-                        intake.move_voltage(-12000);
-                        pros::delay(20);
+                        intake.move_voltage(-4000);
+                        pros::delay(25);
                         intake.move_voltage(0);
                         blocking = false;
                         stap = false;
@@ -165,20 +184,23 @@ class IntakeHelper {
             }
             
             
-
-            if (excludeBlue && (!blockSort)) {
-                if (opt.get_hue() >= 200 && opt.get_hue() <= 230 && opt.get_proximity() >= 150) {
+            
+            if (excludeBlue && (!blockSort) && !pros::competition::is_disabled()) {
+                if (opt.get_hue() >= 190 && opt.get_hue() <= 230 && opt.get_proximity() >= 150) {
+                    // pros::lcd::print(7, "BLUE EJECT TRIGGERED");
                     reject();
                 } else if (opt.get_hue() < 10 && opt.get_proximity() >= 340) {
                     // colorPistion.overrideState(0); // ACCEPT red
                 }
-            } else if ((!excludeBlue) && (!blockSort)) {
+            } else if ((!excludeBlue) && (!blockSort) && !pros::competition::is_disabled()) {
                 if (opt.get_hue() >= 200 && opt.get_hue() <= 250) {
                     // colorPistion.overrideState(0); // ACCEPT blue
-                } else if (opt.get_hue() < 10) {
+                } else if (opt.get_hue() < 20) {
+                    // pros::lcd::print(7, "RED EJECT TRIGGERED");
                     reject();
                 }
             }
+            
             // pros::lcd::set_text(5, "err: " + std::to_string(opt.get_hue()));
                 
             pros::delay(MAIN_LOOP_DELAY);
@@ -240,6 +262,7 @@ class IntakeHelper {
         opt.set_led_pwm(100);
         // opt.set_integration_time(10);
         pros::Task IntakeMngr(main);
+        pros::delay(40);
 
     }
 
